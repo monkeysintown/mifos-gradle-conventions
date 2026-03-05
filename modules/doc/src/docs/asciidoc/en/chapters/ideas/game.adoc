@@ -1,0 +1,139 @@
+= 7-Day Godot 2.5D Platformer Game
+
+== Overview
+
+A **dyslexia-friendly, one-week intensive plan** designed around multisensory learning, heavy visual scaffolding, and tiny instruction chunks. The goal is a *nice-looking* 2.5D platformer in Godot 4, not a massive RPG. Scope is deliberately tiny so the student finishes with a playable, polished thing they are proud of.
+
+== Core Teaching Principles for the Week
+
+[cols="1,2", options="header"]
+|===
+| Principle | How to Apply It in Godot
+
+| **Chunking** | Never introduce more than **3 new ideas per day**. Break each day into 3 short sessions (≈60 min) with physical breaks between them.
+| **Multisensory** | Every concept must be **shown** (video/demo), **heard** (talk through it), and **touched/done** (they build it immediately). Avoid reading documentation aloud.
+| **Visual Scaffolding** | Use paper flowcharts / whiteboard sketches before opening the computer. In Godot, use colored node groups, visible collision shapes, and the visual signal-connection editor.
+| **Working Memory Support** | Provide **code "snack cards"**—pre-typed snippets they drag in or copy from a separate sheet, rather than typing long blocks from scratch.
+| **Minimize Text** | Use icon-based UI in the final game. If you must give written notes, use a dyslexia-friendly font (e.g., OpenDyslexic), large size, short bullet lists, and high contrast.
+|===
+
+== Pre-Week Setup (Do This Before Day 1)
+
+- **Install Godot 4.3+** and set the editor to **dark theme** with a large font (`Editor Settings > Interface`).
+- **Download 1 asset pack** of pixel-art platformer tiles/characters (e.g., from *Kenney.nl* or *itch.io*). Having assets ready removes the pressure to draw *and* code in the same week.
+- **Prepare "Code Snack Cards"**: Print 5–6 GDScript snippets on colored cards (Movement, Jump, Death, Collectible, Enemy Patrol). Use syntax highlighting colors matching Godot's editor.
+- **Set up a second screen or tablet** to play video tutorials (e.g., GDQuest or Single-Minded Ryan) so the student can watch and pause without tabbing away.
+
+== The 7-Day Schedule
+
+=== Day 1: "See the World" — Scene Building (Zero Code)
+
+*Goal: A static level that looks like a screenshot from a game.*
+
+- **Session 1:** Open Godot. Explain the **Node tree** using a physical analogy (a Lego stack). Build a `Node2D` main scene. Add a `TileMapLayer` and paint a small level using the pre-downloaded tileset. *Purely click-and-drag.*
+- **Session 2:** Add a `CharacterBody2D` player node. Attach the sprite, collision shape, and a `Camera2D`. Show how the camera follows. No code yet—just inspector values.
+- **Session 3:** Playtest walking (Godot's built-in "Run Project" button). Let them tweak the camera zoom and sprite scale with sliders. Celebrate that something is *on screen and moving*.
+
+[TIP]
+.Use the **Y-Sort** checkbox in the TileMap node today so objects naturally layer. Explain it with paper cutouts: "Things lower on the screen are closer to the camera."
+
+=== Day 2: "Feel the Physics" — Movement & Jump
+
+*Goal: The player can run and jump around the level.*
+
+- **Session 1:** Add the **movement script** using a pre-printed "Snack Card." Only focus on left/right velocity. Run it immediately.
+- **Session 2:** Add gravity and jump. Use Godot's `is_on_floor()` method. Let them *feel* bad gravity by setting it to a silly number first (e.g., 5000), then dialing it back together. Use the inspector, not hard numbers in code.
+- **Session 3:** Add a **squash-and-stretch** animation using the `AnimationPlayer` node (visual timeline editor). When they land, the character squashes. This is pure visual feedback—no reading required.
+
+[TIP]
+.Use **color-coded printouts** for the script: green for movement, blue for jump, red for gravity. This maps to the syntax highlighting in Godot.
+
+=== Day 3: "Make it 2.5D" — Depth, Parallax, & Lighting
+
+*Goal: The game looks "nice" and dimensional.*
+
+- **Session 1:** **ParallaxBackground**. Add 3 layers: far sky (moves slow), mid mountains, close trees (move fast). Show how scrolling creates instant depth. No code—just node setup.
+- **Session 2:** **Y-Sort & Z-Index**. Place objects the player can walk *behind* (tree trunks) and *in front of* (grass). Use colored rectangles in the editor to visualize the zones (red = foreground, blue = background).
+- **Session 3:** **Lighting**. Add a `DirectionalLight2D` and a `PointLight2D` near a lantern or torch asset. Watch the scene pop. Adjust colors with a color wheel, not text fields.
+
+[TIP]
+.Before touching the computer, lay out paper layers on the desk. Let them physically move a paper player sprite between layers. This tactile step builds the mental model before the screen version.
+
+=== Day 4: "Interact" — Collectibles & One Enemy
+
+*Goal: There is a goal and a challenge.*
+
+- **Session 1:** **Coins/Hearts**. Use `Area2D` nodes. Connect the `body_entered` signal by **dragging the node connection** in the editor (visual wiring, not typing). On pickup: play a sound + spawn a particle burst.
+- **Session 2:** **One simple enemy**. A patrolling slime/bird using another "Snack Card." They only change the speed number and the turn-around timer. Keep the logic to 5 lines.
+- **Session 3:** **Death & Respawn**. When the player hits the enemy, they respawn at the start. Use a visual checkpoint marker (a flag sprite).
+
+[TIP]
+.Signal connections in Godot are done by dragging lines between nodes. Emphasize this "visual wiring" over reading API docs.
+
+=== Day 5: "Juice & Sound" — Polish
+
+*Goal: It feels like a real game.*
+
+- **Session 1:** **Screen shake** on landing/hit. Use a tiny script or a tween in the `AnimationPlayer`. Add running dust particles (`CPUParticles2D`).
+- **Session 2:** **Audio**. Add a background music track and 3 sound effects (jump, coin, die). Let them choose the sounds—auditory choice boosts engagement and memory.
+- **Session 3:** **Camera polish**. Add camera smoothing (drag the `Drag` sliders in `Camera2D`) and vertical/horizontal limits so the camera feels cinematic.
+
+=== Day 6: "Guide the Player" — UI & Menus
+
+*Goal: A start screen and a HUD that requires almost no reading.*
+
+- **Session 1:** **Start Screen**. Big buttons with icons (a play triangle, a door for quit). Use Godot's `Button` nodes with `TextureButton` if possible. Theme the UI with large, dyslexia-friendly fonts.
+- **Session 2:** **HUD**. Show score as **big numbers** (no "Score:" label, just the digit). Use a `TextureProgressBar` for health (hearts or a green bar). Keep text to zero if possible.
+- **Session 3:** **Full playthrough test**. Fix bugs together. If an error appears in Godot's console, read it aloud and translate it: "This red text means the computer lost the player—let's check the name in the node tree."
+
+=== Day 7: "Ship It" — Export & Celebrate
+
+*Goal: A file they can show friends.*
+
+- **Session 1:** **Export** to HTML5 (runs in a browser) or Windows executable. Walk through the export template setup together—click buttons, don't read docs.
+- **Session 2:** **Play & record**. Screen-record a 30-second clip of them playing. Let them narrate what they made. This verbal recap reinforces learning without writing a devlog.
+- **Session 3:** **Visual Retrospective**. On a whiteboard, draw 3 columns: 😎 (what was awesome), 🤔 (what was tricky), 🚀 (what I'd add next). Use stickers or magnets, not essays.
+
+== Daily Rhythm Template
+
+Each day should follow this energy pattern:
+
+[cols="1,2", options="header"]
+|===
+| Time | Activity
+
+| 0:00 | **Warm-up (10 min):** Review yesterday's build by playing it. No new info.
+| 0:10 | **Whiteboard/Paper (15 min):** Sketch today's goal with icons and arrows.
+| 0:25 | **Session 1 (45–60 min):** New concept, heavy teacher demo.
+| *Break* | **Physical break (15–20 min):** Walk, snack, no screens.
+| 1:30 | **Session 2 (45–60 min):** Guided practice, teacher nearby.
+| *Break* | **Physical break (15–20 min).**
+| 3:00 | **Session 3 (30–45 min):** Free tweak time—they choose a color, speed, or sound.
+| 3:45 | **Show & Tell (10 min):** They demo today's build to you. End on a win.
+|===
+
+== Dyslexia Accommodations Checklist
+
+- [ ] **Godot Editor:** `Editor Settings > Interface` → increase font size to 18+, use a dark theme.
+- [ ] **All written materials:** Short bullet lists, max 5 items per list. Use icons.
+- [ ] **Code:** Never type under pressure. Provide pre-written snippets on colored cards. Let them focus on *where* to put it, not *memorizing* syntax.
+- [ ] **Documentation:** Use video tutorials. If text is unavoidable, use a browser text-to-speech extension.
+- [ ] **File naming:** Keep scene/script names short and visual (`Player.tscn`, `Coin.tscn`). Avoid underscores if they confuse; Godot allows plain names.
+- [ ] **Error handling:** When Godot throws an error, read it calmly and reframe it as a puzzle clue, not a failure.
+
+== Scope Reality Check
+
+In one week with a beginner, you will **not** build a multi-level epic. The finished project should be:
+
+- **1** playable character (run, jump, die)
+- **1** small level (one screen wide, tile-based)
+- **3–4** parallax layers for the 2.5D look
+- **3–5** collectible items
+- **1** enemy type
+- **Start screen + HUD**
+
+That is enough to look *nice* and feel complete. The "2.5D" effect comes from the **layered parallax + Y-sort depth + lighting**, not from complex 3D math.
+
+== Final Tip for You as the Teacher
+
+Model the struggle. When *you* forget a node name or miswire a signal, narrate your fix out loud: *"Oops, I dragged the wire to the wrong spot. I'll try the other slot."* This normalizes error-checking and reduces the anxiety that often accompanies dyslexia in learning environments. Keep the ratio at roughly **70% doing, 20% watching you do it, 10% talking about it**. Good luck!

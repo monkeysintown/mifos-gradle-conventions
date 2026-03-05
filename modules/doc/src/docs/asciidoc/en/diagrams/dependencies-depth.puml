@@ -1,0 +1,53 @@
+@startuml dependency-depth
+title Top Dependency Depth Chains (Current State)
+
+rectangle "DD=4\n(Most Dangerous)" as DD4 #LightPink {
+    rectangle "fixeddeposit" as FD
+    rectangle "recurringdeposit" as RD
+}
+
+rectangle "DD=3" as DD3 #LightYellow {
+    rectangle "savings" as S
+    rectangle "loan" as L
+    rectangle "batch" as B
+    rectangle "teller" as T
+    rectangle "report" as R
+    rectangle "group" as G
+}
+
+rectangle "DD=2" as DD2 #PaleGreen {
+    rectangle "accounting" as A
+    rectangle "client" as C
+    rectangle "shareaccounts" as SA
+    rectangle "account-transfers" as AT
+    rectangle "mix" as M
+    rectangle "useradministration" as UA
+}
+
+rectangle "DD=0-1\n(Safe)" as DD0 #LightGreen {
+    rectangle "charge" as CHG
+    rectangle "calendar" as CAL
+    rectangle "rate" as RAT
+    rectangle "organisation" as ORG
+    rectangle "notifications" as N
+    rectangle "template" as TMP
+}
+
+FD -down-> S : 1
+RD -down-> S : 1
+L -down-> A : 1
+S -down-> A : 1
+T -down-> L : 1
+B -down-> L : 1
+R -down-> L : 1
+A -down-> ORG : 1
+C -down-> ORG : 1
+G -down-> C : 1
+
+note right of DD4
+  Transitive chain example:
+  FD → savings → accounting → organisation
+  = depth 4
+end note
+
+@enduml

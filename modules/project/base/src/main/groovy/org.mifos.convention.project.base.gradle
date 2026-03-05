@@ -1,0 +1,96 @@
+plugins {
+    // id "maven-publish"
+    id "me.qoomon.git-versioning"
+    // id "org.danilopianini.git-sensitive-semantic-versioning"
+    id "com.github.ben-manes.versions"
+    id "com.gorylenko.gradle-git-properties"
+    id "idea"
+}
+
+configurations {
+    configureEach {
+        resolutionStrategy {
+            // fail eagerly on version conflict (includes transitive dependencies)
+            // e.g. multiple different versions of the same dependency (group and name are equal)
+            failOnVersionConflict()
+
+            // prefer modules that are part of this build (multi-project or composite build) over external modules
+            preferProjectModules()
+
+            cacheDynamicVersionsFor 8, "hours"
+            cacheChangingModulesFor 5, "days"
+        }
+    }
+    asciidoc {
+        description = "Javadoc Asciidoctor doclet dependencies"
+    }
+    asn1 {
+        description = "ASN1 code generator dependencies"
+    }
+    mifosTemplate {
+        description = "Mifos Project Templates"
+    }
+    developmentOnly {
+        description = "Spring Development Tools"
+    }
+}
+
+/*
+gitSemVer {
+    minimumVersion = "0.1.0"
+    developmentIdentifier = "dev"
+    noTagIdentifier = "archeo"
+    fullHash = false // set to true if you want to use the full git hash
+    maxVersionLength = 99 // Useful to limit the maximum version length, e.g. Gradle Plugins have a limit on 20
+    developmentCounterLength = 2 // How many digits after `dev`
+    enforceSemanticVersioning = true // Whether the plugin should stop if the resulting version is not a valid SemVer, or just warn
+    computeReleaseVersion = false // You can decide whether the generated version should be for releases or pre-releases (default behaviour)
+    // The separator for the pre-release block.
+    // Changing it to something else than "+" may result in non-SemVer compatible versions
+    preReleaseSeparator = "-"
+    // The separator for the build metadata block.
+    // Some systems (notably, the Gradle plugin portal) do not support versions with a "+" symbol.
+    // In these cases, changing it to "-" is appropriate.
+    buildMetadataSeparator = "+"
+    distanceCounterRadix = 36 // The radix for the commit-distance counter. Must be in the 2-36 range.
+    // A prefix on tags that should be ignored when computing the Semantic Version.
+    // Many project are versioned with tags named "vX.Y.Z", de-facto building valid SemVer versions but for the leading "v".
+    // If it is the case for some project, setting this property to "v" would make these tags readable as SemVer tags.
+    versionPrefix = ""
+    // This reproduces the behavior of the plugin at version 0.x.y: ignores non-annotated (lightweight) tags.
+    excludeLightweightTags()
+    // Compute the next upgrade type (major/minor/patch) based on commit messages; defaults to patch regardless of the commits.
+    commitNameBasedUpdateStrategy { org.danilopianini.gradle.gitsemver.UpdateType.PATCH }
+}
+*/
+
+gitVersioning.apply {
+    refs {
+        considerTagsOnBranches = true
+        describeTagPattern = '.*(\\d+\\.\\d+\\.\\d+).*'
+        describeTagFirstParent = false
+        branch('main') {
+            version = '${describe.tag.version.major}.${describe.tag.version.minor}.${describe.tag.version.patch}'
+        }
+    }
+    rev {
+        version = '${describe.tag.version.major}.${describe.tag.version.minor}.${describe.tag.version.patch.next}-${commit.short}'
+    }
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral().content {
+        excludeModule("javax.media", "jai_core")
+    }
+    gradlePluginPortal()
+    maven {
+        url = "https://mifos.jfrog.io"
+    }
+    maven {
+        url = uri("https://central.sonatype.com/repository/maven-snapshots")
+    }
+    maven {
+        url = layout.buildDirectory.dir("staging-deploy")
+    }
+}

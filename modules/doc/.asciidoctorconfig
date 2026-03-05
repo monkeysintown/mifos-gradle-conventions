@@ -1,0 +1,29 @@
+:title-page-background-image: images/draft.svg[position=top]
+:rootdir: {asciidoctorconfigdir}/..
+:imagesdir: {asciidoctorconfigdir}/src/docs/asciidoc/en/images
+:diagramsdir: {asciidoctorconfigdir}/src/docs/asciidoc/en/diagrams
+:commondir: {rootdir}/config/src/main/resources/asciidoc/pages
+:years:  2026
+:organization: Mifos Initiative
+:email: info@mifos.org
+:phone: +381-677xxxxxx
+:plantuml-config: {rootdir}/config/src/main/resources/plantuml/themes/mifos-default-config.cfg
+:revnumber: 1.0.0
+:revremark: Draft
+:branch: main
+:revdate: 2026-05-03
+:toc: left
+:toclevels: 1
+:sectanchors:
+:vgdir: ~/.local/share/node/bin
+:vg2svg: {vgdir}/vg2svg
+:vg2png: {vgdir}/vg2png
+:vl2vg: {vgdir}/vg2vg
+:vl2svg: {vgdir}/vl2svg
+:vl2png: {vgdir}/vl2png
+:datadir: file://{asciidoctorconfigdir}/src/data
+:icons: font
+:caution-caption: 🔥 ERROR
+:tip-caption: ✅ SUCCESS
+:warning-caption: ⚠ WARNING
+:note-caption: ⚡ SKIPPED

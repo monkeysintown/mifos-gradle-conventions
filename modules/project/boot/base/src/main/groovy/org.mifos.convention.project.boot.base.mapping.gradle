@@ -1,0 +1,21 @@
+plugins {
+    id "org.mifos.convention.project.boot.base"
+}
+
+dependencies {
+    implementation "org.springframework:spring-context"
+    compileOnly "tools.jackson.core:jackson-databind"
+    compileOnly "org.mapstruct:mapstruct"
+    compileOnly "org.mapstruct:mapstruct-processor"
+    compileOnly "org.mapstruct.extensions.spring:mapstruct-spring-extensions"
+    compileOnly "org.mapstruct.extensions.spring:mapstruct-spring-test-extensions"
+    compileOnly "org.mapstruct.extensions.spring:mapstruct-spring-annotations"
+    annotationProcessor "org.mapstruct:mapstruct-processor"
+
+    testCompileOnly "org.mapstruct:mapstruct"
+    testCompileOnly "org.mapstruct:mapstruct-processor"
+    testCompileOnly "org.mapstruct.extensions.spring:mapstruct-spring-extensions"
+    testCompileOnly "org.mapstruct.extensions.spring:mapstruct-spring-test-extensions"
+    testCompileOnly "org.mapstruct.extensions.spring:mapstruct-spring-annotations"
+    testAnnotationProcessor "org.mapstruct:mapstruct-processor"
+}

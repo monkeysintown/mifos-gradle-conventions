@@ -1,0 +1,63 @@
+plugins {
+    id "org.mifos.convention.project.base.java"
+    id "test-report-aggregation"
+    id "jvm-test-suite"
+    id "jacoco"
+    // id "jacoco-aggregation"
+}
+
+test {
+    useJUnitPlatform()
+
+    jvmArgs "-Dmifos.environment=local"
+
+    maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
+
+    ignoreFailures = false
+
+    reports {
+        junitXml.required = true
+        html.required = true
+    }
+
+    finalizedBy "jacocoTestReport"
+}
+
+jacoco {
+    toolVersion = "0.8.14"
+    // reportsDirectory = layout.buildDirectory.dir("reports/coverage")
+}
+
+jacocoTestReport {
+    reports {
+        xml.required = true
+        html.required = true
+        csv.required = false
+    }
+    dependsOn test
+}
+
+/*
+reporting {
+    reports {
+        testAggregateTestReport(AggregateTestReport) {
+            testType = TestSuiteType.UNIT_TEST
+        }
+    }
+}
+*/
+
+dependencies {
+    testImplementation "org.junit.platform:junit-platform-suite"
+
+    testImplementation "io.cucumber:cucumber-java"
+    testImplementation "io.cucumber:cucumber-junit-platform-engine"
+
+    testImplementation "io.karatelabs:karate-junit5"
+
+    testImplementation "org.openjdk.jmh:jmh-core"
+
+    testImplementation "org.assertj:assertj-core"
+
+    testImplementation "org.mockito:mockito-junit-jupiter"
+}

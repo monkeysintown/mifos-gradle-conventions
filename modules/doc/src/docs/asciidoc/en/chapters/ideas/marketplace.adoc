@@ -1,0 +1,556 @@
+= Functional Requirements: Mifos Marketplace
+
+IMPORTANT: This document is enhanced using AI tools.
+
+== Introduction
+
+Functional requirements for building a plugins/extensions marketplace for Mifos products, services and plugins, modeled after GitHub Marketplace architecture with fintech-specific adaptations.
+
+== 1. Overview
+
+This document defines the functional requirements for a two-sided marketplace platform connecting plugin developers (publishers) with users of a fintech product. The platform enables discovery, installation, billing, and runtime integration of third-party plugins while maintaining financial-grade security, compliance, and audit standards.
+
+=== Core Functional Pillars
+
+1. **Discovery & Categorization** — Search, filter, featured placements, verified badges
+2. **Publisher Lifecycle** — Draft listings, verification, submission, approval workflow
+3. **Listing Management** — Metadata, pricing, versioning, categorization
+4. **Unified Billing** — Subscription lifecycle, trials, upgrades, proration, payouts
+5. **Trust & Security** — Security reviews, publisher KYC, permission scoping, sandboxing
+6. **Installation & Permissions** — Granular consent, scoped credentials, webhook subscriptions
+7. **Analytics & Monitoring** — Listing metrics, transaction reporting, health telemetry
+8. **Compliance & Audit** — Immutable logs, data access tracking, regulatory reporting
+
+== 2. UI (Web) Functional Requirements
+
+=== 2.1 Discovery & Browse Experience
+
+|===
+| ID | Requirement | Priority | Fintech Adaptation
+
+|UI-001
+|**Category-based browsing** with primary and secondary categories (e.g., Reporting, Compliance, Data Visualization, Risk Management, KYC/AML, Trading Connectors, Tax, Audit).
+|P0
+|Categories must align with financial use cases and regulatory domains.
+
+|UI-002
+|**Faceted search and filtering** by pricing model (free, paid, trial), compatibility (product version, API version), user rating, popularity/install count, compliance certification (SOC 2, PCI DSS, ISO 27001), and publisher verification status.
+|P1
+|Add compliance/certification filters critical for financial buyers conducting vendor due diligence.
+
+|UI-003
+|**Featured and curated placements** on homepage with randomized or editorially selected plugin cards, seasonal promotions, and staff picks.
+|P0
+|Include "Regulator Approved", "Security Certified", and "Enterprise Ready" featured sections.
+
+|UI-004
+|**Search with autocomplete, spell correction, and relevance ranking** across plugin names, descriptions, tags, and publisher names.
+|P0
+|
+
+|UI-005
+|**Plugin detail pages** displaying: introductory description, detailed value propositions, feature lists, screenshots (min. 3), demo videos, interactive demos, changelog/version history, supported product versions, required permissions/scopes matrix, data access disclosures, and integration setup guides.
+|P0
+|**Mandatory**: Clear disclosure of what financial data the plugin accesses (accounts, transactions, PII, balances, statements) and retention policies.
+
+|UI-006
+|**Publisher profile pages** showing all plugins from a publisher, verification badge, business registration info, support links, documentation, status page, and incident history.
+|P1
+|
+
+|UI-007
+|**Comparison tool** allowing side-by-side comparison of up to 3 plugins across features, pricing, ratings, and compliance certifications.
+|P2
+|
+|===
+
+=== 2.2 Publisher Portal (Plugin Developer UI)
+
+|===
+| ID | Requirement | Priority | Fintech Adaptation
+
+| UI-008
+| **Draft listing creation** with form fields for all metadata, image uploads (logo ≥200×200px, feature card 1280×640px, screenshots ≤ 5), and URL validation.
+| P0
+|
+
+| UI-009
+| **Pricing plan editor** supporting: free plans, flat-rate subscriptions, per-seat pricing, usage-based pricing (API calls, transactions, data volume), tiered pricing, and trial periods (7/14/30-day).
+| P0
+| Support complex fintech pricing: per-transaction, basis-point on AUM, tiered by institution size (retail vs. SMB vs. enterprise).
+
+| UI-010
+| **Submission workflow** with checklist of requirements, status tracking (draft → submitted → under review → changes requested → approved/rejected → published → deprecated), and reviewer feedback loop with threaded comments.
+| P0
+|
+
+| UI-011
+| **Analytics dashboard** for publishers showing: listing impressions, click-through rates, unique views, installs/uninstalls, conversion funnel, revenue, MRR/ARR, churn rate, active subscriptions, and geographic distribution.
+| P1
+| Add financial-specific metrics: API call volume, data sync frequency, average transaction value processed.
+
+| UI-012
+| **Webhook configuration UI** for publishers to register endpoints for marketplace events (purchase, cancel, upgrade, downgrade, trial ending) with secret token management and delivery log viewer.
+| P1
+|
+
+| UI-013
+| **Version management** allowing publishers to submit new versions, view approval status per version, and manage deprecation timelines.
+| P0
+|
+
+| UI-014
+| **Payout dashboard** showing earnings, platform fees deducted, payout history, tax form status (W-9, W-8BEN, VAT), and pending payout schedule.
+| P1
+|
+|===
+
+
+=== 2.3 User/Buyer Portal
+
+|===
+| ID | Requirement | Priority | Fintech Adaptation
+
+| UI-015
+| **Plugin installation flow** with explicit permission grant screen showing exactly what data and capabilities the plugin requests, scoped by tenant/environment.
+| P0
+| **Critical**: Granular, itemized consent for financial data access; no blanket permissions. Require explicit confirmation for PII and payment initiation scopes.
+
+| UI-016
+| **Subscription management** page for users to view active plugins, billing cycles, next charge dates, upgrade/downgrade plans with proration preview, cancel subscriptions, pause/resume, and view/download invoices.
+| P0
+|
+
+| UI-017
+| **In-app plugin configuration** screens post-installation (settings, field mappings, API key rotation, notification preferences, data retention settings).
+| P0
+|
+
+| UI-018
+| **Review and rating system** with written feedback, 1-5 star ratings, verified purchase badges, and ability to edit/update reviews.
+| P1
+| Add compliance/security review flags (e.g., "Report security concern", "Flag for compliance review").
+
+| UI-019
+| **Support request escalation** from plugin page directly to publisher support channel (email, ticketing URL, chat) or internal helpdesk with auto-populated context.
+| P1
+|
+
+| UI-020
+| **Plugin usage dashboard** for buyers showing data sync status, last successful run, error logs, API quota consumption, and data accessed by the plugin.
+| P1
+|
+|===
+
+=== 2.4 Admin/Operations UI
+
+|===
+| ID | Requirement | Priority | Fintech Adaptation
+
+| UI-021
+| **Publisher verification admin panel** to review DNS records, identity documents, 2FA enforcement, email domain validation, and business registration.
+| P0
+| **Enhanced KYC for publishers**: business verification, financial services licenses, background checks, sanctions list screening.
+
+| UI-022
+| **Plugin review and approval queue** with security scan results, compliance checklist, sandbox test results, manual code review notes, and approval/rejection actions with templated reasoning.
+| P0
+|
+
+| UI-023
+| **Dispute and refund management** interface for handling billing disputes, chargebacks, and escalations with case tracking and resolution workflow.
+| P1
+|
+
+| UI-024
+| **Platform analytics** showing marketplace health, GMV, revenue, top categories, publisher performance, churn rates, and security incident trends.
+| P1
+|
+
+| UI-025
+| **Emergency operations console** for kill-switch activation, mass tenant notifications, and incident response coordination.
+| P0
+| **Critical for fintech**: Single-click emergency revocation with automated audit trail.
+|===
+
+== 3. Backend Functional Requirements
+
+=== 3.1 Plugin Registry & Catalog Management
+
+|===
+| ID | Requirement | Priority | Fintech Adaptation
+
+| BE-001
+| **Plugin registry service** storing plugin metadata, versions, manifests (JSON/YAML), dependencies, compatibility matrices (product version × API version), and approval states.
+| P0
+| Immutable version history with rollback capability for financial stability. No mutable published versions.
+
+| BE-002
+| **Category and taxonomy management** with hierarchical categories, tagging system, synonym handling, and dynamic category creation by admins.
+| P1
+|
+
+| BE-003
+| **Publisher entity management** linking plugins to organizations/individuals with verification status, contact info, payout details, tax info, and reputation score.
+| P0
+|
+
+| BE-004
+| **Listing state machine** managing draft → submitted → in_review → changes_requested → approved → published → deprecated → delisted lifecycle with full audit logging of every transition.
+| P0
+| **Audit trail mandatory** for regulatory compliance.
+
+| BE-005
+| **Content delivery for plugin assets** (logos, screenshots, documentation) with CDN distribution, image validation (size, format, content scanning for malware), and virus scanning.
+| P0
+|
+
+| BE-006
+| **Search indexing service** with full-text search, faceted indexing, and near-real-time index updates on listing changes.
+| P1
+|
+|===
+
+=== 3.2 Identity, Access & Security
+
+|===
+| ID | Requirement | Priority | Fintech Adaptation
+
+| BE-007
+| **Granular permission and scope system** defining what each plugin can access: read accounts, write transactions, access PII, trigger payments, read balances, access statements, export data, etc. | P0 | **Zero-trust model**: default deny; explicit allowlists per data type and operation. No implicit inheritance.
+
+| BE-008
+| **Authentication service** supporting OAuth 2.0 / OIDC with PKCE, short-lived access tokens (≤1 hour), refresh token rotation, and installation-scoped credentials.
+| P0
+| Support mTLS and hardware security modules (HSM) for high-sensitivity plugins.
+
+| BE-009
+| **Plugin sandboxing/isolation** ensuring plugins run in isolated environments (containers, WASM, secure enclaves, or separate microservices) with no direct access to the host database or core financial engine.
+| P0
+| **Mandatory for fintech**: Plugins must not execute within the core banking/financial engine; use secure APIs and event buses only.
+
+| BE-010
+| **Runtime permission enforcement** intercepting all plugin API calls against granted scopes with real-time denial of out-of-scope requests and alerting on violations.
+| P0
+|
+
+| BE-011
+| **Secret management service** for plugin API keys, credentials, certificates, and webhooks with automatic rotation, encrypted storage (KMS/HSM), and injection at runtime.
+| P0
+|
+
+| BE-012
+| **Security scanning pipeline** running SAST, DAST, dependency vulnerability scans (SCA), container image scans, license compliance checks, and secrets detection on every plugin version submission.
+| P0
+| Add financial malware detection, behavior analysis, and third-party risk scoring.
+
+| BE-013
+| **Data residency and privacy controls** ensuring plugin data processing respects regional regulations (GDPR, CCPA, LGPD, data localization laws) with region-aware routing and storage.
+| P0
+|
+
+| BE-014
+| **Rate limiting and quota enforcement** per tenant, per plugin, and per API endpoint with configurable tiers and burst handling.
+| P0
+|
+|===
+
+=== 3.3 Billing & Payments
+
+|===
+| ID | Requirement | Priority | Fintech Adaptation
+
+| BE-015
+| **Unified billing engine** handling subscription lifecycle: new purchase, free trial activation, trial-to-paid conversion, upgrade, downgrade, proration (credit/debit), cancellation (end-of-period vs. immediate), expiration, and renewal.
+| P0
+|
+
+| BE-016
+| **Multiple pricing models**: free, flat fee, per-seat, usage-based (API calls, transaction volume, data volume, report generation), tiered (volume discounts), and hybrid/combined models.
+| P0
+| **Fintech-specific**: per-transaction, basis-point on AUM, tiered by institution type (retail vs. SMB vs. enterprise).
+
+| BE-017
+| **Webhook event dispatch** to publishers for all billing state changes (new purchase, cancel, upgrade, downgrade, trial ending, payment failure) with idempotency keys, at-least-once delivery, exponential backoff retry logic, and dead letter queue.
+| P0
+|
+
+| BE-018
+| **Invoice generation and tax handling** (VAT, GST, sales tax, withholding) based on publisher and buyer jurisdictions with tax calculation engine integration.
+| P0
+|
+
+| BE-019
+| **Revenue share and payout engine** calculating platform fees (e.g., 5–30%), holding funds in escrow where required by regulation, and scheduling payouts to publishers (monthly, threshold-based).
+| P0
+| **Fintech compliance**: Anti-money laundering (AML) checks on payouts, sanctions list screening (OFAC, UN, EU), suspicious activity monitoring.
+
+| BE-020
+| **Payment method management** storing cards, bank accounts (ACH, SEPA), and alternative payment methods with PCI DSS Level 1 compliance.
+| P0
+| **Mandatory**: Tokenization via certified vault; no raw card data storage or processing by marketplace.
+
+| BE-021
+| **Refund and chargeback processing** with automated prorated refunds, partial refunds, dispute evidence submission, and chargeback notification webhooks to publishers.
+| P1
+|
+
+| BE-022
+| **Dunning management** for failed payments: retry schedule, payment method update prompts, grace periods, and subscription suspension/cancellation workflows.
+| P1
+|
+|===
+
+=== 3.4 Installation & Runtime Integration
+
+|===
+| ID | Requirement | Priority | Fintech Adaptation
+
+| BE-023
+| **Plugin installation service** provisioning plugin instances, registering webhooks, creating scoped credentials, enabling feature flags in the host product, and validating prerequisites.
+| P0
+|
+
+| BE-024
+| **Plugin configuration store** for tenant-specific settings, encrypted at rest (AES-256), with schema validation and versioning.
+| P0
+|
+
+| BE-025
+| **Event bus / message queue** delivering host product events to subscribed plugins (e.g., new transaction, account update, compliance alert, audit event) with guaranteed delivery, ordering, and at-least-once semantics.
+| P0
+| **Exactly-once processing** for financial events; idempotency enforcement via deduplication keys.
+
+| BE-026
+| **Plugin API gateway** routing authenticated requests from plugins to host product APIs with rate limiting, throttling, quota enforcement per tenant, request/response transformation, and caching.
+| P0
+|
+
+| BE-027
+| **Health monitoring and telemetry** tracking plugin uptime, error rates, API latency (p50/p95/p99), resource consumption (CPU, memory), and alerting on anomalies.
+| P1
+|
+
+| BE-028
+| **Graceful degradation**: if a plugin fails, times out, or exceeds quotas, the core fintech product must continue operating unaffected; failed plugin calls must not cascade.
+| P0
+| **Critical**: No single point of failure introduced by plugins. Circuit breaker pattern mandatory.
+
+| BE-029
+| **Plugin update/rollback service** handling version updates with zero-downtime deployment, blue-green rollout, and instant rollback to previous version on failure.
+| P1
+|
+|===
+
+=== 3.5 Compliance, Audit & Risk
+
+|===
+| ID | Requirement | Priority | Fintech Adaptation
+
+| BE-030
+| **Comprehensive audit logging** of all marketplace actions: searches, views, installs, permission grants, data access, configuration changes, billing events, admin approvals, and kill-switch activations.
+| P0
+| **Immutable, tamper-evident logs** with WORM (Write Once Read Many) storage for regulatory exams.
+
+| BE-031
+| **Data access logging** recording exactly what data each plugin read or wrote, when, by which user/tenant, and for what purpose (if declared).
+| P0
+| **Required for GDPR Article 30, PCI DSS Requirement 10, and financial regulations (SOX, MiFID II).**
+
+| BE-032
+| **Plugin risk scoring engine** evaluating publisher reputation, code quality, security scan results, user ratings, incident history, and financial license status to assign dynamic risk tiers (low/medium/high/critical).
+| P1
+|
+
+| BE-033
+| **Compliance reporting** generating on-demand and scheduled reports for regulators and auditors showing: plugin inventory, active data flows, access controls, security review status, and incident history.
+| P0
+|
+
+| BE-034
+| **Kill switch / emergency revocation** allowing immediate suspension of a plugin across all tenants or specific tenants in case of security breach, fraud, or regulatory order.
+| P0
+| **Sub-second revocation capability** with automated tenant notification and audit trail.
+
+| BE-035
+| **Data retention policy enforcement** automatically purging plugin-accessed data copies after retention periods per tenant policy and regulatory requirements.
+| P1
+|
+|===
+
+== 4. Mobile Functional Requirements
+
+=== 4.1 Discovery & Installation
+
+|===
+| ID | Requirement | Priority | Fintech Adaptation
+
+| MO-001
+| **Browse and search** marketplace catalog with category filters, search, featured sections, and trending plugins optimized for mobile screens.
+| P0
+|
+
+| MO-002
+| **Plugin detail view** with swipeable screenshots, collapsible descriptions, accordion-style feature lists, and one-tap "Add to [Product]" installation initiation.
+| P0
+|
+
+| MO-003
+| **Simplified permission review** with clear, mobile-friendly visualization of data access requests before installation, using icons and color-coding for risk levels.
+| P0
+| **Critical**: Financial data access must be explicitly itemized and require biometric or PIN confirmation before granting.
+
+| MO-004
+| **Offline catalog caching** allowing browsing previously loaded plugins and cached detail pages without connectivity.
+| P2
+|
+
+| MO-005
+| **Deep linking** from external sources (email, SMS, QR code) directly to plugin detail or installation screens with referral tracking.
+| P1
+|
+|===
+
+=== 4.2 Management
+
+|===
+| ID | Requirement | Priority | Fintech Adaptation
+
+| MO-006
+| **My Plugins dashboard** showing installed plugins, active/paused status, subscription details, renewal dates, and quick toggle to enable/disable non-critical plugins.
+| P0
+|
+
+| MO-007
+| **Push notifications** for billing events (trial ending in 3 days, payment failed, invoice ready), plugin updates available, security alerts, and publisher announcements.
+| P1
+|
+
+| MO-008
+| **In-app plugin configuration** for mobile-relevant settings: notification preferences, mobile widget placement, quick-action shortcuts, biometric unlock for plugin actions.
+| P1
+|
+
+| MO-009
+| **Biometric-secured sensitive actions** requiring Face ID/Touch ID/fingerprint for installing plugins that access sensitive financial data, initiate payments, or modify compliance settings.
+| P0
+| **Mandatory**: Step-up authentication for high-risk plugin permissions.
+
+| MO-010
+| **Plugin usage summary** showing recent activity, data synced, and quota consumption in mobile-optimized charts.
+| P2
+|
+|===
+
+=== 4.3 Publisher & Admin (Mobile)
+
+|===
+| ID | Requirement | Priority | Fintech Adaptation
+
+| MO-011
+| **Publisher analytics snapshot** with key metrics (daily installs, revenue, ratings, active subscriptions) in mobile-optimized charts and cards.
+| P2
+|
+
+| MO-012
+| **Critical alert handling** allowing admins to receive and act on security alerts, approval requests, and kill-switch triggers from mobile with biometric confirmation for destructive actions.
+| P0
+| **SOC/NOC integration**: Escalation paths for critical financial system alerts with acknowledgment tracking.
+
+| MO-013
+| **Support ticket triage** for publishers to view, prioritize, and respond to user issues from mobile with template responses.
+| P2
+|
+|===
+
+== 5. Fintech-Specific Differentiators
+
+|===
+| Domain | Generic Marketplace Approach | Fintech Requirement
+
+| **Trust Model**
+| Optional publisher verification
+| **Mandatory KYC/AML for all publishers**, security review for *all* plugins, financial services license validation, ongoing monitoring
+
+| **Permissions**
+| Coarse-grained scopes
+| **Mandatory least-privilege** with explicit user consent per data type; no "blanket" or all-or-nothing scopes
+
+| **Runtime**
+| External hosting or loose integration
+| **Sandboxed/isolated execution**; plugins must not compromise core financial systems; strict API boundary enforcement
+
+| **Billing**
+| Simple subscription (monthly/annual)
+| **Complex pricing models**: per-transaction, usage-based, AUM-based; escrow and payout compliance; AML screening
+
+| **Audit**
+| Basic metrics and logs
+| **Immutable, regulator-ready audit trails** of all data access, permission changes, and configuration changes with WORM storage
+
+| **Revocation**
+| Standard uninstall with 30-day grace
+| **Emergency kill switch** with instant, system-wide plugin suspension capability (<1 second propagation)
+
+| **Mobile**
+| Web-responsive or companion app
+| **First-class native mobile support** with biometric-gated installation for plugins touching financial data or payment initiation
+
+| **Data Residency**
+| Single-region or optional multi-region
+| **Mandatory region-aware routing** with data localization controls per tenant jurisdiction
+
+| **Incident Response**
+| Standard ticketing
+| **Integrated SOC/NOC workflow** with automated tenant notification, regulatory reporting triggers, and forensic preservation
+|===
+
+== 6. Summary Architecture
+
+=== PRESENTATION LAYER (Web + Mobile)
+- Discovery, Search, Plugin Detail, Publisher Portal
+- Admin Console, Subscription Management, Analytics
+- Mobile BFF (Backend-for-Frontend)
+
+=== API GATEWAY LAYER
+- Authentication, Authorization (OAuth 2.0 / OIDC)
+- Rate Limiting, Throttling, DDoS Protection
+- Request Routing, Load Balancing, Caching
+- Mobile API Aggregation
+
+=== MARKETPLACE CORE SERVICES
+- Catalog & Registry Service
+- Search Engine (Full-text + Faceted)
+- Billing & Subscription Engine
+- Publisher Verification & Review Workflow
+- Notification Service (Email, Push, SMS)
+- Webhook Dispatch Service (Idempotent, Retrying)
+
+=== SECURITY & COMPLIANCE LAYER
+- Identity & Access Management (IAM)
+- Permission Engine / Policy Enforcement Point (PEP)
+- Secret Management Vault (KMS/HSM-backed)
+- Encryption Service (At-rest + In-transit)
+- Audit Logging Service (Immutable, WORM)
+- Risk Scoring & Compliance Reporting Engine
+- Fraud Detection & AML Screening
+
+=== PLUGIN RUNTIME & INTEGRATION LAYER
+- Sandboxed Execution Environment (Containers/WASM)
+- Event Bus (Financial Events → Plugins)
+- Plugin API Gateway (Plugins → Host Product)
+- Circuit Breaker & Graceful Degradation
+- Health Monitoring, Telemetry, Alerting
+- Kill Switch / Emergency Revocation
+
+=== DATA LAYER
+- Plugin Metadata, Versions, Manifests (Immutable)
+- Tenant Configurations, Scoped Credentials
+- Subscription & Billing Records
+- Transaction & Payout Ledger
+- Audit Logs (WORM Storage)
+- Search Indexes
+
+== Other
+
+- https://www.x402.org

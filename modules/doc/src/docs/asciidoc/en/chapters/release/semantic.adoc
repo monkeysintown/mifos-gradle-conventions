@@ -1,0 +1,55 @@
+= Semantic Release
+
+https://semantic-release.gitbook.io/semantic-release[Semantic Release^] is a tool that automates the entire package release workflow, including determining the next version number, generating release notes, and publishing packages. It eliminates the need for manual version bumps and removes the human error that inevitably accompanies them. Instead of tagging releases by hand, semantic-release analyzes the commit history since the last release, applies the rules of https://semver.org[Semantic Versioning^], and derives the correct next version automatically.
+
+The core principle is simple: your commit messages define your releases. By following the https://www.conventionalcommits.org/[Conventional Commits^] specification, every commit carries structured metadata about the nature of the change. A commit prefixed with `feat:` triggers a minor version bump, `fix:` triggers a patch bump, and a `BREAKING CHANGE:` footer or `feat!:` prefix triggers a major version bump. This creates a fully traceable link between code changes and version increments.
+
+To install semantic-release in a Mifos project, add it as a development dependency:
+
+[source,bash]
+----
+npm install --save-dev semantic-release \
+  @semantic-release/commit-analyzer \
+  @semantic-release/release-notes-generator \
+  @semantic-release/changelog \
+  @semantic-release/git \
+  @semantic-release/github
+----
+
+The configuration is defined in a `.releaserc.json` file at the project root. Here is a standard configuration for Mifos projects:
+
+[source,json]
+----
+{
+  "branches": [
+    "main",
+    { "name": "alpha", "prerelease": true },
+    { "name": "beta", "prerelease": true },
+    { "name": "rc", "prerelease": true }
+  ],
+  "plugins": [
+    "@semantic-release/commit-analyzer",
+    "@semantic-release/release-notes-generator",
+    [
+      "@semantic-release/changelog",
+      { "changelogFile": "CHANGELOG.md" }
+    ],
+    [
+      "@semantic-release/git",
+      {
+        "assets": ["CHANGELOG.md"],
+        "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+      }
+    ],
+    "@semantic-release/github"
+  ]
+}
+----
+
+This configuration ensures that releases are only created from the `main` branch, while `alpha`, `beta`, and `rc` branches produce pre-release versions such as `1.2.0-alpha.1` or `2.0.0-rc.3`. The `changelog` plugin maintains a `CHANGELOG.md` file, and the `git` plugin commits it back to the repository with a `[skip ci]` tag to prevent infinite CI loops.
+
+NOTE: Semantic-release requires a minimum of Node.js 18. If your build environment does not include Node.js, use the official Docker image: `docker run --rm -v $PWD:$PWD -w $PWD semanticrelease/semantic-release`.
+
+see:
+
+- https://semantic-release.gitbook.io/semantic-release

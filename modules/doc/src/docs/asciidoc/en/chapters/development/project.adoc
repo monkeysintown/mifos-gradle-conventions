@@ -1,0 +1,101 @@
+= Projects
+
+WARNING: This text still needs to be redacted to match what we really want to do here.
+
+The Mifos ecosystem is composed of several interconnected repositories, each serving a distinct role in the financial inclusion platform. At the center is Apache Fineract, the core banking engine that provides the REST API for loan management, savings, client management, and accounting. Surrounding it are community applications, mobile SDKs, and operational tooling.
+
+The typical Mifos project is a multi-module Gradle build. The root project defines shared configuration through convention plugins, while individual modules encapsulate bounded contexts or deployable artifacts. Below is a representative project layout:
+
+[source,terminaloutput]
+----
+mifos-platform/
+├── buildSrc/                     # Convention plugins and shared build logic
+│   ├── src/main/kotlin/
+│   │   ├── mifos-java-conventions.gradle.kts
+│   │   ├── mifos-spring-boot-conventions.gradle.kts
+│   │   └── mifos-publishing-conventions.gradle.kts
+│   └── build.gradle.kts
+├── fineract-provider/            # Core banking REST API
+├── fineract-infrastructure/      # Shared infrastructure (crypto, events)
+├── fineract-accounting/          # Accounting module
+├── fineract-portfolio/           # Loan and savings portfolio
+├── community-app/                # Community web application (Angular + Java)
+├── mobile-wallet/                # Mobile wallet SDK
+├── anubis/                       # Tenant authentication layer
+├── gradle/
+│   └── wrapper/
+│       ├── gradle-wrapper.jar
+│       └── gradle-wrapper.properties
+├── gradle.properties             # Version catalog and global properties
+├── settings.gradle.kts           # Module includes
+└── build.gradle.kts              # Root build file
+----
+
+The relationship between these projects is important to understand. The `fineract-provider` module depends on `fineract-infrastructure`, `fineract-accounting`, and `fineract-portfolio`. The `community-app` consumes the REST API exposed by `fineract-provider`. Mobile applications interact exclusively through the public API surface, never directly with the database.
+
+Each module has its own `build.gradle.kts` that applies one or more convention plugins from `buildSrc`. This ensures, for example, that every Java module inherits the same Checkstyle configuration, JaCoCo coverage thresholds, and dependency version constraints without any copy-paste.
+
+== Layouts
+
+WARNING: We should do layouts per project type (backend, mobile, web).
+
+Mifos follows the standard Gradle/Java project layout conventions. These conventions are not arbitrary—they are understood by every Java IDE, build tool, and framework in the ecosystem. Deviating from them adds friction for contributors and breaks assumptions in tooling.
+
+The standard source layout for a Java module is:
+
+[source,terminaloutput]
+----
+module-name/
+├── src/
+│   ├── main/
+│   │   ├── java/
+│   │   │   └── org/mifos/module/
+│   │   │       ├── domain/
+│   │   │       │   ├── Client.java
+│   │   │       │   └── Loan.java
+│   │   │       ├── repository/
+│   │   │       │   └── ClientRepository.java
+│   │   │       ├── service/
+│   │   │       │   └── ClientService.java
+│   │   │       └── rest/
+│   │   │           └── ClientRestController.java
+│   │   └── resources/
+│   │       ├── application.yml
+│   │       ├── messages_en.properties
+│   │       └── db/migration/
+│   │           └── V001__create_client_table.sql
+│   └── test/
+│       ├── java/
+│       │   └── org/mifos/module/
+│       │       ├── service/
+│       │       │   └── ClientServiceTest.java
+│       │       └── rest/
+│       │           └── ClientRestControllerTest.java
+│       └── resources/
+│           └── application-test.yml
+├── build.gradle.kts
+└── README.md
+----
+
+Key layout rules:
+
+* **Production code** lives under `src/main/java/` with the package root `org.mifos`.
+* **Test code** mirrors the production package structure under `src/test/java/`.
+* **Integration tests** may be placed in `src/integrationTest/java/` with a corresponding source set.
+* **Resources** including Spring configuration, i18n bundles, and Flyway migrations go under `src/main/resources/`.
+* **Test resources** override or supplement production configuration under `src/test/resources/`.
+
+WARNING: Never place test classes in the production source tree. The Gradle build will package them into the deployed JAR, inflating artifact size and potentially leaking test utilities into production.
+
+For Gradle plugin development (Kotlin only), the convention is:
+
+[source,terminaloutput]
+----
+buildSrc/
+├── src/main/kotlin/
+│   ├── mifos-java-conventions.gradle.kts
+│   └── mifos-spring-boot-conventions.gradle.kts
+└── build.gradle.kts
+----
+
+For Android modules, follow the standard Android source sets (`src/main/java`, `src/debug/java`, `src/release/java`).

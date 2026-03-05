@@ -1,0 +1,20 @@
+@startuml
+!define FONTAWESOME https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/font-awesome-5
+
+title Modern Architecture Diagram
+
+skinparam backgroundColor #2b2b2b
+skinparam componentStyle uml2
+skinparam shadowing true
+
+component [API Gateway] as GW
+component [Service A] as S1
+component [Service B] as S2
+database [Database] as DB
+
+GW --> S1
+GW --> S2
+S1 --> DB
+S2 --> DB
+
+@enduml

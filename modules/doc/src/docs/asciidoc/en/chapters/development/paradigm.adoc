@@ -1,0 +1,185 @@
+= Software Development Paradigms
+
+TBD
+
+== Imperative
+
+Imperative programming is the default paradigm for Mifos server-side services. In the imperative style, code executes sequentially: each statement runs to completion before the next one begins, making the flow of control explicit and easy to follow. This is the model that most Java developers are comfortable with and the one that Spring Framework's core abstractions (dependency injection, transaction management, AOP) are optimized for.
+
+A typical imperative service method in Mifos follows a straightforward read-validate-execute-write pattern:
+
+[source,java]
+----
+@Service
+@Transactional
+public class LoanDisbursementService {
+
+    private final LoanRepository loanRepository;
+    private final ClientRepository clientRepository;
+    private final AccountingService accountingService;
+    private final DomainEventPublisher eventPublisher;
+
+    public LoanDisbursementService(
+            LoanRepository loanRepository,
+            ClientRepository clientRepository,
+            AccountingService accountingService,
+            DomainEventPublisher eventPublisher) {
+        this.loanRepository = loanRepository;
+        this.clientRepository = clientRepository;
+        this.accountingService = accountingService;
+        this.eventPublisher = eventPublisher;
+    }
+
+    public Loan disburse(Long loanId, DisbursementCommand command) {
+        // 1. Read
+        Loan loan = loanRepository.findById(loanId)
+            .orElseThrow(() -> new PlatformResourceNotFoundException("Loan", loanId.toString()));
+
+        // 2. Validate
+        if (loan.getStatus() != LoanStatus.APPROVED) {
+            throw new LoanProcessingException(loanId, "MIFOS-3002",
+                "Only approved loans can be disbursed. Current status: " + loan.getStatus());
+        }
+
+        // 3. Execute business logic
+        loan.disburse(command.getDisbursementDate(), command.getDisbursedBy());
+
+        // 4. Write side effects
+        accountingService.createDisbursementEntry(loan);
+        loanRepository.save(loan);
+
+        // 5. Publish domain event
+        eventPublisher.publish(new LoanDisbursedEvent(loanId, loan.getClientId()));
+
+        return loan;
+    }
+}
+----
+
+The imperative style is preferred for Mifos because it is easy to reason about, debug, and trace. Transaction boundaries are explicit, the call stack is linear, and error handling follows familiar try-catch patterns. For the vast majority of Mifos use cases—processing a loan application, posting a savings deposit, running an end-of-day batch—imperative code is the right tool for the job.
+
+== Asynchronous
+
+Asynchronous programming becomes necessary when a service must perform I/O-bound operations that would otherwise waste threads waiting for responses. In Mifos, this typically involves calling external services (SMS gateways, payment processors, credit bureaus) where the response time is unpredictable and blocking a thread would reduce throughput.
+
+Java's `CompletableFuture` is the primary tool for asynchronous programming in the Mifos server stack. It allows you to compose asynchronous operations without the cognitive overhead of reactive streams:
+
+[source,java]
+----
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+
+@Service
+public class NotificationService {
+
+    private final SmsGatewayClient smsClient;
+    private final EmailGatewayClient emailClient;
+    private final Executor asyncExecutor;
+
+    public NotificationService(SmsGatewayClient smsClient,
+                               EmailGatewayClient emailClient,
+                               Executor asyncExecutor) {
+        this.smsClient = smsClient;
+        this.emailClient = emailClient;
+        this.asyncExecutor = asyncExecutor;
+    }
+
+    public CompletableFuture<NotificationResult> notifyClient(
+            Client client, String message) {
+
+        // Send SMS and email in parallel
+        CompletableFuture<SmsResult> smsFuture =
+            CompletableFuture.supplyAsync(
+                () -> smsClient.send(client.getMobile(), message),
+                asyncExecutor
+            );
+
+        CompletableFuture<EmailResult> emailFuture =
+            CompletableFuture.supplyAsync(
+                () -> emailClient.send(client.getEmail(), "Mifos Notification", message),
+                asyncExecutor
+            );
+
+        // Combine results when both complete
+        return smsFuture.thenCombineAsync(emailFuture,
+            (smsResult, emailResult) -> new NotificationResult(
+                smsResult.messageId(),
+                emailResult.messageId()
+            ),
+            asyncExecutor
+        ).exceptionally(ex -> {
+            LOG.warn("Notification delivery partially failed for client {}: {}",
+                client.getId(), ex.getMessage());
+            return NotificationResult.partialFailure();
+        });
+    }
+}
+----
+
+Common pitfalls to avoid:
+
+* **Never block on `CompletableFuture.get()`** in a web request thread—this defeats the purpose of async. Use `.thenApply()` and `.thenCompose()` to chain results.
+* **Always supply a custom `Executor`** with a bounded thread pool. The default `ForkJoinPool.commonPool()` is shared across the JVM and can become a bottleneck.
+* **Handle exceptions explicitly** with `.exceptionally()` or `.handle()`. Unhandled exceptions in futures are silently swallowed.
+* **Keep async boundaries narrow**. Don't make an entire service async if only one method calls an external API. Wrap only the I/O-bound portion.
+
+== Reactive
+
+Reactive programming with Project Reactor provides a powerful model for handling high-concurrency streaming workloads with minimal thread usage. Instead of pulling data synchronously, reactive pipelines push data through a sequence of operators, with **backpressure** ensuring that fast producers don't overwhelm slow consumers.
+
+Mifos uses reactive programming selectively—for scenarios involving real-time event streams, high-throughput data pipelines, or WebSocket-based dashboard updates. The core CRUD operations remain imperative.
+
+A simple reactive pipeline for streaming loan events:
+
+[source,java]
+----
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
+
+@Service
+public class LoanEventStreamService {
+
+    private final LoanEventRepository eventRepository;
+
+    public LoanEventStreamService(LoanEventRepository eventRepository) {
+        this.eventRepository = eventRepository;
+    }
+
+    /**
+     * Streams loan events in real-time for the given tenant.
+     * Uses backpressure to limit memory consumption.
+     */
+    public Flux<LoanEvent> streamEvents(String tenantId) {
+        return eventRepository.findByTenantId(tenantId)
+            .subscribeOn(Schedulers.boundedElastic())
+            .filter(event -> event.getTimestamp().isAfter(Instant.now().minusSeconds(3600)))
+            .onBackpressureBuffer(1000, () ->
+                LOG.warn("Backpressure buffer overflow for tenant {}", tenantId))
+            .doOnError(ex -> LOG.error("Event stream error for tenant {}", tenantId, ex))
+            .retryWhen(reactor.util.retry.Retry.backoff(3, java.time.Duration.ofSeconds(1)));
+    }
+
+    /**
+     * Processes a single event reactively.
+     */
+    public Mono<ProcessingResult> processEvent(LoanEvent event) {
+        return Mono.fromCallable(() -> doProcess(event))
+            .subscribeOn(Schedulers.boundedElastic())
+            .timeout(java.time.Duration.ofSeconds(30))
+            .onErrorResume(ex -> {
+                LOG.error("Failed to process event {}", event.getId(), ex);
+                return Mono.just(ProcessingResult.failed(event.getId()));
+            });
+    }
+}
+----
+
+Key concepts:
+
+* **Mono**: Represents a single value or empty result (analogous to `Optional` or `CompletableFuture`).
+* **Flux**: Represents a stream of zero or more values (analogous to a Java `Stream` with push semantics).
+* **Backpressure**: The mechanism by which a subscriber signals how many items it can process, preventing buffer overflow. The `onBackpressureBuffer()` operator is the most common strategy.
+* **Schedulers**: Reactor operations run on the subscribing thread by default. Use `subscribeOn()` for upstream scheduling and `publishOn()` for downstream scheduling. `Schedulers.boundedElastic()` is preferred for I/O-bound work.
+
+CAUTION: Reactive code is significantly harder to debug, test, and maintain than imperative code. Adopt it only when the performance benefits are measurable and necessary. Premature adoption of reactive patterns creates complexity without benefit.

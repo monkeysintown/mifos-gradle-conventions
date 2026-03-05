@@ -1,0 +1,111 @@
+= PlantUML
+
+PlantUML (https://plantuml.com) is the primary diagram-as-code tool in the Mifos project. It uses a simple text syntax to define UML and non-UML diagrams, and integrates seamlessly with AsciiDoc through the asciidoctor-diagram extension. During the documentation build, PlantUML source blocks are automatically rendered to SVG images and embedded in the output.
+
+.Gradle PlantUML Configuration
+[source,groovy]
+----
+// build.gradle.kts
+asciidoctor {
+    requires("asciidoctor-diagram")
+
+    attributes(
+        "plantumlconfig" to file("src/docs/plantuml/mifos-theme.puml").absolutePath
+    )
+}
+----
+
+== Class Diagram
+
+A class diagram shows the structure of a domain model—its classes, attributes, methods, and relationships. The following PlantUML class diagram models a simplified version of the Mifos Client domain:
+
+[source,asciidoc]
+----
+// TODO: provide example
+----
+
+== Sequence Diagram
+
+A sequence diagram captures the interactions between actors and system components over time. The following diagram illustrates the loan application flow in Mifos, from initial submission through approval and disbursement:
+
+[plantuml,test_diagram,svg]
+----
+include::{diagramsdir}/test.puml[]
+----
+
+The rendered diagram shows three distinct phases: submission (where the loan officer submits the application and the system verifies the client and checks credit), approval (where the loan officer approves the application after underwriting review), and disbursement (where the loan is activated and the repayment schedule is generated). Each phase publishes domain events that other modules can react to, illustrating the event-driven architecture.
+
+== State Diagram
+
+A state diagram models the lifecycle of an entity through its various states and the transitions between them. The following diagram captures the loan application state machine in Mifos:
+
+[plantuml,loan-state-diagram,svg]
+----
+@startuml
+skinparam state {
+    BackgroundColor<<active>> #4CAF50
+    BackgroundColor<<rejected>> #F44336
+    BackgroundColor<<closed>> #9E9E9E
+}
+
+[*] --> Submitted : Client applies
+
+state Submitted {
+    [*] --> PendingReview
+    PendingReview : Awaiting underwriter review
+}
+
+Submitted --> Approved : Underwriter approves
+Submitted --> Rejected <<rejected>> : Underwriter rejects
+Rejected --> [*]
+
+state Approved {
+    [*] --> AwaitingDisbursement
+    AwaitingDisbursement : Ready for fund release
+}
+
+Approved --> Active <<active>> : Funds disbursed
+Approved --> Withdrawn : Client withdraws
+
+state Active <<active>> {
+    [*] --> Repaying
+    Repaying : Regular installments due
+    Repaying --> InArrears : Payment overdue
+    InArrears --> Repaying : Payment received
+}
+
+Active --> Closed <<closed>> : All installments paid
+Active --> WrittenOff <<closed>> : Default written off
+Active --> Overpaid : Excess payment received
+
+Closed --> [*]
+WrittenOff --> [*]
+Withdrawn --> [*]
+Overpaid --> Closed : Refund excess
+
+@enduml
+----
+
+== Component
+
+[plantuml,test_folder_diagram,svg]
+----
+include::{diagramsdir}/test-folder.puml[]
+----
+
+== Theming
+
+Consistent visual branding across all diagrams is essential for professional documentation. PlantUML supports theming through configuration files that define color schemes, fonts, and styling defaults. In the Mifos project, we maintain a shared PlantUML theme file that ensures all diagrams share a cohesive visual identity.
+
+.Mifos PlantUML Theme
+[source,terminaloutput]
+----
+// TODO: point to Mifos theme
+----
+
+Apply the theme to any diagram with the `!theme` directive:
+
+[plantuml,test,svg]
+----
+include::{diagramsdir}/test-theme.puml[]
+----

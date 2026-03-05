@@ -1,0 +1,614 @@
+# ============================================================
+# DRAMATIC ASCIIDOC PDF THEME
+# Palette: https://coolors.co/00193a-002b53-023f73-034780-7a0213-a10220-bf0a26-cd0c2b-131313-262626
+# ============================================================
+
+extends: default
+
+# ============================================================
+# COLOR DEFINITIONS
+# ============================================================
+color:
+  # Navy family
+  navy-deepest:   '00193A'
+  navy-dark:      '002B53'
+  navy-medium:    '023F73'
+  navy-bright:    '034780'
+
+  # Red family
+  red-dark:       '7A0213'
+  red-strong:     'A10220'
+  red-bright:     'BF0A26'
+  red-vivid:      'CD0C2B'
+
+  # Neutral family
+  black:          '131313'
+  dark-gray:      '262626'
+  mid-gray:       '4A4A4A'
+  light-gray:     '8A8A8A'
+
+  # Background tints
+  navy-tint:      'E6EEF7'
+  red-tint:       'FDE8EC'
+  gray-tint:      'F5F5F5'
+  white:          'FFFFFF'
+  off-white:      'FAFAFA'
+
+# ============================================================
+# FONTS
+# ============================================================
+font:
+  catalog:
+    merge: true
+    NotoSerif:
+      normal: NotoSerif-Regular.ttf
+      italic: NotoSerif-Italic.ttf
+      bold: NotoSerif-Bold.ttf
+      bold_italic: NotoSerif-BoldItalic.ttf
+    NotoSans:
+      normal: NotoSans-Regular.ttf
+      italic: NotoSans-Italic.ttf
+      bold: NotoSans-Bold.ttf
+      bold_italic: NotoSans-BoldItalic.ttf
+    NotoMono:
+      normal: NotoSansMono-Regular.ttf
+      bold: NotoSansMono-Bold.ttf
+
+# ============================================================
+# PAGE
+# ============================================================
+page:
+  background_color: $color_off-white
+  layout: portrait
+  margin: [0.75in, 0.85in, 0.75in, 0.85in]
+  size: A4
+
+# ============================================================
+# BASE
+# ============================================================
+base:
+  align: justify
+  font_color: $color_black
+  font_family: NotoSans
+  font_size: 11
+  line_height: 1.6
+  line_height_length: 17.6
+  line_height_font_size: 11
+
+# ============================================================
+# HEADINGS
+# ============================================================
+heading:
+  align: left
+  font_color: $color_navy-deepest
+  font_family: NotoSans
+  font_style: bold
+  line_height: 1.2
+  margin_bottom: 12
+
+  h1:
+    font_size: 28
+    font_color: $color_navy-deepest
+    border_color: $color_navy-bright
+    border_width: 0
+    border_offset: 0
+    margin_top: 0
+    margin_bottom: 16
+    text_transform: uppercase
+    letter_spacing: 0.5
+
+  h2:
+    font_size: 22
+    font_color: $color_navy-dark
+    border_color: $color_navy-bright
+    border_width: 0
+    border_offset: 0
+    margin_top: 24
+    margin_bottom: 12
+
+  h3:
+    font_size: 16
+    font_color: $color_navy-medium
+    margin_top: 20
+    margin_bottom: 10
+
+  h4:
+    font_size: 13
+    font_color: $color_navy-bright
+    margin_top: 16
+    margin_bottom: 8
+    font_style: bold_italic
+
+  h5:
+    font_size: 11
+    font_color: $color_red-strong
+    margin_top: 12
+    margin_bottom: 6
+    text_transform: uppercase
+    letter_spacing: 0.8
+
+  h6:
+    font_size: 10
+    font_color: $color_red-dark
+    margin_top: 10
+    margin_bottom: 4
+    text_transform: uppercase
+    letter_spacing: 1
+
+# ============================================================
+# TITLE PAGE
+# ============================================================
+title_page:
+  align: center
+  background_color: $color_navy-deepest
+  font_color: $color_white
+
+  title:
+    font_size: 36
+    font_family: NotoSans
+    font_color: $color_white
+    font_style: bold
+    line_height: 1.1
+    margin_top: 2.5in
+    text_transform: uppercase
+    letter_spacing: 1
+
+  subtitle:
+    font_size: 16
+    font_family: NotoSerif
+    font_color: $color_navy-tint
+    font_style: italic
+    line_height: 1.3
+    margin_top: 12
+
+  authors:
+    font_size: 12
+    font_family: NotoSans
+    font_color: $color_navy-tint
+    margin_top: 24
+
+  revision:
+    font_size: 10
+    font_family: NotoSans
+    font_color: $color_navy-tint
+    margin_top: 8
+
+# ============================================================
+# PARAGRAPH
+# ============================================================
+paragraph:
+  margin_bottom: 12
+  indent: 0
+
+# ============================================================
+# BLOCK
+# ============================================================
+block:
+  margin_bottom: 16
+
+# ============================================================
+# CAPTION
+# ============================================================
+caption:
+  align: center
+  font_color: $color_mid-gray
+  font_family: NotoSans
+  font_size: 9
+  font_style: italic
+  margin_inside: 6
+  margin_outside: 0
+
+# ============================================================
+# LEAD (role=lead)
+# ============================================================
+lead:
+  font_size: 13
+  font_color: $color_navy-dark
+  font_style: italic
+  line_height: 1.5
+
+# ============================================================
+# QUOTE / BLOCKQUOTE
+# ============================================================
+quote:
+  background_color: $color_navy-tint
+  border_color: $color_navy-bright
+  border_left_width: 4
+  border_radius: 0
+  font_color: $color_navy-deepest
+  font_size: 11
+  font_style: italic
+  padding: [12, 16, 12, 16]
+  margin_bottom: 16
+
+  cite:
+    align: right
+    font_color: $color_red-strong
+    font_family: NotoSans
+    font_size: 9
+    font_style: bold
+
+# ============================================================
+# VERSE
+# ============================================================
+verse:
+  background_color: $color_navy-tint
+  border_color: $color_navy-bright
+  border_left_width: 4
+  font_color: $color_navy-deepest
+  font_size: 11
+  font_style: italic
+  padding: [12, 16, 12, 16]
+  margin_bottom: 16
+
+# ============================================================
+# SIDEBAR
+# ============================================================
+sidebar:
+  background_color: $color_gray-tint
+  border_color: $color_light-gray
+  border_radius: 4
+  border_width: 1
+  padding: [16, 16, 16, 16]
+  margin_bottom: 16
+
+  title:
+    align: left
+    font_color: $color_navy-deepest
+    font_family: NotoSans
+    font_size: 13
+    font_style: bold
+    margin_bottom: 8
+
+# ============================================================
+# EXAMPLE BLOCK
+# ============================================================
+example:
+  background_color: $color_white
+  border_color: $color_navy-bright
+  border_left_width: 4
+  border_radius: 0
+  padding: [12, 16, 12, 16]
+  margin_bottom: 16
+
+  title:
+    align: left
+    font_color: $color_navy-deepest
+    font_family: NotoSans
+    font_size: 11
+    font_style: bold
+
+# ============================================================
+# ADMONITIONS
+# ============================================================
+admonition:
+  background_color: $color_white
+  border_color: $color_navy-bright
+  border_left_width: 4
+  border_radius: 0
+  column_rule_color: $color_light-gray
+  column_rule_width: 1
+  padding: [10, 14, 10, 14]
+  margin_bottom: 16
+
+  #icon:
+  #  name: $attr_admonition_icon_name
+  #  stroke_color: $color_white
+  #  size: 14
+
+  label:
+    font_color: $color_navy-deepest
+    font_family: NotoSans
+    font_size: 10
+    font_style: bold
+    text_transform: uppercase
+    letter_spacing: 0.5
+
+# --- Note ---
+admonition_icon_note:
+  background_color: $color_navy-bright
+  stroke_color: $color_white
+
+admonition_label_note:
+  font_color: $color_navy-bright
+
+# --- Tip ---
+admonition_icon_tip:
+  background_color: $color_navy-medium
+  stroke_color: $color_white
+
+admonition_label_tip:
+  font_color: $color_navy-medium
+
+# --- Important ---
+admonition_icon_important:
+  background_color: $color_red-strong
+  stroke_color: $color_white
+
+admonition_label_important:
+  font_color: $color_red-strong
+
+# --- Warning ---
+admonition_icon_warning:
+  background_color: $color_red-bright
+  stroke_color: $color_white
+
+admonition_label_warning:
+  font_color: $color_red-bright
+
+# --- Caution ---
+admonition_icon_caution:
+  background_color: $color_red-vivid
+  stroke_color: $color_white
+
+admonition_label_caution:
+  font_color: $color_red-vivid
+
+# ============================================================
+# CODE / LISTING
+# ============================================================
+code:
+  background_color: $color_navy-deepest
+  border_color: $color_navy-dark
+  border_radius: 4
+  border_width: 1
+  font_color: $color_white
+  font_family: NotoMono
+  font_size: 9
+  line_height: 1.4
+  padding: [10, 12, 10, 12]
+  margin_bottom: 16
+
+literal:
+  background_color: $color_gray-tint
+  border_color: $color_light-gray
+  border_radius: 3
+  border_width: 0.5
+  font_color: $color_red-strong
+  font_family: NotoMono
+  font_size: 9.5
+  padding: [2, 4, 2, 4]
+
+# ============================================================
+# CALLOUTS
+# ============================================================
+callout:
+  background_color: $color_navy-tint
+  border_color: $color_navy-bright
+  border_radius: 3
+  border_width: 0.5
+  font_color: $color_navy-deepest
+  font_family: NotoMono
+  font_size: 9
+
+# ============================================================
+# TABLES
+# ============================================================
+table:
+  background_color: $color_white
+  border_color: $color_light-gray
+  border_width: 1
+  cell_padding: [8, 10, 8, 10]
+  margin_bottom: 16
+
+  head:
+    background_color: $color_navy-deepest
+    font_color: $color_white
+    font_family: NotoSans
+    font_size: 10
+    font_style: bold
+    text_transform: uppercase
+    letter_spacing: 0.5
+
+  body:
+    background_color: $color_white
+    font_color: $color_black
+    font_family: NotoSerif
+    font_size: 10
+    stripe_background_color: $color_gray-tint
+
+  foot:
+    background_color: $color_navy-tint
+    font_color: $color_navy-deepest
+    font_family: NotoSans
+    font_size: 9
+    font_style: bold
+
+# ============================================================
+# HORIZONTAL RULE
+# ============================================================
+hr:
+  border_color: $color_navy-bright
+  border_style: solid
+  border_width: 1
+  margin_bottom: 16
+  margin_top: 16
+
+# ============================================================
+# LISTS
+# ============================================================
+list:
+  margin_bottom: 12
+  margin_left: 20
+
+  item:
+    margin_bottom: 4
+    text_indent: -16
+
+  marker:
+    font_color: $color_navy-bright
+    font_family: NotoSans
+
+# --- Ordered list ---
+olist:
+  marker:
+    font_color: $color_red-strong
+
+# --- Description list ---
+dlist:
+  term:
+    font_color: $color_navy-deepest
+    font_family: NotoSans
+    font_size: 11
+    font_style: bold
+    margin_bottom: 2
+
+  description:
+    margin_bottom: 8
+    margin_left: 16
+
+# ============================================================
+# LINKS
+# ============================================================
+link:
+  font_color: $color_navy-bright
+  text_decoration: underline
+  text_decoration_color: $color_navy-bright
+
+# ============================================================
+# MENU (kbd, btn)
+# ============================================================
+menu:
+  background_color: $color_gray-tint
+  border_color: $color_light-gray
+  border_radius: 3
+  border_width: 0.5
+  font_color: $color_dark-gray
+  font_family: NotoSans
+  font_size: 9
+  padding: [2, 4, 2, 4]
+
+# ============================================================
+# FOOTNOTES
+# ============================================================
+footnotes:
+  background_color: $color_gray-tint
+  border_color: $color_light-gray
+  border_top_width: 1
+  font_color: $color_mid-gray
+  font_size: 8.5
+  padding: [8, 0, 0, 0]
+  margin_top: 20
+
+# ============================================================
+# INDEX
+# ============================================================
+index:
+  font_color: $color_black
+  font_family: NotoSerif
+  font_size: 10
+
+  category:
+    font_color: $color_navy-deepest
+    font_family: NotoSans
+    font_size: 12
+    font_style: bold
+    margin_bottom: 4
+    text_transform: uppercase
+    letter_spacing: 0.5
+
+# ============================================================
+# TOC
+# ============================================================
+toc:
+  font_color: $color_black
+  font_family: NotoSerif
+  font_size: 10
+  line_height: 1.4
+
+  h1:
+    font_color: $color_navy-deepest
+    font_family: NotoSans
+    font_size: 12
+    font_style: bold
+    margin_bottom: 4
+
+  h2:
+    font_color: $color_navy-dark
+    font_family: NotoSans
+    font_size: 10.5
+    font_style: bold
+    margin_bottom: 2
+    margin_left: 12
+
+  h3:
+    font_color: $color_navy-medium
+    font_family: NotoSerif
+    font_size: 10
+    font_style: italic
+    margin_bottom: 2
+    margin_left: 24
+
+# ============================================================
+# HEADER
+# ============================================================
+header:
+  background_color: $color_navy-deepest
+  border_color: $color_navy-bright
+  border_width: 0
+  font_color: $color_white
+  font_family: NotoSans
+  font_size: 8
+  height: 0.5in
+  padding: [8, 16, 8, 16]
+  vertical_align: center
+
+  recto:
+    right:
+      content: '{document-title}'
+      font_color: $color_white
+      font_style: bold
+      text_transform: uppercase
+      letter_spacing: 0.5
+    left:
+      content: '{page-number}'
+      font_color: $color_navy-tint
+
+  verso:
+    left:
+      content: '{document-title}'
+      font_color: $color_white
+      font_style: bold
+      text_transform: uppercase
+      letter_spacing: 0.5
+    right:
+      content: '{page-number}'
+      font_color: $color_navy-tint
+
+# ============================================================
+# FOOTER
+# ============================================================
+footer:
+  background_color: $color_navy-deepest
+  border_color: $color_navy-bright
+  border_width: 0
+  font_color: $color_navy-tint
+  font_family: NotoSans
+  font_size: 8
+  height: 0.4in
+  padding: [8, 16, 8, 16]
+  vertical_align: center
+
+  recto:
+    center:
+      content: '{chapter-title}'
+      font_color: $color_navy-tint
+      font_style: italic
+
+  verso:
+    center:
+      content: '{chapter-title}'
+      font_color: $color_navy-tint
+      font_style: italic
+
+# ============================================================
+# PAGE NUMBERING
+# ============================================================
+page_numbering:
+  start_at: 1
+
+# ============================================================
+# RUNNING CONTENT (header/footer content)
+# ============================================================
+running_content:
+  start_at: toc

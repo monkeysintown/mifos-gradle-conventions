@@ -1,0 +1,9 @@
+dependencies {
+    // implementation platform("io.micrometer:micrometer-bom:1.16.1")
+
+    implementation platform("io.opentelemetry:opentelemetry-bom:1.62.0")
+
+    constraints {
+        implementation "io.prometheus:simpleclient_pushgateway:0.16.0"
+    }
+}

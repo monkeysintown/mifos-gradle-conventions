@@ -1,0 +1,32 @@
+plugins {
+    id "org.mifos.convention.internal.project.template"
+}
+
+description = "Mifos Initiative - Gradle Conventions - Project - Boot - Layout"
+
+dependencies {
+    api project(":mifos-conventions-gradle-project-boot-imperative")
+    api project(":mifos-conventions-gradle-project-boot-reactive")
+    implementation "commons-io:commons-io:2.22.0"
+}
+
+gradlePlugin {
+    plugins {
+        MifosProjectBootLayoutPlugin {
+            id = "org.mifos.convention.project.boot.layout"
+            implementationClass = "org.mifos.convention.project.boot.layout.MifosProjectBootLayoutPlugin"
+        }
+        MifosProjectBootPersistenceLayoutPlugin {
+            id = "org.mifos.convention.project.boot.persistence.layout"
+            implementationClass = "org.mifos.convention.project.boot.layout.MifosProjectBootPersistenceLayoutPlugin"
+        }
+        MifosProjectBootTransportLayoutPlugin {
+            id = "org.mifos.convention.project.boot.transport.layout"
+            implementationClass = "org.mifos.convention.project.boot.layout.MifosProjectBootTransportLayoutPlugin"
+        }
+        MifosProjectDocLayoutPlugin {
+            id = "org.mifos.convention.project.boot.doc.layout"
+            implementationClass = "org.mifos.convention.project.boot.layout.MifosProjectDocLayoutPlugin"
+        }
+    }
+}

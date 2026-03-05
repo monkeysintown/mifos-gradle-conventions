@@ -1,0 +1,11 @@
+= Release Management
+
+The release process is a critical part of the Mifos development lifecycle. A reliable, automated release pipeline ensures that software is delivered to users consistently, predictably, and without manual intervention. This chapter covers the tools, conventions, and workflows that govern how Mifos projects move from code commits to published artifacts.
+
+include::semantic.adoc[leveloffset=+1]
+
+include::jreleaser.adoc[leveloffset=+1]
+
+include::branching.adoc[leveloffset=+1]
+
+include::workflow.adoc[leveloffset=+1]

@@ -1,0 +1,60 @@
+= Building Awesome Slides
+:author: Your Name
+:email: you@example.com
+:revnumber: 1.0
+:revdate: 2026-05-03
+:backend: revealjs
+:revealjs_theme: black
+:revealjs_transition: slide
+:revealjs_slideNumber: c/t
+:source-highlighter: highlight.js
+:icons: font
+
+== Introduction
+
+[%step]
+* Write slides in AsciiDoc
+* Generate beautiful HTML presentations
+* Version control friendly
+
+== Why AsciiDoc?
+
+[.columns]
+== !
+
+[.column]
+--
+* Plain text
+* Semantic markup
+* Multiple outputs
+--
+
+[.column]
+--
+image::images/diagram.png[Diagram, width=80%]
+--
+
+== Code Example
+
+[source,java]
+----
+public class Hello {
+    public static void main(String[] args) {
+        System.out.println("Hello, Reveal.js!");
+    }
+}
+----
+
+== Fragments
+
+[%step]
+* Appear one by one
+* Keep audience focused
+* Easy to write
+
+== The End
+
+Thank you!
+
+[.stretch]
+image::https://media.giphy.com/media/3o7abB06u9bNzA8lu8/giphy.gif[Thanks!]

@@ -1,0 +1,97 @@
+= Mermaid
+
+Mermaid (https://mermaid.js.org/) is a text-based diagramming tool with a simpler syntax than PlantUML, designed for speed and ease of use. Its most compelling advantage is native rendering support on GitHub: any Mermaid code block in a Markdown or AsciiDoc file is rendered automatically on GitHub's web interface, without any plugins or build steps. This makes Mermaid ideal for diagrams that need to be visible directly in pull requests and issue discussions.
+
+In the Mifos project, Mermaid is recommended for simple diagrams where the overhead of PlantUML is not justified: basic flowcharts, simple sequence diagrams, and class overviews that accompany PR descriptions.
+
+.Flowchart Example (Loan Approval Flow)
+[source,mermaid]
+----
+flowchart TD
+    A[Client Submits Application] --> B{Credit Check}
+    B -->|Pass| C{Underwriter Review}
+    B -->|Fail| D[Application Rejected]
+    C -->|Approve| E[Loan Approved]
+    C -->|Reject| D
+    E --> F[Funds Disbursed]
+    F --> G[Loan Active]
+    G --> H[Repayment Complete]
+    H --> I[Loan Closed]
+----
+
+.Sequence Diagram Example (Payment Processing)
+[source,mermaid]
+----
+sequenceDiagram
+    participant C as Client
+    participant P as Payment Gateway
+    participant L as Loan Service
+    participant N as Notification Service
+
+    C->>P: Submit payment
+    P->>P: Validate card details
+    P->>L: Process repayment
+    L->>L: Update loan balance
+    L->>N: Payment received event
+    N->>C: Payment confirmation SMS
+    L-->>P: Repayment confirmed
+    P-->>C: Payment successful
+----
+
+.Class Diagram Example (Simplified Domain Model)
+[source,mermaid]
+----
+classDiagram
+    class Client {
+        +String clientId
+        +String fullName
+        +ClientStatus status
+        +activate()
+        +close()
+    }
+    class Loan {
+        +String loanId
+        +BigDecimal principal
+        +LoanStatus status
+        +approve()
+        +disburse()
+    }
+    class SavingsAccount {
+        +String accountId
+        +BigDecimal balance
+        +deposit()
+        +withdraw()
+    }
+    Client "1" --> "0..*" Loan : holds
+    Client "1" --> "0..*" SavingsAccount : owns
+----
+
+.Asciidoc Integration with asciidoctor-diagram
+[source,asciidoc]
+----
+[mermaid,payment-flow,svg]
+....
+sequenceDiagram
+    participant Client
+    participant PaymentService
+    Client->>PaymentService: Submit payment
+    PaymentService-->>Client: Confirmation
+....
+----
+
+To build Mermaid diagrams from the command line:
+
+[source,bash]
+----
+# Install Mermaid CLI
+npm install -g @mermaid-js/mermaid-cli
+
+# Render a Mermaid file to SVG
+mmdc -i diagrams/payment-flow.mmd -o build/diagrams/payment-flow.svg
+
+# Render with a custom theme
+mmdc -i diagrams/payment-flow.mmd -o output.svg -t dark
+
+# Render from stdin
+echo 'graph TD; A-->B;' | mmdc -i - -o output.svg
+----

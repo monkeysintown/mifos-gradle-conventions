@@ -1,0 +1,112 @@
+= Mifos Build Conventions
+
+TBD
+
+See:
+
+- https://www.asciiart.eu/ascii-draw-studio/app
+- https://mooltiverse.github.io/nyx/docs/resources/examples/simple-configuration-example
+- https://jreleaser.org/guide/latest/reference/index.html
+- https://www.conventionalcommits.org/en/about
+- https://github.com/tomasbjerre/git-changelog-gradle-plugin
+- https://github.com/Zhengqbbb/cz-git
+- https://commitizen-tools.github.io/commitizen/
+- https://gitlab.com/DeveloperC/conventional_commits_linter
+- https://dev.to/devsatasurion/automate-changelogs-to-ease-your-release-282
+- https://dwmkerr.com/conventional-commits-and-semantic-versioning-for-java/
+- https://commitizen.github.io/cz-cli
+- https://github.com/all-contributors/allcontributors.org
+- https://ai-svg-icon-gen.vercel.app/how-it-works
+- https://fly.io/
+- https://github.com/andipollok/Fontastic/
+- https://github.com/google/fonts
+- https://github.com/fontsource/fontsource
+- https://github.com/bjango/Bjango-Templates/blob/main/Help/Help.md
+- https://www.baeldung.com/ascii-art-in-java
+- https://medium.com/@shubham0473/unleash-your-inner-artist-a-step-by-step-guide-to-converting-images-to-ascii-art-using-java-97860464f19a
+- excellent results: https://github.com/Furlanetto-Dev/image-to-ascii
+- not bad: https://github.com/delington/image-to-ASCII
+- solid: https://github.com/korhner/asciimg
+- https://korhner.github.io/java/image-processing/ascii-art-generator/
+- https://this-person-does-not-exist.com/en
+- https://medium.com/@shubham0473/from-pixels-to-pictures-a-guide-to-image-manipulation-in-java-3647cac29ca3
+- https://uxwing.com/category/banking-finance/page/2/
+- https://www.vectorlogo.zone/logos/mifos/
+- https://greenmail-mail-test.github.io/greenmail/
+- https://www.cisa.gov/opensource
+- https://github.com/zaproxy/zaproxy
+- https://www.finos.org/projects
+
+TODO:
+
+- crate TL;DR for contributing code
+- find out how to list all licenses used in the project in the LICENSE text file
+- https://github.com/github/awesome-copilot/blob/main/skills
+- https://github.com/dastergon/awesome-chaos-engineering
+
+[source,java]
+----
+import java.awt.Color;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import javax.imageio.ImageIO;
+
+public class ImageToAscii {
+// Characters from lightest (space) to darkest (@)
+private static final String ASCII_CHARS = " .:-=+*#%@";
+
+    public static String convertToAscii(BufferedImage image) {
+        StringBuilder ascii = new StringBuilder();
+        int width = image.getWidth();
+        int height = image.getHeight();
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                Color color = new Color(image.getRGB(x, y));
+                // Calculate grayscale brightness
+                int gray = (color.getRed() + color.getGreen() + color.getBlue()) / 3;
+
+                // Map brightness to ASCII character index
+                int index = (gray * (ASCII_CHARS.length() - 1)) / 255;
+                ascii.append(ASCII_CHARS.charAt(index));
+            }
+            ascii.append("\n");
+        }
+        return ascii.toString();
+    }
+
+    public static void main(String[] args) {
+        try {
+            BufferedImage image = ImageIO.read(new File("input.jpg"));
+            System.out.println(convertToAscii(image));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+----
+
+.Profiling Gradle Builds
+[source,bash]
+----
+./gradlew build --profile
+----
+
+.Environment Variables
+[source,bash]
+----
+MIFOS_GITHUB_TOKEN
+MIFOS_GITHUB_USERNAME
+MIFOS_GPG_PASSPHRASE
+MIFOS_GPG_PUBLIC_KEY
+MIFOS_GPG_SECRET_KEY
+MIFOS_JFROG_TOKEN
+MIFOS_JFROG_USERNAME
+----
+
+.Generate the documentation
+[source,bash]
+----
+./gradlew asciidoctorZip --no-configuration-cache
+----

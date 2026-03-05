@@ -1,0 +1,37 @@
+dependencies {
+
+    implementation platform("org.flowable:flowable-bom:8.0.0")
+
+    implementation platform("org.cibseven.bpm:cibseven-bom:2.1.0")
+
+    implementation platform("org.eximeebpms.bpm:eximeebpms-bom:1.2.0")
+
+    implementation platform("org.operaton.bpm:operaton-bom:2.1.0")
+
+    implementation platform("io.temporal:temporal-bom:1.35.0")
+
+    // NOTE: important to select one that is compatible with the latest Camunda Spring Boot starters!
+    implementation platform("io.camunda:zeebe-bom:8.9.6")
+
+    constraints {
+        implementation "dev.dbos:transact:0.9.0-m20"
+        implementation "dev.dbos:transact-jooq-step-factory:0.9.0-m20"
+        implementation "dev.dbos:transact-spring-txstep-starter:0.9.0-m20"
+        implementation "dev.dbos:transact-spring-boot-starter:0.9.0-m20"
+        implementation "dev.dbos:transact-jdbi-step-factory:0.9.0-m20"
+
+        implementation "dev.restate:sdk-api:2.7.0"
+        implementation "dev.restate:sdk-spring-boot-starter:2.7.0"
+        implementation "dev.restate:sdk-api-gen:2.7.0"
+        implementation "dev.restate:sdk-java-http:2.7.0"
+        implementation "dev.restate:sdk-java-lambda:2.7.0"
+
+        implementation "com.uber.cadence:cadence-client:4.0.0"
+        implementation "io.orkes.conductor:orkes-conductor-client-spring:5.0.3"
+        implementation "io.camunda.spring:spring-boot-starter-camunda:8.5.23"
+        implementation "io.camunda.spring:spring-boot-starter-camunda-test:8.9.6"
+        implementation "io.camunda.spring:spring-boot-starter-camunda-testcontainers:8.9.6"
+        implementation "org.camunda.community.process_test_coverage:camunda-process-test-coverage-junit5-platform-8:3.0.1"
+        implementation "org.rocksdb:rocksdbjni:10.10.1.1"
+    }
+}

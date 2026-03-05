@@ -1,0 +1,7 @@
+= Appendix
+
+include::lorem.adoc[leveloffset=+1]
+
+include::ipsum.adoc[leveloffset=+1]
+
+// include::{commondir}/appendix-about.adoc[leveloffset=+1]

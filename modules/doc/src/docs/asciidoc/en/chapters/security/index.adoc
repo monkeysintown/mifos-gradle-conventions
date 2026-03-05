@@ -1,0 +1,29 @@
+= Security
+
+TBD
+
+See:
+
+- https://code.likeagirl.io/security-concepts-every-java-developer-in-banking-should-master-part-4-a9d3ed742105
+- https://github.com/sigstore/sigstore-java/blob/main/fuzzing/test.sh#L9
+- https://safecode.org/wp-content/uploads/2017/05/SAFECode_TM_Whitepaper.pdf
+- https://slsa.dev/spec/v1.2/
+- https://in-toto.io/
+- https://www.bestpractices.dev/en
+- https://openssf.org/public-policy/eu-cyber-resilience-act/
+- https://github.com/carabiner-dev/ampel
+- https://www.cracowi.eu/activities-outcomes/deliverables/
+- https://github.com/ossf/security-assessments/blob/main/guidance/self-assessment/getting-started-self-assessment.md
+- https://www.finops.org/framework/principles/
+- https://www.stigviewer.com/about
+- https://exida-oss.gitlab.io/stig/stig/index_md.html
+
+include::threat.adoc[leveloffset=+1]
+
+include::rbac.adoc[leveloffset=+1]
+
+include::abac.adoc[leveloffset=+1]
+
+include::rebac.adoc[leveloffset=+1]
+
+include::opa.adoc[leveloffset=+1]

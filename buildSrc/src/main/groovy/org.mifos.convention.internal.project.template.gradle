@@ -1,0 +1,28 @@
+plugins {
+    id "base"
+    id "maven-publish"
+    id "groovy-gradle-plugin"
+    id "java-gradle-plugin"
+}
+
+tasks.register("mifosTemplateZip", Zip) {
+    group = "mifos"
+    description = "Package Mifos Project Templates"
+    archiveBaseName = "mifos-conventions-gradle-template"
+
+    into("template") {
+        from("${projectDir}/src/main/template") {
+            include "**/*"
+        }
+    }
+}
+
+tasks.build.dependsOn.add(tasks.named("mifosTemplateZip").get())
+
+publishing {
+    publications {
+        mavenZip(MavenPublication) {
+            artifact source: mifosTemplateZip, classifier: "template", extension: "zip"
+        }
+    }
+}

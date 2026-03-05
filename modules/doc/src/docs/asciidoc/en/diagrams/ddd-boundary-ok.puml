@@ -1,0 +1,22 @@
+@startuml
+
+skinparam SequenceGroupBodyBackgroundColor #FFFFFF90
+
+box "Tax Service" #LightBlue
+    participant read
+end box
+
+box "Account Retrieve Usecase" #LightGreen
+    participant execute
+end box
+
+box "Account Service" #LightCoral
+    participant retrieve
+end box
+
+group Wrong!!!
+    read -> execute : call()
+    execute -> retrieve : call()
+end
+
+@enduml

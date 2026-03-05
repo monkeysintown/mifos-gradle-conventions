@@ -1,0 +1,56 @@
+pluginManagement {
+    repositories {
+        mavenLocal()
+        mavenCentral().content {
+            excludeModule("javax.media", "jai_core")
+        }
+        gradlePluginPortal()
+        maven {
+            url = "https://mifos.jfrog.io"
+        }
+    }
+}
+
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral().content {
+            excludeModule("javax.media", "jai_core")
+        }
+        maven {
+            url = "https://mifos.jfrog.io"
+        }
+        gradlePluginPortal()
+    }
+
+    configurations.configureEach {
+        resolutionStrategy {
+            dependencySubstitution {
+                substitute module( "com.burgstaller:okhttp-digest:1.10" ) using module("io.github.rburgst:okhttp-digest:1.21") because "okhttp-digest only version 1.21 is available on Maven Central. Old version was on jcenter, which asciidoctor-gradle-plugin depends on transitively through simplified-jruby-gradle-plugin via http-builder-ng-okhttp "
+            }
+        }
+    }
+}
+
+rootProject.name = "mifos-conventions-gradle"
+
+include(":mifos-conventions-gradle-config")
+project(":mifos-conventions-gradle-config").projectDir = file("${rootDir}/modules/config")
+include(":mifos-conventions-gradle-doc")
+project(":mifos-conventions-gradle-doc").projectDir = file("${rootDir}/modules/doc")
+include(":mifos-conventions-gradle-project-base")
+project(":mifos-conventions-gradle-project-base").projectDir = file("${rootDir}/modules/project/base")
+include(":mifos-conventions-gradle-project-docs")
+project(":mifos-conventions-gradle-project-docs").projectDir = file("${rootDir}/modules/project/docs")
+include(":mifos-conventions-gradle-project-dependencies")
+project(":mifos-conventions-gradle-project-dependencies").projectDir = file("${rootDir}/modules/project/dependencies")
+include(":mifos-conventions-gradle-project-java")
+project(":mifos-conventions-gradle-project-java").projectDir = file("${rootDir}/modules/project/java")
+include(":mifos-conventions-gradle-project-boot-base")
+project(":mifos-conventions-gradle-project-boot-base").projectDir = file("${rootDir}/modules/project/boot/base")
+include(":mifos-conventions-gradle-project-boot-imperative")
+project(":mifos-conventions-gradle-project-boot-imperative").projectDir = file("${rootDir}/modules/project/boot/imperative")
+include(":mifos-conventions-gradle-project-boot-reactive")
+project(":mifos-conventions-gradle-project-boot-reactive").projectDir = file("${rootDir}/modules/project/boot/reactive")
+include(":mifos-conventions-gradle-project-boot-layout")
+project(":mifos-conventions-gradle-project-boot-layout").projectDir = file("${rootDir}/modules/project/boot/layout")

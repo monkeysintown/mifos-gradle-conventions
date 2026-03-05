@@ -1,0 +1,7 @@
+= Event Sourcing
+
+TBD
+
+See:
+
+- https://en.wikipedia.org/wiki/Event_storming

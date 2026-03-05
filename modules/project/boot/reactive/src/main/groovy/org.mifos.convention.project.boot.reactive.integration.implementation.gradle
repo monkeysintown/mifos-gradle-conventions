@@ -1,0 +1,9 @@
+plugins {
+    id "org.mifos.convention.project.boot.base.integration.implementation"
+}
+
+dependencies {
+    implementation "org.apache.camel.springboot:camel-reactive-streams-starter"
+
+    testImplementation "org.mifos:mifos-common-boot-testing"
+}

@@ -1,0 +1,10 @@
+= Compliance Frameworks Reference
+
+- **PCI DSS** — Payment Card Industry Data Security Standard
+- **SOC 2** — Service Organization Control Type 2
+- **GDPR** — General Data Protection Regulation (EU)
+- **CCPA** — California Consumer Privacy Act
+- **SOX** — Sarbanes-Oxley Act
+- **MiFID II** — Markets in Financial Instruments Directive (EU)
+- **AML/KYC** — Anti-Money Laundering / Know Your Customer
+- **OFAC** — Office of Foreign Assets Control (US sanctions)

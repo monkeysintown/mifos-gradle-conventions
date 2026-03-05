@@ -1,0 +1,3 @@
+dependencies {
+    implementation platform("io.cloudevents:cloudevents-bom:4.0.1")
+}

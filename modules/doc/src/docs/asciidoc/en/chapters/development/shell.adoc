@@ -1,0 +1,7 @@
+= Shell Scripts
+
+TBD
+
+See:
+
+- https://google.github.io/styleguide/shellguide.html

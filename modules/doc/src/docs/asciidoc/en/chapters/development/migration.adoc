@@ -1,0 +1,74 @@
+= Data Migration
+
+Database schema evolution in Mifos is managed through **Flyway**, the industry-standard migration tool for Java applications. Flyway ensures that every database change is tracked, versioned, and reproducible across environments—from a developer's laptop to the production cluster.
+
+Migration files follow a strict naming convention that encodes the version, description, and type:
+
+[source,terminaloutput]
+----
+src/main/resources/db/migration/
+├── V001__create_client_table.sql
+├── V002__create_loan_table.sql
+├── V003__add_loan_status_column.sql
+├── V004__create_savings_account_table.sql
+├── V005__add_index_on_client_external_id.sql
+├── R001__seed_reference_data.sql
+└── U003__add_loan_status_column.sql    # Undo (rarely used)
+----
+
+The naming convention is:
+
+* **V**`NNN`__`description`**.sql** — Versioned migrations (run once, in order).
+* **R**__`description`**.sql** — Repeatable migrations (run every time their checksum changes; used for views, functions, seed data).
+* **U**`NNN`__`description`**.sql** — Undo migrations (reverse a versioned migration; use sparingly).
+
+Key principles:
+
+* **Forward-only**: Mifos follows the forward-only migration philosophy. Once a migration has been applied to production, it is never modified. If a change needs to be reversed, write a new migration that undoes the effect.
+* **No gaps**: Version numbers must be sequential with no gaps. Flyway will fail to start if it detects a gap in the applied versions.
+* **Atomic**: Each migration should represent a single logical change. Avoid bundling unrelated schema changes into one migration file.
+* **Reversible in development**: While production follows forward-only, development migrations should be written so that a fresh database can be built from scratch by running all migrations in sequence.
+
+== Liquibase
+
+WARNING: Liquibase changed its licensing model starting with version 5.0, moving from the Apache 2.0 license to the Functional Source License (FSL-1.1-ALv2). This has no impact for usage in your projects, unless you write extensions for Liquibase. In this case you have to publish your extension, i.e. do this in a separate Git repo (maybe we'll bundle such extensions in a separate Mifos org project). See: https://www.liquibase.com/blog/liquibase-community-for-the-future-fsl
+
+WARNING: Fix below example and use Liquibase!
+
+Example migration:
+
+[source,sql]
+----
+-- V003__add_loan_status_column.sql
+ALTER TABLE m_loan ADD COLUMN loan_status_enum SMALLINT NOT NULL DEFAULT 100;
+
+CREATE INDEX idx_loan_status ON m_loan (loan_status_enum);
+
+COMMENT ON COLUMN m_loan.loan_status_enum IS
+  'Loan status: 100=Submitted, 200=Approved, 300=Active, 400=Closed, 500=Written Off';
+----
+
+To run migrations manually (typically the application does this on startup):
+
+[source,bash]
+----
+# Run all pending migrations
+./gradlew flywayMigrate
+
+# View migration status
+./gradlew flywayInfo
+
+# Validate migration integrity
+./gradlew flywayValidate
+
+# Repair the schema history table (use with caution)
+./gradlew flywayRepair
+----
+
+WARNING: Never modify a migration file that has already been applied to a shared environment (staging, production). If you need to correct a mistake, create a new migration. Modifying applied migrations causes Liquibase checksum validation failures and can corrupt the schema history.
+
+== Rollbacks
+
+TBD
+
+See: https://www.baeldung.com/liquibase-rollback

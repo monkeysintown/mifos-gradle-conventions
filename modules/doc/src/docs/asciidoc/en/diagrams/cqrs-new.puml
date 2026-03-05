@@ -1,0 +1,58 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+title C4 Component Diagram - Apache Fineract CQRS Command Processing Module
+
+Person(apiClient, "API Client / Frontend", "Sends write requests via REST API")
+System_Boundary(fineractSystem, "Apache Fineract System") {
+    Container(restApi, "REST API Layer", "Spring Web MVC / JAX-RS", "Receives HTTP write requests and assembles typed Command DTOs")
+
+    Container_Boundary(commandModule, "fineract-command Module") {
+        Component(commandDto, "Command<T>", "Java Record", "Generic command envelope: idempotencyKey, ipAddress, timestamps, usernames, typed payload")
+
+        Component(dispatcher, "CommandDispatcher", "Interface", "Entry point for command processing. Returns Supplier<<RES> for deferred execution")
+
+        Component(handlerMgr, "CommandHandlerManager", "Functional Interface", "Resolves and delegates to the appropriate CommandHandler")
+
+        Component(handler, "CommandHandler<<REQ, RES>", "Interface", "Business logic handler: handle(), fallback(), matches() methods. Implemented by domain modules.")
+
+        Component(hookMgr, "CommandHookManager", "Interface", "Orchestrates cross-cutting concerns: before(), after(), error()")
+
+        Component(hookBefore, "CommandHookBefore", "Functional Interface", "Pre-processing hook contract")
+        Component(hookAfter, "CommandHookAfter", "Functional Interface", "Post-processing hook contract")
+        Component(hookError, "CommandHookError", "Functional Interface", "Error handling hook contract")
+
+        Component(commandStore, "CommandStore", "Interface", "Persistence contract: get by id/key, store with CommandState")
+        Component(commandState, "CommandState", "Enum", "Command lifecycle states")
+
+        Component(exceptions, "Command Exceptions", "Runtime Exceptions", "CommandHandlerNotFoundException, CommandIllegalArgumentException, CommandPolicyException")
+    }
+
+    Container(businessServices, "Domain Business Services", "Spring Services", "Core banking business logic (loans, savings, clients, etc.)")
+    ContainerDb(database, "Fineract Database", "PostgreSQL / MySQL", "Stores command audit trail, idempotency records, and domain data")
+}
+
+Rel(apiClient, restApi, "Sends write requests (POST/PUT/DELETE)", "HTTP/JSON")
+Rel(restApi, commandDto, "Assembles and creates", "Java")
+Rel(restApi, dispatcher, "Dispatches command via", "Java")
+
+Rel(dispatcher, hookMgr, "Triggers before/after/error hooks via", "Java")
+Rel(dispatcher, handlerMgr, "Delegates execution to", "Java")
+
+Rel(handlerMgr, handler, "Looks up and invokes", "Java")
+Rel(handler, businessServices, "Calls domain logic on", "Java")
+
+Rel(hookMgr, hookBefore, "Iterates over", "Java")
+Rel(hookMgr, hookAfter, "Iterates over", "Java")
+Rel(hookMgr, hookError, "Iterates over", "Java")
+
+Rel(dispatcher, commandStore, "Persists command state via", "Java")
+Rel(commandStore, database, "Reads/Writes", "JDBC/SQL")
+Rel(businessServices, database, "Reads/Writes domain data", "JDBC/SQL")
+
+Rel(commandDto, commandState, "Uses lifecycle state", "Java")
+Rel(commandDto, exceptions, "Throws on validation/routing errors", "Java")
+
+SHOW_LEGEND()
+@enduml

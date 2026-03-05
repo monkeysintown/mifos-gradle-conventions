@@ -1,0 +1,19 @@
+= Frameworks
+
+TBD
+
+== Spring Framework
+
+TBD
+
+== Spring Boot
+
+TBD
+
+== Spring Batch
+
+TBD
+
+== Apache Camel
+
+TBD

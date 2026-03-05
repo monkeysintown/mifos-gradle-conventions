@@ -1,0 +1,333 @@
+{
+  "specificationVersion": "2026.05",
+  "sourceReferences": [
+    "https://developer.apple.com/design/human-interface-guidelines/app-icons",
+    "https://developer.android.com/develop/ui/compose/system/icon_design_adaptive",
+    "https://learn.microsoft.com/en-us/windows/apps/design/iconography/app-icon-construction",
+    "https://github.com/bjango/Bjango-Templates/blob/main/Help/Help.md",
+    "https://specifications.freedesktop.org/icon-theme-spec/icon-theme-spec-latest.html"
+  ],
+  "platforms": {
+    "apple": {
+      "displayName": "Apple Ecosystem",
+      "note": "All Apple app icons must be opaque PNG in sRGB or Display P3 color space. The system applies masking automatically; you must supply square, unmasked artwork.",
+      "variants": {
+        "ios_ipados": {
+          "displayName": "iOS & iPadOS",
+          "layoutShape": "square",
+          "systemMask": "rounded_rectangle",
+          "masterSize": { "width": 1024, "height": 1024, "unit": "px" },
+          "icons": [
+            { "context": "App Store", "width": 1024, "height": 1024, "filename": "Icon-AppStore-1024x1024.png", "location": "Assets.xcassets/AppIcon.appiconset/", "shape": "square", "format": "PNG", "scale": "1x", "required": true },
+            { "context": "iPhone Home Screen", "width": 120, "height": 120, "filename": "Icon-App-iPhone-60x60@2x.png", "location": "Assets.xcassets/AppIcon.appiconset/", "shape": "square", "format": "PNG", "scale": "2x", "required": true },
+            { "context": "iPhone Home Screen", "width": 180, "height": 180, "filename": "Icon-App-iPhone-60x60@3x.png", "location": "Assets.xcassets/AppIcon.appiconset/", "shape": "square", "format": "PNG", "scale": "3x", "required": true },
+            { "context": "iPad Home Screen", "width": 152, "height": 152, "filename": "Icon-App-iPad-76x76@2x.png", "location": "Assets.xcassets/AppIcon.appiconset/", "shape": "square", "format": "PNG", "scale": "2x", "required": true },
+            { "context": "iPad Pro Home Screen", "width": 167, "height": 167, "filename": "Icon-App-iPadPro-83.5x83.5@2x.png", "location": "Assets.xcassets/AppIcon.appiconset/", "shape": "square", "format": "PNG", "scale": "2x", "required": true },
+            { "context": "Spotlight", "width": 80, "height": 80, "filename": "Icon-Spotlight-iPhone-40x40@2x.png", "location": "Assets.xcassets/AppIcon.appiconset/", "shape": "square", "format": "PNG", "scale": "2x", "required": true },
+            { "context": "Spotlight", "width": 120, "height": 120, "filename": "Icon-Spotlight-iPhone-40x40@3x.png", "location": "Assets.xcassets/AppIcon.appiconset/", "shape": "square", "format": "PNG", "scale": "3x", "required": true },
+            { "context": "Settings", "width": 58, "height": 58, "filename": "Icon-Settings-iPhone-29x29@2x.png", "location": "Assets.xcassets/AppIcon.appiconset/", "shape": "square", "format": "PNG", "scale": "2x", "required": true },
+            { "context": "Settings", "width": 87, "height": 87, "filename": "Icon-Settings-iPhone-29x29@3x.png", "location": "Assets.xcassets/AppIcon.appiconset/", "shape": "square", "format": "PNG", "scale": "3x", "required": true },
+            { "context": "Notifications", "width": 76, "height": 76, "filename": "Icon-Notification-iPhone-38x38@2x.png", "location": "Assets.xcassets/AppIcon.appiconset/", "shape": "square", "format": "PNG", "scale": "2x", "required": true },
+            { "context": "Notifications", "width": 114, "height": 114, "filename": "Icon-Notification-iPhone-38x38@3x.png", "location": "Assets.xcassets/AppIcon.appiconset/", "shape": "square", "format": "PNG", "scale": "3x", "required": true }
+          ]
+        },
+        "macos": {
+          "displayName": "macOS",
+          "layoutShape": "square",
+          "systemMask": "rounded_rectangle",
+          "note": "macOS icons use a subtle drop shadow and tilt effect. Provide layered square artwork.",
+          "icons": [
+            { "context": "App Store", "width": 1024, "height": 1024, "filename": "icon_512x512@2x.png", "location": "Assets.xcassets/AppIcon.appiconset/", "shape": "square", "format": "PNG", "scale": "2x", "required": true },
+            { "context": "General", "width": 512, "height": 512, "filename": "icon_512x512.png", "location": "Assets.xcassets/AppIcon.appiconset/", "shape": "square", "format": "PNG", "scale": "1x", "required": true },
+            { "context": "General", "width": 256, "height": 256, "filename": "icon_256x256.png", "location": "Assets.xcassets/AppIcon.appiconset/", "shape": "square", "format": "PNG", "scale": "1x", "required": true },
+            { "context": "General", "width": 128, "height": 128, "filename": "icon_128x128.png", "location": "Assets.xcassets/AppIcon.appiconset/", "shape": "square", "format": "PNG", "scale": "1x", "required": true },
+            { "context": "General", "width": 32, "height": 32, "filename": "icon_32x32.png", "location": "Assets.xcassets/AppIcon.appiconset/", "shape": "square", "format": "PNG", "scale": "1x", "required": true },
+            { "context": "General", "width": 16, "height": 16, "filename": "icon_16x16.png", "location": "Assets.xcassets/AppIcon.appiconset/", "shape": "square", "format": "PNG", "scale": "1x", "required": true }
+          ]
+        },
+        "watchos": {
+          "displayName": "watchOS",
+          "layoutShape": "square",
+          "systemMask": "circular",
+          "masterSize": { "width": 1088, "height": 1088, "unit": "px" },
+          "note": "System applies circular mask. Avoid black backgrounds.",
+          "icons": [
+            { "context": "App Store", "width": 1024, "height": 1024, "filename": "Icon-AppStore-1024x1024.png", "location": "Assets.xcassets/AppIcon.appiconset/", "shape": "square", "format": "PNG", "required": true },
+            { "context": "Home Screen", "width": 172, "height": 172, "filename": "Icon-Home-86x86@2x.png", "location": "Assets.xcassets/AppIcon.appiconset/", "shape": "square", "format": "PNG", "scale": "2x", "required": true },
+            { "context": "Home Screen (small)", "width": 108, "height": 108, "filename": "Icon-Home-54x54@2x.png", "location": "Assets.xcassets/AppIcon.appiconset/", "shape": "square", "format": "PNG", "scale": "2x", "required": true }
+          ]
+        },
+        "tvos": {
+          "displayName": "tvOS",
+          "layoutShape": "rectangle_landscape",
+          "systemMask": "rounded_rectangle",
+          "note": "Icons are layered (parallax) and landscape rectangular. Include a safe zone.",
+          "icons": [
+            { "context": "App Store", "width": 1280, "height": 768, "filename": "AppleTV-Icon-App-Large-1280x768.png", "location": "Assets.xcassets/AppIcon.appiconset/", "shape": "rectangle", "format": "PNG", "required": true },
+            { "context": "Home Screen", "width": 800, "height": 480, "filename": "AppleTV-Icon-App-Small-400x240@2x.png", "location": "Assets.xcassets/AppIcon.appiconset/", "shape": "rectangle", "format": "PNG", "scale": "2x", "required": true },
+            { "context": "Home Screen (focused)", "width": 400, "height": 240, "filename": "AppleTV-Icon-App-Small-400x240.png", "location": "Assets.xcassets/AppIcon.appiconset/", "shape": "rectangle", "format": "PNG", "scale": "1x", "required": true },
+            { "context": "Top Shelf Poster", "width": 404, "height": 608, "filename": "AppleTV-TopShelf-Poster-404x608.png", "location": "Assets.xcassets/AppIcon.appiconset/", "shape": "rectangle", "format": "PNG", "required": false },
+            { "context": "Top Shelf Square", "width": 608, "height": 608, "filename": "AppleTV-TopShelf-Square-608x608.png", "location": "Assets.xcassets/AppIcon.appiconset/", "shape": "square", "format": "PNG", "required": false }
+          ]
+        },
+        "visionos": {
+          "displayName": "visionOS",
+          "layoutShape": "square",
+          "systemMask": "circular",
+          "note": "Uses 3D layered effect. Provide flat square layers.",
+          "icons": [
+            { "context": "App Store / Home", "width": 1024, "height": 1024, "filename": "Icon-visionOS-1024x1024.png", "location": "Assets.xcassets/AppIcon.appiconset/", "shape": "square", "format": "PNG", "required": true }
+          ]
+        }
+      }
+    },
+    "android": {
+      "displayName": "Android",
+      "note": "Adaptive icons require separate foreground and background layers. Legacy icons are still needed for older devices.",
+      "variants": {
+        "adaptive_icon": {
+          "displayName": "Adaptive Launcher Icon",
+          "canvasSize": { "width": 108, "height": 108, "unit": "dp" },
+          "safeZone": { "width": 66, "height": 66, "unit": "dp" },
+          "maxVisibleBoundary": { "width": 72, "height": 72, "unit": "dp" },
+          "shape": "system_dependent",
+          "layers": {
+            "foreground": {
+              "filename": "ic_launcher_foreground.png",
+              "location": "res/mipmap-anydpi-v26/",
+              "format": "PNG",
+              "transparency": "allowed",
+              "sizes": [
+                { "density": "mdpi", "width": 108, "height": 108, "unit": "px" },
+                { "density": "hdpi", "width": 162, "height": 162, "unit": "px" },
+                { "density": "xhdpi", "width": 216, "height": 216, "unit": "px" },
+                { "density": "xxhdpi", "width": 324, "height": 324, "unit": "px" },
+                { "density": "xxxhdpi", "width": 432, "height": 432, "unit": "px" }
+              ]
+            },
+            "background": {
+              "filename": "ic_launcher_background.png",
+              "location": "res/mipmap-anydpi-v26/",
+              "format": "PNG",
+              "transparency": "none",
+              "sizes": [
+                { "density": "mdpi", "width": 108, "height": 108, "unit": "px" },
+                { "density": "hdpi", "width": 162, "height": 162, "unit": "px" },
+                { "density": "xhdpi", "width": 216, "height": 216, "unit": "px" },
+                { "density": "xxhdpi", "width": 324, "height": 324, "unit": "px" },
+                { "density": "xxxhdpi", "width": 432, "height": 432, "unit": "px" }
+              ]
+            },
+            "monochrome": {
+              "filename": "ic_launcher_monochrome.xml",
+              "location": "res/mipmap-anydpi-v26/",
+              "format": "VectorDrawable",
+              "note": "Required for themed icons on Android 13+",
+              "required": false
+            }
+          }
+        },
+        "legacy_icon": {
+          "displayName": "Legacy Launcher Icon",
+          "shape": "square",
+          "note": "Fallback for devices below API 26",
+          "icons": [
+            { "context": "Launcher", "density": "mdpi", "width": 48, "height": 48, "filename": "ic_launcher.png", "location": "res/mipmap-mdpi/", "shape": "square", "format": "PNG", "required": true },
+            { "context": "Launcher", "density": "hdpi", "width": 72, "height": 72, "filename": "ic_launcher.png", "location": "res/mipmap-hdpi/", "shape": "square", "format": "PNG", "required": true },
+            { "context": "Launcher", "density": "xhdpi", "width": 96, "height": 96, "filename": "ic_launcher.png", "location": "res/mipmap-xhdpi/", "shape": "square", "format": "PNG", "required": true },
+            { "context": "Launcher", "density": "xxhdpi", "width": 144, "height": 144, "filename": "ic_launcher.png", "location": "res/mipmap-xxhdpi/", "shape": "square", "format": "PNG", "required": true },
+            { "context": "Launcher", "density": "xxxhdpi", "width": 192, "height": 192, "filename": "ic_launcher.png", "location": "res/mipmap-xxxhdpi/", "shape": "square", "format": "PNG", "required": true }
+          ]
+        },
+        "play_store": {
+          "displayName": "Google Play Store",
+          "icons": [
+            { "context": "Store Listing", "width": 512, "height": 512, "filename": "playstore-icon.png", "location": "publish/", "shape": "square", "format": "PNG", "required": true }
+          ]
+        }
+      }
+    },
+    "microsoft": {
+      "displayName": "Microsoft Windows",
+      "note": "Windows 10/11 supports multiple scale factors. ICO files should bundle multiple sizes. UWP/WinUI apps also require theme variants.",
+      "variants": {
+        "win32_ico_bundle": {
+          "displayName": "Win32 ICO Bundle",
+          "filename": "app.ico",
+          "location": "resources/",
+          "format": "ICO",
+          "shape": "square",
+          "note": "Single ICO file containing all standard sizes. Supports transparency.",
+          "embeddedSizes": [
+            { "width": 16, "height": 16, "required": true },
+            { "width": 20, "height": 20, "required": false },
+            { "width": 24, "height": 24, "required": true },
+            { "width": 32, "height": 32, "required": true },
+            { "width": 40, "height": 40, "required": false },
+            { "width": 48, "height": 48, "required": true },
+            { "width": 64, "height": 64, "required": false },
+            { "width": 128, "height": 128, "required": false },
+            { "width": 256, "height": 256, "required": true }
+          ]
+        },
+        "uwp_winui_packaging": {
+          "displayName": "UWP / WinUI / MSIX",
+          "basePath": "Assets/",
+          "icons": [
+            { "context": "App List / Taskbar", "width": 16, "height": 16, "filename": "AppList.targetsize-16.png", "location": "Assets/", "shape": "square", "format": "PNG", "themeVariant": "default", "required": true },
+            { "context": "App List / Taskbar", "width": 20, "height": 20, "filename": "AppList.targetsize-20.png", "location": "Assets/", "shape": "square", "format": "PNG", "themeVariant": "default", "required": false },
+            { "context": "App List / Taskbar", "width": 24, "height": 24, "filename": "AppList.targetsize-24.png", "location": "Assets/", "shape": "square", "format": "PNG", "themeVariant": "default", "required": true },
+            { "context": "App List / Taskbar", "width": 30, "height": 30, "filename": "AppList.targetsize-30.png", "location": "Assets/", "shape": "square", "format": "PNG", "themeVariant": "default", "required": false },
+            { "context": "App List / Taskbar", "width": 32, "height": 32, "filename": "AppList.targetsize-32.png", "location": "Assets/", "shape": "square", "format": "PNG", "themeVariant": "default", "required": true },
+            { "context": "App List / Taskbar", "width": 36, "height": 36, "filename": "AppList.targetsize-36.png", "location": "Assets/", "shape": "square", "format": "PNG", "themeVariant": "default", "required": false },
+            { "context": "App List / Taskbar", "width": 40, "height": 40, "filename": "AppList.targetsize-40.png", "location": "Assets/", "shape": "square", "format": "PNG", "themeVariant": "default", "required": false },
+            { "context": "App List / Taskbar", "width": 48, "height": 48, "filename": "AppList.targetsize-48.png", "location": "Assets/", "shape": "square", "format": "PNG", "themeVariant": "default", "required": true },
+            { "context": "App List / Taskbar", "width": 60, "height": 60, "filename": "AppList.targetsize-60.png", "location": "Assets/", "shape": "square", "format": "PNG", "themeVariant": "default", "required": false },
+            { "context": "App List / Taskbar", "width": 64, "height": 64, "filename": "AppList.targetsize-64.png", "location": "Assets/", "shape": "square", "format": "PNG", "themeVariant": "default", "required": false },
+            { "context": "App List / Taskbar", "width": 72, "height": 72, "filename": "AppList.targetsize-72.png", "location": "Assets/", "shape": "square", "format": "PNG", "themeVariant": "default", "required": false },
+            { "context": "App List / Taskbar", "width": 80, "height": 80, "filename": "AppList.targetsize-80.png", "location": "Assets/", "shape": "square", "format": "PNG", "themeVariant": "default", "required": false },
+            { "context": "App List / Taskbar", "width": 96, "height": 96, "filename": "AppList.targetsize-96.png", "location": "Assets/", "shape": "square", "format": "PNG", "themeVariant": "default", "required": false },
+            { "context": "App List / Taskbar", "width": 256, "height": 256, "filename": "AppList.targetsize-256.png", "location": "Assets/", "shape": "square", "format": "PNG", "themeVariant": "default", "required": true },
+            { "context": "Start Pins", "width": 32, "height": 32, "filename": "AppList.scale-100.png", "location": "Assets/", "shape": "square", "format": "PNG", "scale": "100", "required": false },
+            { "context": "Start Pins", "width": 40, "height": 40, "filename": "AppList.scale-125.png", "location": "Assets/", "shape": "square", "format": "PNG", "scale": "125", "required": false },
+            { "context": "Start Pins", "width": 48, "height": 48, "filename": "AppList.scale-150.png", "location": "Assets/", "shape": "square", "format": "PNG", "scale": "150", "required": false },
+            { "context": "Start Pins", "width": 64, "height": 64, "filename": "AppList.scale-200.png", "location": "Assets/", "shape": "square", "format": "PNG", "scale": "200", "required": false },
+            { "context": "Start Pins", "width": 256, "height": 256, "filename": "AppList.scale-400.png", "location": "Assets/", "shape": "square", "format": "PNG", "scale": "400", "required": false }
+          ],
+          "themeVariants": {
+            "dark": { "suffix": "_altform-unplated", "note": "Used on dark taskbar/start" },
+            "light": { "suffix": "_altform-lightunplated", "note": "Used on light taskbar/start" }
+          }
+        }
+      }
+    },
+    "linux": {
+      "displayName": "Linux (freedesktop.org)",
+      "note": "Follows the XDG Icon Theme Specification. Icons are organized by size in theme directories. SVG scalable versions are preferred when available.",
+      "variants": {
+        "gnome": {
+          "displayName": "GNOME / GTK",
+          "themePath": "share/icons/hicolor/",
+          "scalable": {
+            "filename": "{{appName}}.svg",
+            "location": "share/icons/hicolor/scalable/apps/",
+            "shape": "square",
+            "format": "SVG",
+            "required": true
+          },
+          "icons": [
+            { "context": "Menu / Panel", "width": 16, "height": 16, "filename": "{{appName}}.png", "location": "share/icons/hicolor/16x16/apps/", "shape": "square", "format": "PNG", "required": true },
+            { "context": "Menu / Panel", "width": 22, "height": 22, "filename": "{{appName}}.png", "location": "share/icons/hicolor/22x22/apps/", "shape": "square", "format": "PNG", "required": true },
+            { "context": "Menu / Panel", "width": 24, "height": 24, "filename": "{{appName}}.png", "location": "share/icons/hicolor/24x24/apps/", "shape": "square", "format": "PNG", "required": true },
+            { "context": "Menu / Panel", "width": 32, "height": 32, "filename": "{{appName}}.png", "location": "share/icons/hicolor/32x32/apps/", "shape": "square", "format": "PNG", "required": true },
+            { "context": "Launcher", "width": 48, "height": 48, "filename": "{{appName}}.png", "location": "share/icons/hicolor/48x48/apps/", "shape": "square", "format": "PNG", "required": true },
+            { "context": "Launcher", "width": 64, "height": 64, "filename": "{{appName}}.png", "location": "share/icons/hicolor/64x64/apps/", "shape": "square", "format": "PNG", "required": false },
+            { "context": "Launcher", "width": 96, "height": 96, "filename": "{{appName}}.png", "location": "share/icons/hicolor/96x96/apps/", "shape": "square", "format": "PNG", "required": false },
+            { "context": "Launcher / Store", "width": 128, "height": 128, "filename": "{{appName}}.png", "location": "share/icons/hicolor/128x128/apps/", "shape": "square", "format": "PNG", "required": true },
+            { "context": "Store / HiDPI", "width": 256, "height": 256, "filename": "{{appName}}.png", "location": "share/icons/hicolor/256x256/apps/", "shape": "square", "format": "PNG", "required": false },
+            { "context": "Store / HiDPI", "width": 512, "height": 512, "filename": "{{appName}}.png", "location": "share/icons/hicolor/512x512/apps/", "shape": "square", "format": "PNG", "required": false },
+            { "context": "Store / HiDPI", "width": 1024, "height": 1024, "filename": "{{appName}}.png", "location": "share/icons/hicolor/1024x1024/apps/", "shape": "square", "format": "PNG", "required": false }
+          ]
+        },
+        "kde": {
+          "displayName": "KDE Plasma",
+          "themePath": "share/icons/hicolor/",
+          "scalable": {
+            "filename": "{{appName}}.svg",
+            "location": "share/icons/hicolor/scalable/apps/",
+            "shape": "square",
+            "format": "SVG",
+            "required": true
+          },
+          "icons": [
+            { "context": "Panel", "width": 16, "height": 16, "filename": "{{appName}}.png", "location": "share/icons/hicolor/16x16/apps/", "shape": "square", "format": "PNG", "required": true },
+            { "context": "Panel", "width": 22, "height": 22, "filename": "{{appName}}.png", "location": "share/icons/hicolor/22x22/apps/", "shape": "square", "format": "PNG", "required": true },
+            { "context": "Menu", "width": 32, "height": 32, "filename": "{{appName}}.png", "location": "share/icons/hicolor/32x32/apps/", "shape": "square", "format": "PNG", "required": true },
+            { "context": "Launcher", "width": 48, "height": 48, "filename": "{{appName}}.png", "location": "share/icons/hicolor/48x48/apps/", "shape": "square", "format": "PNG", "required": true },
+            { "context": "Launcher", "width": 64, "height": 64, "filename": "{{appName}}.png", "location": "share/icons/hicolor/64x64/apps/", "shape": "square", "format": "PNG", "required": false },
+            { "context": "Launcher", "width": 128, "height": 128, "filename": "{{appName}}.png", "location": "share/icons/hicolor/128x128/apps/", "shape": "square", "format": "PNG", "required": true },
+            { "context": "Store", "width": 256, "height": 256, "filename": "{{appName}}.png", "location": "share/icons/hicolor/256x256/apps/", "shape": "square", "format": "PNG", "required": false },
+            { "context": "Store", "width": 512, "height": 512, "filename": "{{appName}}.png", "location": "share/icons/hicolor/512x512/apps/", "shape": "square", "format": "PNG", "required": false }
+          ]
+        }
+      }
+    },
+    "web": {
+      "displayName": "Web / PWA",
+      "note": "Modern web requires ICO fallback, PNG for touch icons, and manifest icons for installability.",
+      "variants": {
+        "favicon": {
+          "displayName": "Browser Favicon",
+          "icons": [
+            { "context": "Legacy Tab", "width": 16, "height": 16, "filename": "favicon.ico", "location": "root/", "shape": "square", "format": "ICO", "note": "Multi-size container: 16x16, 32x32, 48x48", "required": true },
+            { "context": "Modern Tab", "width": 32, "height": 32, "filename": "favicon-32x32.png", "location": "root/", "shape": "square", "format": "PNG", "required": true },
+            { "context": "Modern Tab", "width": 16, "height": 16, "filename": "favicon-16x16.png", "location": "root/", "shape": "square", "format": "PNG", "required": true },
+            { "context": "SVG Modern", "width": null, "height": null, "filename": "icon.svg", "location": "root/", "shape": "square", "format": "SVG", "note": "Supports dark mode via CSS media queries", "required": false }
+          ]
+        },
+        "apple_touch": {
+          "displayName": "Apple Touch Icon",
+          "icons": [
+            { "context": "iOS Home Screen", "width": 180, "height": 180, "filename": "apple-touch-icon.png", "location": "root/", "shape": "square", "format": "PNG", "note": "iOS applies rounded mask automatically", "required": true }
+          ]
+        },
+        "pwa_manifest": {
+          "displayName": "PWA / Web Manifest",
+          "icons": [
+            { "context": "Android Home Screen", "width": 192, "height": 192, "filename": "android-chrome-192x192.png", "location": "root/", "shape": "square", "format": "PNG", "required": true },
+            { "context": "Splash / Install", "width": 512, "height": 512, "filename": "android-chrome-512x512.png", "location": "root/", "shape": "square", "format": "PNG", "required": true },
+            { "context": "Maskable", "width": 192, "height": 192, "filename": "maskable-icon-192x192.png", "location": "root/", "shape": "square_with_padding", "format": "PNG", "note": "Safe zone: center 80x80dp within 108x108dp canvas", "required": false }
+          ]
+        },
+        "social_opengraph": {
+          "displayName": "Social Sharing",
+          "icons": [
+            { "context": "Open Graph", "width": 1200, "height": 630, "filename": "og-image.png", "location": "assets/", "shape": "rectangle", "format": "PNG", "required": false }
+          ]
+        }
+      }
+    },
+    "packaging": {
+      "displayName": "Packaging Tools (JReleaser, etc.)",
+      "note": "Cross-platform packaging tools typically need a consolidated set of icons in predictable locations.",
+      "variants": {
+        "jreleaser": {
+          "displayName": "JReleaser",
+          "icons": [
+            { "context": "Linux", "width": 256, "height": 256, "filename": "{{appName}}.png", "location": "icons/linux/", "shape": "square", "format": "PNG", "required": true },
+            { "context": "macOS", "width": 1024, "height": 1024, "filename": "{{appName}}.icns", "location": "icons/macos/", "shape": "square", "format": "ICNS", "note": "Bundled: 16,32,64,128,256,512,1024", "required": true },
+            { "context": "Windows", "width": 256, "height": 256, "filename": "{{appName}}.ico", "location": "icons/windows/", "shape": "square", "format": "ICO", "note": "Bundled: 16,24,32,48,256", "required": true }
+          ]
+        },
+        "flatpak": {
+          "displayName": "Flatpak",
+          "icons": [
+            { "context": "App Icon", "width": 128, "height": 128, "filename": "{{appId}}.png", "location": "share/icons/hicolor/128x128/apps/", "shape": "square", "format": "PNG", "required": true },
+            { "context": "App Icon", "width": 512, "height": 512, "filename": "{{appId}}.png", "location": "share/icons/hicolor/512x512/apps/", "shape": "square", "format": "PNG", "required": false }
+          ]
+        },
+        "snap": {
+          "displayName": "Snapcraft",
+          "icons": [
+            { "context": "App Icon", "width": 256, "height": 256, "filename": "icon.png", "location": "snap/gui/", "shape": "square", "format": "PNG", "required": true },
+            { "context": "App Icon", "width": 512, "height": 512, "filename": "icon.png", "location": "snap/gui/", "shape": "square", "format": "PNG", "required": false }
+          ]
+        }
+      }
+    }
+  },
+  "shapeDefinitions": {
+    "square": { "description": "Exact square. No rounding or masking applied by creator.", "systemMasking": "none" },
+    "rounded_rectangle": { "description": "Square canvas; system applies rounded corners (e.g., Apple squircle ~20% radius).", "systemMasking": "automatic" },
+    "circular": { "description": "Square canvas; system applies circular mask.", "systemMasking": "automatic" },
+    "rectangle": { "description": "Non-square aspect ratio (e.g., 16:9 or 5:3).", "systemMasking": "none" },
+    "square_with_padding": { "description": "Square with internal padding for safe-zone masking (e.g., Android maskable).", "systemMasking": "automatic" }
+  },
+  "formatDefinitions": {
+    "PNG": { "mimeType": "image/png", "supportsTransparency": true, "colorSpaces": ["sRGB", "Display P3"], "notes": "Preferred raster format for all platforms." },
+    "SVG": { "mimeType": "image/svg+xml", "supportsTransparency": true, "colorSpaces": ["sRGB"], "notes": "Scalable; ideal for Linux themes and modern web." },
+    "ICO": { "mimeType": "image/x-icon", "supportsTransparency": true, "colorSpaces": ["sRGB"], "notes": "Container format; must embed multiple sizes." },
+    "ICNS": { "mimeType": "image/icns", "supportsTransparency": true, "colorSpaces": ["sRGB"], "notes": "Container format for macOS; embeds multiple icon types." },
+    "VectorDrawable": { "mimeType": "application/xml", "supportsTransparency": true, "colorSpaces": ["sRGB"], "notes": "Android XML vector format for monochrome themed icons." }
+  }
+}

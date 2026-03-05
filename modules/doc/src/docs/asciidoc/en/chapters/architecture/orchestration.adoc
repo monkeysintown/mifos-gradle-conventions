@@ -1,0 +1,15 @@
+= Orchestration
+
+TBD
+
+- https://github.com/amirjani/saga-pattern
+- https://www.baeldung.com/cs/saga-pattern-microservices
+- https://medium.com/better-programming/distributed-transactions-in-depth-f900875bbf6
+- https://www.youtube.com/watch?v=wWtrFg1aPjc
+- Event Driven Architecture: https://www.youtube.com/watch?v=klKbtGKdqUE
+- https://cadenceworkflow.io
+- https://cibseven.org/en
+- https://conductor-oss.org
+- https://eximeebpms.org
+- https://operaton.org
+- https://www.flowable.com/open-source

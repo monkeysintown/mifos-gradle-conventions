@@ -1,0 +1,13 @@
+= Orchestration
+
+- workflow engines
+- saga design pattern
+- expose behaviour through REST APIs (HATEOAS, see: https://www.youtube.com/watch?v=x3Bf25altb4)
+- process managers
+- https://www.baeldung.com/cs/saga-pattern-microservices
+- https://microprofile.io/specifications/microprofile-lra/
+- https://docs.axoniq.io/axon-framework-reference/4.10/release-notes/major-releases/
+- https://microservices.io/patterns/data/saga.html
+- https://github.com/amirjani/saga-pattern
+- https://medium.com/better-programming/distributed-transactions-in-depth-f900875bbf6
+-

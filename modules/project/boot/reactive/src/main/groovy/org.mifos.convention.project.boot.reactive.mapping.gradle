@@ -1,0 +1,7 @@
+plugins {
+    id "org.mifos.convention.project.boot.base.mapping"
+}
+
+dependencies {
+    api "org.mifos:mifos-common-boot-mapping"
+}

@@ -1,0 +1,67 @@
+= Design Patterns
+
+The Mifos codebase draws on design patterns documented in the classic *_Design Patterns: Elements of Reusable Object-Oriented Software_* (Gamma, Helm, Johnson, Vlissides — the "`Gang of Four`") <<gof>> and the pragmatic wisdom of *_The Pragmatic Programmer_* (Hunt and Thomas) <<pp>>. Patterns are applied judiciously—only when they solve a real problem and make the code clearer, not as architectural decoration.
+
+The patterns most commonly used in Mifos are:
+
+**Builder Pattern** — For constructing complex objects with many optional parameters, such as loan products with dozens of configuration flags:
+
+[source,java]
+----
+var loanProduct = LoanProduct.builder()
+    .name("Short-Term Agricultural Loan")
+    .shortName("AGRI-ST")
+    .fundSource(fundSource)
+    .principal(250000.00)
+    .interestRate(12.5)
+    .repaymentStrategy(RepaymentStrategy.PRINCIPAL_INTEREST)
+    .amortization(Amortization.EQUAL_INSTALLMENTS)
+    .interestCalculation(InterestCalculation.DECLINING_BALANCE)
+    .allowPartialPeriodInterestCalculation(true)
+    .daysInMonth(DaysInMonth.ACTUAL)
+    .daysInYear(DaysInYear.ACTUAL)
+    .build();
+----
+
+**Strategy Pattern** — For selecting business rule implementations at runtime, such as interest calculation methods:
+
+[source,java]
+----
+public interface InterestCalculationStrategy {
+    BigDecimal calculate(Loan loan, LocalDate asOfDate);
+}
+
+public class FlatInterestStrategy implements InterestCalculationStrategy {
+    // ...
+}
+
+public class DecliningBalanceStrategy implements InterestCalculationStrategy {
+    // ...
+}
+
+// Selected at runtime based on loan product configuration
+var strategy = loanProduct.getInterestCalculation() == InterestCalculation.FLAT
+    ? new FlatInterestStrategy()
+    : new DecliningBalanceStrategy();
+var interest = strategy.calculate(loan, asOfDate);
+----
+
+**Observer Pattern** — For domain events. When a loan is disbursed, multiple subscribers react independently: accounting creates entries, SMS notifications are sent, and audit logs are written.
+
+**Repository Pattern** — For data access abstraction. All database interaction goes through repository interfaces, never directly through JPA entity managers or SQL strings in service code. This enables testing with in-memory implementations and swapping persistence technologies.
+
+See:
+
+- https://www.amazon.com/Philosophy-Software-Design-2nd/dp/173210221X/ref=pd_sbs_d_sccl_1_5/135-5877793-8747446?pd_rd_w=UDXN1&content-id=amzn1.sym.aa738fbd-ad05-4d11-aae2-04b598db6305&pf_rd_p=aa738fbd-ad05-4d11-aae2-04b598db6305&pf_rd_r=VW7WFH92J4TEC2DQKFE0&pd_rd_wg=8Luoy&pd_rd_r=de11175b-8797-4864-b7c9-ce67c1219998&pd_rd_i=173210221X&psc=1
+
+== Basic Vocabulary
+
+- Pattern
+- Controller
+- Value Object
+- DTO
+- Service
+- Component
+- Repository
+- Immutable
+- ...

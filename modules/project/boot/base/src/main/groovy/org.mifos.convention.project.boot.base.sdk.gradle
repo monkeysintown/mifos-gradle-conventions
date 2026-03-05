@@ -1,0 +1,13 @@
+plugins {
+    id "org.mifos.convention.project.boot.base"
+    id "org.mifos.convention.project.java.test.spring"
+    id "org.openapi.generator"
+    id "com.google.protobuf"
+}
+
+dependencies {
+    api "jakarta.validation:jakarta.validation-api"
+
+    testAnnotationProcessor "org.mapstruct:mapstruct-processor"
+    testCompileOnly "org.mapstruct:mapstruct-processor"
+}

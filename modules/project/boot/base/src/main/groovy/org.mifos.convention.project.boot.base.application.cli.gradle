@@ -1,0 +1,15 @@
+plugins {
+    id "org.mifos.convention.project.boot.base.application"
+}
+
+dependencies {
+    // implementation "org.springframework.shell:spring-shell-starter"
+    implementation "info.picocli:picocli"
+    implementation "info.picocli:picocli-spring-boot-starter"
+    implementation "dev.tamboui:tamboui-toolkit"
+    implementation "dev.tamboui:tamboui-css"
+    implementation "dev.tamboui:tamboui-aesh-backend"
+    // implementation "dev.tamboui:tamboui-jline3-backend"
+    // implementation "dev.tamboui:tamboui-panama-backend"
+    implementation "dev.tamboui:tamboui-image"
+}

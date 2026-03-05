@@ -1,0 +1,39 @@
+= Excalidraw
+
+Excalidraw (https://excalidraw.com) is a virtual whiteboard tool that produces hand-drawn style diagrams. Its deliberately informal aesthetic makes it ideal for early design phase discussions, brainstorming sessions, and internal architecture sketches where polish is less important than clarity and speed. The hand-drawn style signals that a diagram is a work-in-progress, not a finalized specification—a useful visual cue that encourages feedback and iteration.
+
+In the Mifos project, Excalidraw is recommended for:
+
+* *Design sessions*: Quick sketches during architecture discussions and sprint planning
+* *Internal documentation*: Diagrams that convey rough structure without implying finality
+* *Onboarding aids*: Informal overviews that help new contributors orient themselves before diving into formal documentation
+
+.Workflow
+
+. Create diagrams at excalidraw.com or using the VS Code Excalidraw extension.
+. Save the diagram as a `.excalidraw` JSON file in the repository.
+. Export as SVG for inclusion in documentation.
+
+[source,bash]
+----
+# Install the Excalidraw VS Code extension
+code --install-extension pomdtr.excalidraw-editor
+
+# Export using the Excalidraw CLI (if available)
+npx @excalidraw/excalidraw-cli \
+    --input src/docs/excalidraw/architecture-sketch.excalidraw \
+    --output build/diagrams/architecture-sketch.svg
+----
+
+.Include in AsciiDoc
+[source,asciidoc]
+----
+.Early Architecture Sketch (Work in Progress)
+// image::diagrams/architecture-sketch.svg[Architecture Sketch]
+----
+
+[WARNING]
+====
+Do not use Excalidraw for formal, customer-facing, or regulatory documentation. The hand-drawn style is inappropriate for contexts where precision and authority are expected. Use PlantUML or Draw.io for those cases instead.
+====
+

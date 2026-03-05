@@ -1,0 +1,419 @@
+= Project Quality
+
+TBD
+
+== Tools
+
+Mifos employs a multi-layered quality toolchain that runs on every pull request. No single tool catches every class of defect, which is why we layer static analysis, dynamic testing, coverage tracking, and security scanning.
+
+The primary quality tools and their Gradle integrations:
+
+[cols="1,3,2"]
+|===
+|Tool |Purpose |Gradle Plugin
+
+|SonarQube
+|Comprehensive static analysis: code smells, duplication, complexity, security hotspots
+|`org.sonarqube`
+
+|JaCoCo
+|Java code coverage measurement with line and branch coverage
+|`jacoco`
+
+|SpotBugs
+|Bytecode-level bug detection (null pointers, resource leaks, concurrency issues)
+|`com.github.spotbugs`
+
+|PMD
+|Source-level rule checking: unused code, suboptimal patterns, complexity
+|`pmd`
+
+|Checkstyle
+|Code style and formatting enforcement based on Google Java Style
+|`checkstyle`
+
+|Error Prone
+|Compiler-integrated bug detection: common Java mistakes, suggested fixes
+|`net.ltgt.errorprone`
+|===
+
+Gradle configuration for quality tools in a convention plugin:
+
+[source,kotlin]
+----
+// buildSrc/src/main/kotlin/mifos-quality-conventions.gradle.kts
+plugins {
+    jacoco
+    pmd
+    checkstyle
+    id("com.github.spotbugs")
+    id("net.ltgt.errorprone")
+}
+
+checkstyle {
+    toolVersion = "10.20.0"
+    configDirectory = rootProject.file("config/checkstyle")
+}
+
+pmd {
+    toolVersion = "7.8.0"
+    ruleSetFiles = files(rootProject.file("config/pmd/ruleset.xml"))
+    isConsoleOutput = true
+}
+
+spotbugs {
+    toolVersion = "4.8.6"
+    excludeFilter = rootProject.file("config/spotbugs/exclude.xml")
+}
+
+jacoco {
+    toolVersion = "0.8.12"
+}
+
+tasks.jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                minimum = "0.80".toBigDecimal()
+            }
+        }
+        rule {
+            element = "CLASS"
+            excludes = listOf("*.configuration.*", "*.dto.*")
+            limit {
+                minimum = "0.70".toBigDecimal()
+            }
+        }
+    }
+}
+
+tasks.jacocoTestReport {
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
+}
+
+tasks.check {
+    dependsOn(
+        tasks.jacocoTestCoverageVerification,
+        tasks.jacocoTestReport
+    )
+}
+----
+
+To run all quality checks:
+
+[source,bash]
+----
+./gradlew check
+# This runs: test, checkstyleMain, checkstyleTest, pmdMain, pmdTest,
+#            spotbugsMain, spotbugsTest, jacocoTestCoverageVerification
+----
+
+
+== Style
+
+Consistent code style is not about aesthetics—it is about reducing cognitive load. When every file follows the same formatting rules, reviewers spend their attention on logic rather than layout, and diffs are cleaner because gratuitous reformatting is eliminated.
+
+Mifos style conventions:
+
+* **Java 25 baseline**: All code uses Java 25 language features. Records, sealed classes, pattern matching, and text blocks are encouraged where they improve clarity.
+* **Kotlin only for Android and Gradle plugins**: Server-side application code is Java. Gradle build logic (`buildSrc`, convention plugins) and Android modules use Kotlin.
+* **Palantir Java Format**: The primary formatter, enforced through Spotless. Palantir Java Format is a deterministic, opinionated formatter that produces consistent output—there is only one way to format any given construct.
+* **Import ordering**: `java.*`, `jakarta.*`, `org.*`, `com.*`, with blank lines between groups. Static imports last. Enforced by both Checkstyle and Spotless.
+
+Spotless configuration:
+
+[source,kotlin]
+----
+// In mifos-java-conventions.gradle.kts
+plugins {
+    id("com.diffplug.spotless")
+}
+
+spotless {
+    java {
+        palantirJavaFormat()
+        removeUnusedImports()
+        trimTrailingWhitespace()
+        endWithNewline()
+        targetExclude("**/generated/**")
+    }
+
+    format("misc") {
+        target("*.md", ".gitignore")
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+}
+----
+
+To apply formatting automatically before each commit, add a Git pre-commit hook:
+
+[source,bash]
+----
+# .git/hooks/pre-commit
+#!/bin/sh
+./gradlew spotlessApply
+git add -u
+----
+
+Or use Gradle's `spotlessCheck` in CI to enforce formatting without auto-fixing.
+
+- Java 25 base line
+- Kotlin only for Android and Gradle plugin development
+- ... to be continued...
+
+== Security
+
+Security in a financial platform is non-negotiable. Mifos integrates multiple security tools into the development pipeline to catch vulnerabilities before they reach production. The goal is defense in depth: no single tool catches everything, but layered tools provide broad coverage.
+
+**Snyk** — Dependency vulnerability scanning. Snyk monitors the dependency tree for known CVEs and license compliance issues.
+
+[source,bash]
+----
+# Install the Snyk CLI
+npm install -g snyk
+
+# Authenticate (opens browser)
+snyk auth
+
+# Test the project for vulnerabilities
+snyk test --all-projects
+
+# Monitor for new vulnerabilities over time
+snyk monitor --all-projects
+
+# Generate a vulnerability report
+snyk test --json > snyk-report.json
+----
+
+**Syft** — SBOM (Software Bill of Materials) generation. Required for CRA compliance and vulnerability tracking.
+
+[source,bash]
+----
+# Install Syft
+curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+
+# Generate an SBOM from the built container image
+syft fineract:latest -o spdx-json > sbom.json
+
+# Or from the build directory
+syft dir:fineract-provider/build/libs/ -o cyclonedx-json > sbom.json
+----
+
+**Anchore (Grype)** — Container image vulnerability scanning. Scans the final Docker image for OS-level and library-level vulnerabilities.
+
+[source,bash]
+----
+# Install Grype (Anchore's scanner)
+curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
+
+# Scan a container image
+grype fineract:latest
+
+# Scan with a specific severity threshold
+grype fineract:latest --fail-on critical
+----
+
+**Semgrep** — Static analysis for security patterns. Catches SQL injection, hardcoded secrets, insecure crypto, and other security anti-patterns.
+
+[source,bash]
+----
+# Install Semgrep
+pip install semgrep
+
+# Run the Java security ruleset
+semgrep --config "p/java" --config "p/owasp-top-ten" src/
+
+# Run in CI mode (returns non-zero on findings)
+semgrep --config "p/java" --error src/
+----
+
+**SonarSource** — Continuous code quality and security. Integrates with SonarQube or SonarCloud for long-term quality tracking.
+
+[source,bash]
+----
+# Run SonarQube analysis
+./gradlew sonarqube \
+  -Dsonar.host.url=https://sonarcloud.io \
+  -Dsonar.organization=mifos \
+  -Dsonar.projectKey=mifos-fineract \
+  -Dsonar.login=$SONAR_TOKEN
+----
+
+See:
+
+- https://github.com/bearer/bearer (neat results)
+- https://plugins.jetbrains.com/plugin/10881-hcl-appscan
+- Snyk
+- Syft
+- Anchore
+- Semgrep
+- SonarSource
+- https://www.oligo.security/academy/10-snyk-alternatives-to-consider-in-2025
+
+== Safety
+
+Resilience patterns protect Mifos services from cascading failures when external dependencies (payment gateways, notification services, credit bureaus) become slow or unresponsive. The **resilience4j** library provides lightweight, functional implementations of the essential patterns.
+
+The core resilience patterns used in Mifos:
+
+* **CircuitBreaker**: Stops making calls to a failing service, giving it time to recover. After a threshold of failures, the circuit "opens" and calls fail fast. After a wait period, the circuit "half-opens" to test recovery.
+* **RateLimiter**: Restricts the rate of calls to an external service to prevent overwhelming it.
+* **Retry**: Automatically retries transient failures with configurable backoff.
+* **Bulkhead**: Limits the number of concurrent calls to a service, preventing thread pool exhaustion.
+
+CircuitBreaker configuration example:
+
+[source,java]
+----
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
+
+import java.time.Duration;
+
+@Configuration
+public class ResilienceConfig {
+
+    @Bean
+    public CircuitBreakerRegistry circuitBreakerRegistry() {
+        var config = CircuitBreakerConfig.custom()
+            .failureRateThreshold(50.0f)           // Open at 50% failure rate
+            .slowCallRateThreshold(80.0f)           // Open at 80% slow calls
+            .slowCallDurationThreshold(Duration.ofSeconds(3))
+            .waitDurationInOpenState(Duration.ofSeconds(30))
+            .permittedNumberOfCallsInHalfOpenState(5)
+            .slidingWindowType(CircuitBreakerConfig.SlidingWindowType.COUNT_BASED)
+            .slidingWindowSize(20)
+            .build();
+
+        var registry = CircuitBreakerRegistry.of(config);
+        registry.circuitBreaker("paymentGateway", config);
+        registry.circuitBreaker("creditBureau", config);
+        return registry;
+    }
+}
+----
+
+Using a CircuitBreaker in a service:
+
+[source,java]
+----
+@Service
+public class PaymentGatewayService {
+
+    private final CircuitBreaker circuitBreaker;
+    private final PaymentGatewayClient client;
+
+    public PaymentGatewayService(CircuitBreakerRegistry registry,
+                                 PaymentGatewayClient client) {
+        this.circuitBreaker = registry.circuitBreaker("paymentGateway");
+        this.client = client;
+    }
+
+    public PaymentResult processPayment(PaymentRequest request) {
+        return CircuitBreaker.decorateSupplier(circuitBreaker,
+            () -> client.process(request))
+            .get()
+            .orElse(PaymentResult.serviceUnavailable());
+    }
+}
+----
+
+See:
+
+- resilience4j
+
+== Compliance
+
+Financial software operates in one of the most heavily regulated industries. While Mifos as an open-source project is not itself subject to regulatory audit, the institutions that deploy Mifos are. Our code must be written to facilitate compliance with the following frameworks:
+
+**PCI-DSS Considerations**: While Mifos does not typically process card payments directly, any integration with card networks must comply with the Payment Card Industry Data Security Standard. Key requirements include:
+
+* Never log full card numbers—mask all but the last four digits.
+* Encrypt cardholder data in transit (TLS 1.3) and at rest (AES-256).
+* Restrict access to cardholder data on a need-to-know basis.
+* Maintain audit logs of all access to sensitive data.
+
+**Data Encryption**: All sensitive data must be encrypted both at rest and in transit:
+
+* **In transit**: TLS 1.3 for all HTTP communication. Certificate pinning for mobile clients.
+* **At rest**: AES-256-GCM for PII fields in the database. Use the `fineract-crypto` module for field-level encryption.
+* **Key management**: Encryption keys are managed through Hashicorp Vault or OpenBao, never stored in configuration files.
+
+**Audit Logging**: Every mutation of financial data must produce an immutable audit record:
+
+[source,java]
+----
+@Entity
+@Table(name = "m_audit")
+public class AuditEntry {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "action", nullable = false)
+    private String action;           // e.g., "CREATE", "UPDATE", "DELETE"
+
+    @Column(name = "entity_type", nullable = false)
+    private String entityType;       // e.g., "LOAN", "SAVINGS_ACCOUNT"
+
+    @Column(name = "entity_id", nullable = false)
+    private Long entityId;
+
+    @Column(name = "performed_by", nullable = false)
+    private String performedBy;      // Username or service account
+
+    @Column(name = "performed_at", nullable = false)
+    private Instant performedAt;
+
+    @Column(name = "old_value", columnDefinition = "TEXT")
+    private String oldValue;         // JSON snapshot before change
+
+    @Column(name = "new_value", columnDefinition = "TEXT")
+    private String newValue;         // JSON snapshot after change
+
+    @Column(name = "tenant_id", nullable = false)
+    private String tenantId;
+}
+----
+
+**Access Control**: Mifos implements role-based access control (RBAC) at the API level. Every endpoint is annotated with permission requirements, and the framework enforces that the authenticated user has the required role. Fine-grained permissions (e.g., "CREATE_LOAN", "APPROVE_LOAN", "DISBURSE_LOAN") follow the principle of least privilege.
+
+== Project Quality Score
+
+The project quality score is a composite metric that provides a snapshot of the codebase's health. It aggregates multiple dimensions into a single assessment that helps maintainers prioritize improvement efforts.
+
+**Dimensions of quality**:
+
+* **Code coverage** (JaCoCo): The percentage of code exercised by automated tests. Mifos targets a minimum of 80% line coverage and 70% branch coverage. Coverage below the threshold fails the CI build.
+* **Static analysis score** (SonarQube): A composite of code smells, technical debt ratio, and duplication percentage. The target is a quality gate rating of "Passed" with zero blocker or critical issues.
+* **Security vulnerability count** (Snyk, Grype): The number of known vulnerabilities in the dependency tree, categorized by severity. The target is zero critical/high vulnerabilities and a plan for remediating medium vulnerabilities.
+* **Dependency freshness**: The percentage of dependencies at their latest stable version. Stale dependencies accumulate security debt.
+
+**The Good** (green checks): Code coverage above 80%, zero critical security findings, static analysis quality gate passed, all dependencies current, all CI checks green. This is the target state for every PR and every release.
+
+**The Bad** (warnings): Code coverage between 60% and 80%, medium-severity security findings present, moderate technical debt identified by SonarQube, some dependencies one major version behind. This state requires a deliberate remediation plan and should not persist across releases.
+
+**The Ugly** (critical): Code coverage below 60%, critical or high-severity security vulnerabilities, failing static analysis quality gate, deprecated dependencies with known exploits, tests failing on the main branch. This state is a blocker for any release and must be resolved immediately.
+
+[source,bash]
+----
+# Generate a quality report
+./gradlew check jacocoTestReport sonarqube
+
+# Check coverage
+./gradlew jacocoTestCoverageVerification
+
+# Run security scans
+snyk test --all-projects
+grype fineract:latest --fail-on critical
+----
+
+See:
+
+- https://github.com/autonomousapps/dependency-analysis-gradle-plugin

@@ -1,0 +1,9 @@
+plugins {
+    id "org.mifos.convention.project.boot.base"
+}
+
+dependencies {
+    implementation "com.fasterxml.jackson.core:jackson-annotations"
+    implementation "tools.jackson.core:jackson-core"
+    implementation "tools.jackson.core:jackson-databind"
+}

@@ -1,0 +1,7 @@
+plugins {
+    id "org.mifos.convention.project.boot.base.core"
+}
+
+dependencies {
+    api "io.projectreactor:reactor-core"
+}

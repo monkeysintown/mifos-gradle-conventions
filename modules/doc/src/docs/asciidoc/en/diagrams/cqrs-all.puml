@@ -1,0 +1,211 @@
+@startuml
+!theme cerulean-outline
+skinparam componentStyle rectangle
+skinparam linetype ortho
+skinparam packageStyle rectangle
+
+title Apache Fineract CQRS Architecture - fineract-command Module
+
+' ==================== EXTERNAL LAYERS ====================
+package "Client Layer" {
+    [REST Client\n(Mobile/Web/3rd Party)] as Client
+    [gRPC Client] as GrpcClient
+}
+
+package "API Layer (Spring Web MVC)" {
+    [JAX-RS / Spring MVC\nController] as Controller
+    [OpenAPI / Swagger\nDocumentation] as Swagger
+    [DTO Request\n(Validated)] as RequestDTO
+    [DTO Response] as ResponseDTO
+}
+
+' ==================== COMMAND SIDE (WRITE) ====================
+package "Command Side (Write)" #LightYellow {
+
+    package "fineract-command-core" {
+        [CommandDispatcher] as Dispatcher
+        [Command\n<T extends Payload>] as Command
+        [CommandWrapper\n(username, tenantId,\ntimestamp, payload)] as CommandWrapper
+
+        package "Middleware Chain" #White {
+            [Validation\nMiddleware] as ValMid
+            [Idempotency\nMiddleware] as IdemMid
+            [Authorization\nMiddleware] as AuthMid
+            [Audit Logging\nMiddleware] as AuditMid
+            [Maker-Checker\nMiddleware] as MakerMid
+        }
+
+        package "Executors" #White {
+            [SynchronousCommandExecutor\n(Default)] as SyncExec
+            [AsynchronousCommandExecutor\n(CompletableFuture)] as AsyncExec
+            [NonBlockingCommandExecutor\n(LMAX Disruptor)] as NonBlockExec
+        }
+    }
+
+    package "Command Handlers" {
+        [CommandHandler\n<T, R>] as CommandHandler
+        [LoanCollateralDeleteHandler] as ExampleHandler
+    }
+
+    package "Business Services" {
+        [LoanCollateralManagement\nWriteService] as WriteService
+        [Domain Repositories] as DomainRepo
+    }
+}
+
+' ==================== QUERY SIDE (READ) ====================
+package "Query Side (Read)" #LightBlue {
+
+    package "fineract-query / Read Services" {
+        [LoanCollateralManagement\nReadService] as ReadService
+        [JDBC / JPA\nQuery Repositories] as QueryRepo
+        [SQL Query\nOptimizations] as SqlOpt
+    }
+
+    package "Read DTOs / Projections" {
+        [LoanCollateralResponseData] as ReadDTO
+    }
+}
+
+' ==================== INFRASTRUCTURE ====================
+package "Infrastructure & Cross-Cutting" #LightGray {
+
+    [FineractRequestContextHolder\n(Tenant, User)] as ContextHolder
+    [IdempotencyKeyResolver] as IdemResolver
+    [CommandSourceRepository\n(Command Audit Log)] as CmdAuditRepo
+    [IdempotencyStore\n(DB/Redis)] as IdemStore
+    [EventEmitter / JMS\n(ActiveMQ)] as EventBus
+    [Transaction Manager\n(@Transactional)] as TxMgr
+    [Retry Configuration\n(Resilience4j)] as RetryCfg
+}
+
+' ==================== LEGACY (Coexisting) ====================
+package "Legacy Command Processing" #Pink {
+    [SynchronousCommandProcessingService] as LegacySvc
+    [CommandWrapperBuilder\n(String JSON)] as LegacyWrapper
+    [PortfolioCommandSourceWritePlatformService] as LegacyWrite
+}
+
+' ==================== DATA LAYER ====================
+package "Data Layer" {
+    database "PostgreSQL\n(Multi-tenant)" as Postgres {
+        [Tenant DB Schema] as TenantDB
+        [Command Source\nAudit Table] as CmdAuditTbl
+    }
+}
+
+' ==================== RELATIONSHIPS ====================
+
+' Client to API
+Client --> Controller : HTTP/REST
+GrpcClient ..> Controller : future
+
+' API Layer
+Controller --> RequestDTO : creates
+Controller --> Command : creates & sets payload
+Controller --> Dispatcher : dispatch(command)
+Controller --> ReadService : GET queries
+Controller --> ResponseDTO : returns
+Swagger ..> Controller
+
+' Command Core
+Command --> CommandWrapper : extends / wraps
+Command --> RequestDTO : setPayload()
+Dispatcher --> ValMid : pipeline
+Dispatcher --> IdemMid : pipeline
+Dispatcher --> AuthMid : pipeline
+Dispatcher --> AuditMid : pipeline
+Dispatcher --> MakerMid : pipeline
+
+' Middleware to Executors
+ValMid --> SyncExec
+IdemMid --> SyncExec
+AuthMid --> SyncExec
+AuditMid --> SyncExec
+MakerMid --> SyncExec
+
+' Executors to Handlers
+SyncExec --> CommandHandler : execute
+AsyncExec --> CommandHandler : execute async
+NonBlockExec --> CommandHandler : execute non-blocking
+
+' Handler to Business
+CommandHandler --> WriteService : invoke
+ExampleHandler ..> CommandHandler : implements
+
+' Business to Data
+WriteService --> DomainRepo : persist
+WriteService --> TxMgr : transactional
+WriteService --> EventBus : emit events
+
+' Query Side
+ReadService --> QueryRepo : SQL/JDBC
+QueryRepo --> SqlOpt : optimized queries
+ReadService --> ReadDTO : project
+ReadService --> TenantDB : read
+
+' Infrastructure
+Dispatcher --> ContextHolder : resolve tenant/user
+IdemMid --> IdemResolver : resolve key
+IdemMid --> IdemStore : check/store
+AuditMid --> CmdAuditRepo : log command
+CmdAuditRepo --> CmdAuditTbl : persist
+MakerMid --> CmdAuditRepo : status check
+RetryCfg --> SyncExec : retry policy
+
+' Legacy Coexistence
+LegacySvc --> LegacyWrapper : string payloads
+LegacySvc --> LegacyWrite : logCommandSource()
+LegacySvc ..> CommandHandler : routes to handlers
+
+' Data
+DomainRepo --> TenantDB : write
+CmdAuditTbl --> TenantDB : same DB
+
+' CQRS Separation
+CommandHandler -[hidden]-> ReadService : "CQRS Split"
+WriteService -[hidden]-> ReadService : "Separate Models"
+
+note right of Command
+  **Type-Safe Command**
+  Generic payload<T> replaces
+  legacy string/JSON blob
+  approach
+end note
+
+note right of Dispatcher
+  **Configurable Execution**
+  Drop-in replacements:
+  sync (default) → async → non-blocking
+end note
+
+note bottom of IdemMid
+  **Idempotency Guarantee**
+  Checks IdempotencyStore before
+  processing; prevents duplicate
+  command execution
+end note
+
+note bottom of MakerMid
+  **Maker-Checker Workflow**
+  Four-eyes principle;
+  commands may require
+  approval before execution
+end note
+
+note left of ReadService
+  **Query Optimization**
+  Read side uses direct SQL/JDBC
+  for performance, bypassing ORM
+  for complex aggregations
+end note
+
+note bottom of LegacySvc
+  **Migration Strategy**
+  New command processing runs
+  independently alongside legacy
+  system; gradual migration
+  per service/module
+end note
+
+@enduml

@@ -1,0 +1,359 @@
+= Environment
+
+== Dev Containers
+
+See:
+
+- https://containers.dev/supporting
+- https://flox.dev/
+- https://docs.localstack.cloud/aws/integrations/containers/devcontainers/
+- https://azure.microsoft.com/en-us/products/dev-box
+- https://code.visualstudio.com/docs/devcontainers/containers
+- https://blog.jetbrains.com/idea/2023/06/intellij-idea-2023-2-eap-6/#SupportforDevContainers
+- https://www.jetify.com/docs/devbox
+
+== GnuPG
+
+GnuPG (GPG) is used throughout the Mifos ecosystem to sign Git commits and tags. Signed commits provide cryptographic proof that a change originated from the claimed author, which is essential for supply-chain security in a project used by financial institutions worldwide. GitHub displays a "Verified" badge on signed commits, giving reviewers confidence in the provenance of each change.
+
+Start by generating a GPG key pair. Use RSA with a 4096-bit key for long-term security:
+
+[source,bash]
+----
+# Generate a new key pair (interactive prompts)
+gpg --full-generate-key
+# Select: (1) RSA and RSA
+# Key size: 4096
+# Expiration: 2y (renew before expiry)
+
+# List your keys to find the key ID
+gpg --list-keys --keyid-format long
+# pub   rsa4096/ABCD1234EFGH5678 2025-01-15 [SC] [expires: 2027-01-15]
+# uid                          Developer Name <dev@mifos.org>
+
+# Export the public key (needed by GitHub)
+gpg --armor --export ABCD1234EFGH5678
+----
+
+Copy the armored public key block and add it to your GitHub account under *Settings → SSH and GPG keys → New GPG key*.
+
+Configure Git to sign all commits by default:
+
+[source,bash]
+----
+# Tell Git which key to use
+git config --global user.signingkey ABCD1234EFGH5678
+
+# Enable commit signing by default
+git config --global commit.gpgsign true
+
+# Enable tag signing by default
+git config --global tag.gpgsign true
+
+# Optionally sign all pushes (Git 2.34+)
+git config --global push.gpgsign if-asked
+----
+
+TIP: If you find yourself entering your GPG passphrase frequently, consider using `gpg-agent` with a cached passphrase. On macOS, `gpg-suite` integrates with the Keychain. On Linux, configure `~/.gnupg/gpg-agent.conf` with `default-cache-ttl 3600`.
+
+To verify that a commit is properly signed:
+
+[source,bash]
+----
+git log --show-signature -1
+# gpg: Good signature from "Developer Name <dev@mifos.org>"
+----
+
+== Dot Files
+
+Managing developer environment configuration through version-controlled dotfiles ensures that every contributor can reproduce a consistent shell, editor, and toolchain setup with minimal friction. The Mifos community recommends using **GNU Stow** to manage dotfiles because it creates symbolic links from a central repository to the expected locations in your home directory, keeping the actual files under version control.
+
+The typical dotfiles repository is structured as a set of Stow packages, each representing a tool or concern:
+
+[source,terminaloutput]
+----
+dotfiles/
+├── git/
+│   └── .gitconfig
+├── vim/
+│   └── .vimrc
+├── zsh/
+│   ├── .zshrc
+│   └── .zprofile
+├── sdkman/
+│   └── .sdkmanrc
+└── README.md
+----
+
+To deploy a package, navigate into the dotfiles repository and use `stow`:
+
+[source,bash]
+----
+# Clone the dotfiles repository
+git clone git@github.com:mifos/dotfiles.git ~/dotfiles
+cd ~/dotfiles
+
+# Deploy Git configuration
+stow git
+# This creates: ~/.gitconfig → ~/dotfiles/git/.gitconfig
+
+# Deploy Vim configuration
+stow vim
+# This creates: ~/.vimrc → ~/dotfiles/vim/.vimrc
+
+# Deploy all packages at once
+for pkg in */; do stow "${pkg%/}"; done
+----
+
+To remove a package's symlinks:
+
+[source,bash]
+----
+stow -D git
+----
+
+IMPORTANT: Never store secrets (API keys, GPG private keys, database passwords) in your dotfiles repository, even if it is private. Use environment-specific files like `.env.local` (which should be in `.gitignore`) or a secrets manager.
+
+The Mifos dotfiles repository includes a shared `.sdkmanrc` that pins the JDK version used across the project, a `.gitconfig` with the conventional commit template, and a `.vimrc` / IDE settings directory with consistent formatting rules.
+
+== Gradle
+
+Gradle is the build system for all Mifos Java projects. The most important rule is simple: **always use the Gradle Wrapper, never a system-wide Gradle installation.** The Wrapper guarantees that every developer and every CI runner uses the exact same Gradle version, eliminating the "works on my machine" class of build failures.
+
+[source,bash]
+----
+# Build the entire project
+./gradlew build
+
+# Run tests only
+./gradlew check
+
+# Assemble artifacts without running tests
+./gradlew assemble
+
+# Clean build artifacts
+./gradlew clean
+
+# View dependency tree
+./gradlew dependencies --configuration compileClasspath
+
+# Run a single test
+./gradlew :fineract-provider:test --tests "org.mifos.ClientServiceTest"
+----
+
+The Wrapper files are committed to the repository:
+
+[source,terminaloutput]
+----
+gradle/
+└── wrapper/
+    ├── gradle-wrapper.jar        # The wrapper runtime
+    └── gradle-wrapper.properties # Declares the Gradle version
+gradlew                            # Unix shell script
+gradlew.bat                        # Windows batch script
+----
+
+To upgrade the Gradle version used by the Wrapper:
+
+[source,bash]
+----
+./gradlew wrapper --gradle-version 8.12
+----
+
+The `gradle.properties` file at the repository root defines global properties and the version catalog. This is where you set JDK requirements, dependency versions, and build tuning parameters:
+
+[source,properties]
+----
+# gradle.properties
+org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m
+org.gradle.parallel=true
+org.gradle.caching=true
+org.gradle.configuration-cache=true
+
+# Dependency versions
+springBootVersion=3.4.1
+fineractVersion=24.12.0
+----
+
+Mifos convention plugins live in `buildSrc` or in an included build. Each convention plugin encapsulates a coherent slice of build configuration—Java compilation settings, Spring Boot packaging, code quality plugins, or publishing metadata. A typical convention plugin looks like this:
+
+[source,kotlin]
+----
+// buildSrc/src/main/kotlin/mifos-java-conventions.gradle.kts
+plugins {
+    java
+    checkstyle
+    jacoco
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
+
+tasks.withType<JavaCompile>().configureEach {
+    options.encoding = "UTF-8"
+    options.release.set(25)
+}
+
+checkstyle {
+    toolVersion = "10.20.0"
+    configDirectory = rootProject.file("config/checkstyle")
+}
+
+jacoco {
+    toolVersion = "0.8.12"
+}
+
+tasks.jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                minimum = "0.80".toBigDecimal()
+            }
+        }
+    }
+}
+----
+
+== SDKMan
+
+SDKMan is the recommended tool for managing multiple JDK versions on a developer workstation. It handles downloading, installing, and switching between JDK distributions from a single command line, which is essential when working across Mifos projects that may target different Java versions.
+
+[source,bash]
+----
+# List available Java versions
+sdk list java
+
+# Install a specific JDK (Eclipse Temurin is the recommended distribution)
+sdk install java 25.0.0-tem
+
+# Switch to the installed version in the current shell
+sdk use java 25.0.0-tem
+
+# Set the default JDK for all new terminals
+sdk default java 25.0.0-tem
+
+# Verify the active version
+java -version
+# openjdk version "25.0.0" 2025-09-16
+# OpenJDK Runtime Environment Temurin-25.0.0+1 (build 25.0.0+1)
+# OpenJDK 64-Bit Server VM Temurin-25.0.0+1 (build 25.0.0+1, mixed mode)
+----
+
+For project-level JDK pinning, Mifos repositories include an `.sdkmanrc` file. When you change into the project directory, SDKMan can automatically switch to the correct JDK:
+
+[source,bash]
+----
+# Generate .sdkmanrc for the current Java version
+sdk env init
+
+# The resulting .sdkmanrc file:
+# java=25.0.0-tem
+----
+
+[source,terminaloutput]
+----
+# .sdkmanrc
+java=25.0.0-tem
+----
+
+Enable automatic switching by adding this to your shell profile:
+
+[source,bash]
+----
+# Add to ~/.zshrc or ~/.bashrc
+sdkman_auto_env=true
+----
+
+Now every time you `cd` into a Mifos project, SDKMan reads `.sdkmanrc` and switches the JDK automatically. If the required version is not installed, it prompts you to install it.
+
+TIP: When contributing to multiple Mifos projects that require different JDK versions, SDKMan's per-directory switching ensures you always compile with the correct toolchain without manually managing `JAVA_HOME`.
+
+== JDKs
+
+Java 25 is the baseline JDK for Mifos server-side projects. This version provides modern language features including pattern matching, sealed classes, record classes, virtual threads, and string templates that improve code clarity and reduce boilerplate.
+
+All Mifos projects use Gradle's toolchain feature to decouple the build's JVM from the project's target JVM. This means you can run Gradle with any JDK, and it will automatically download and use the correct one for compilation:
+
+[source,kotlin]
+----
+// In a convention plugin or build.gradle.kts
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
+----
+
+For developers who need to manage multiple JDKs manually, set `JAVA_HOME` explicitly:
+
+[source,bash]
+----
+# Verify current JAVA_HOME
+echo $JAVA_HOME
+
+# Set JAVA_HOME via SDKMan (automatic)
+sdk use java 25.0.0-tem
+
+# Or set manually in .zshrc / .bashrc
+export JAVA_HOME=$HOME/.sdkman/candidates/java/25.0.0-tem
+export PATH=$JAVA_HOME/bin:$PATH
+----
+
+When working with Android modules, you may need JDK 17 for Android Gradle Plugin compatibility alongside JDK 25 for server-side code. SDKMan handles this gracefully:
+
+[source,bash]
+----
+# Install both versions
+sdk install java 25.0.0-tem
+sdk install java 17.0.13-tem
+
+# Use 17 for the Android project
+cd mobile-wallet && sdk use java 17.0.13-tem
+
+# Use 25 for the server project
+cd fineract && sdk use java 25.0.0-tem
+----
+
+IMPORTANT: Never set `sourceCompatibility` or `targetCompatibility` directly in module build files. Always use the toolchain API in convention plugins so that the JDK version is managed centrally.
+
+== Asciinema
+
+Asciinema is a terminal recording tool that captures shell sessions as text-based recordings rather than pixel-based video. This makes recordings tiny, searchable, and accessible—ideal for documenting bug reproductions, onboarding walkthroughs, and demo sessions in a financial technology project where exact command output matters.
+
+[source,bash]
+----
+# Install asciinema
+# On macOS:
+brew install asciinema
+# On Linux:
+sudo apt install asciinema
+# Or via pip:
+pip3 install asciinema
+
+# Start recording a new session
+asciinema rec bug-reproduction.cast
+
+# Your terminal session is now being recorded.
+# Run the commands that demonstrate the bug...
+
+# Stop recording (Ctrl+D or type 'exit')
+exit
+
+# Play back the recording locally
+asciinema play bug-reproduction.cast
+
+# Upload to asciinema.org for sharing
+asciinema upload bug-reproduction.cast
+# View at: https://asciinema.org/a/XXXXXXX
+----
+
+Use cases in the Mifos workflow include:
+
+* **Bug reports**: Attach an asciinema recording to a GitHub issue so maintainers can see the exact sequence of commands and output that triggered the problem. This is far more useful than screenshots or text pastes because it preserves timing and scrollback.
+* **Onboarding**: Record a walkthrough of setting up the development environment, running the test suite, and deploying a local instance. New contributors can play the recording at their own pace.
+* **Documentation**: Embed asciinema recordings in pull request descriptions or wiki pages to demonstrate new CLI commands or workflow changes.
+
+TIP: Use `asciinema rec --overwrite` if you want to re-record without being prompted. Use `asciinema rec -c bash` to record a specific shell. Add `--idle-time-limit 2` to trim long pauses from the recording.

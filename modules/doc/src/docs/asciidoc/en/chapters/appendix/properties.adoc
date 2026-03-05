@@ -1,0 +1,21 @@
+[appendix]
+= Application Properties
+
+TBD
+
+.Supported Properties
+|===
+|Name |Description |Default
+
+|mifos.someapp1.someproperty1
+|Some description 1
+|Default value 1
+
+|mifos.someapp1.someproperty2
+|Some description 2
+|Default value 2
+
+|mifos.someapp1.someproperty3
+|Some description 3
+|Default value 3
+|===

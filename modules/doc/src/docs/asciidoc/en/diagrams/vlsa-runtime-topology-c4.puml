@@ -1,0 +1,26 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+LAYOUT_WITH_LEGEND()
+
+title Deployment Diagram — VSLA Service & Fineract Runtime
+
+Container(mobileApp, "VSLA Mobile App", "Flutter / React Native / Native", "SQLite local queue, YAPE/PLIN SDK, WebSocket client")
+
+Container(vslaApp, "VSLA Application", "Spring Boot 3.x, Java 21", "Port 8081, JVM with G1GC")
+
+ContainerDb(vslaDb, "PostgreSQL", "PostgreSQL 15", "vsla_db schema, event store, outbox table, read model projections")
+
+Container(fineractApp, "Fineract Application", "Spring Boot, Java", "Port 8443, JVM, Tomcat")
+
+ContainerDb(fineractDb, "PostgreSQL", "PostgreSQL 15 / MySQL 8", "fineract_db schema, m_client, m_savings_account, m_loan, acc_gl_journal_entry")
+
+System_Ext(yapePlin, "YAPE / PLIN", "Payment gateway APIs and webhook infrastructure")
+
+Rel(mobileApp, vslaApp, "HTTPS / REST + WebSocket", "JSON, TLS 1.3")
+Rel(vslaApp, vslaDb, "JDBC", "PostgreSQL protocol, TLS")
+Rel(vslaApp, fineractApp, "HTTPS / REST", "fineract-client (Retrofit2), TLS 1.3, mTLS optional")
+Rel(fineractApp, fineractDb, "JDBC", "PostgreSQL / MySQL protocol, TLS")
+Rel(yapePlin, vslaApp, "HTTPS / Webhooks", "JSON, TLS 1.3, HMAC signature")
+Rel(mobileApp, yapePlin, "Mobile SDK", "Deep links / app-to-app / QR")
+@enduml

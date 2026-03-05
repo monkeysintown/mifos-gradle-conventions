@@ -1,0 +1,11 @@
+plugins {
+    id "org.mifos.convention.project.boot.base.persistence"
+}
+
+dependencies {
+    implementation "org.mifos:mifos-common-boot-persistence-redis-reactive"
+
+    // TODO: finish this!
+
+    testImplementation "org.mifos:mifos-common-boot-testing"
+}

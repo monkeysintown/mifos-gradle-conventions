@@ -1,0 +1,165 @@
+= Cucumber Test Specifications
+
+Behavior-Driven Development (BDD) bridges the gap between business stakeholders and developers by expressing acceptance criteria in a structured, human-readable format. Cucumber is the leading BDD framework for the JVM. It uses Gherkin syntax to write feature files that serve as both documentation and executable tests.
+
+In the Mifos project, Cucumber tests are used for:
+
+* **Acceptance criteria** — Product owners write or review Gherkin scenarios that define when a feature is complete.
+* **Regulatory compliance** — Regulatory requirements (e.g., interest rate caps, mandatory disclosures) are expressed as scenarios that must always pass.
+* **Living documentation** — Feature files are version-controlled alongside the code they verify, ensuring documentation never drifts from implementation.
+
+== Gherkin Syntax
+
+A Gherkin file uses the keywords `Feature`, `Scenario`, `Given`, `When`, `Then`, and `And` to describe behavior:
+
+* **Feature** — A group of related scenarios with a description.
+* **Scenario** — A single concrete example of the feature's behavior.
+* **Given** — Preconditions (database state, authenticated user).
+* **When** — The action the user performs.
+* **Then** — The expected outcome.
+* **And / But** — Additional steps that extend the previous keyword.
+
+== Feature File Example
+
+Create the feature file under `src/test/resources/features/`:
+
+[source,gherkin]
+----
+# src/test/resources/features/loan_disbursement.feature
+Feature: Loan Disbursement
+  As a loan officer
+  I want to disburse an approved loan to a client's savings account
+  So that the client can access their funds
+
+  Scenario: Successful disbursement of an approved loan
+    Given a loan with id 1 is in APPROVED status
+    And the client has an active savings account with balance 5000.00
+    When the loan officer disburses the loan for amount 50000.00
+    Then the loan status should be ACTIVE
+    And the savings account balance should be 55000.00
+    And a disbursement transaction should be recorded
+
+  Scenario: Disbursement rejected for a loan that is not approved
+    Given a loan with id 2 is in PENDING status
+    When the loan officer attempts to disburse the loan
+    Then the disbursement should be rejected
+    And the rejection reason should contain "Loan must be in APPROVED status"
+----
+
+== Step Definitions
+
+[source,java]
+----
+import static org.assertj.core.api.Assertions.assertThat;
+
+import io.cucumber.java.en.And;
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
+import java.math.BigDecimal;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
+@SpringBootTest
+public class LoanDisbursementStepDefinitions {
+
+    @Autowired
+    private LoanService loanService;
+
+    @Autowired
+    private LoanRepository loanRepository;
+
+    @Autowired
+    private SavingsAccountRepository savingsAccountRepository;
+
+    private DisbursementResult lastResult;
+    private Exception lastException;
+
+    @Given("a loan with id {long} is in {string} status")
+    public void aLoanWithIdIsInStatus(long loanId, String status) {
+        Loan loan = loanRepository.findById(loanId)
+            .orElseThrow(() -> new IllegalArgumentException("Loan not found: " + loanId));
+        assertThat(loan.getStatus().name()).isEqualTo(status);
+    }
+
+    @And("the client has an active savings account with balance {bigdecimal}")
+    public void theClientHasAnActiveSavingsAccountWithBalance(BigDecimal balance) {
+        // Precondition verified via test data setup in @Before hook
+    }
+
+    @When("the loan officer disburses the loan for amount {bigdecimal}")
+    public void theLoanOfficerDisbursesTheLoanForAmount(BigDecimal amount) {
+        lastResult = loanService.disburse(1L, amount);
+    }
+
+    @When("the loan officer attempts to disburse the loan")
+    public void theLoanOfficerAttemptsToDisburseTheLoan() {
+        try {
+            loanService.disburse(2L, new BigDecimal("50000.00"));
+        } catch (DisbursementException e) {
+            lastException = e;
+        }
+    }
+
+    @Then("the loan status should be {string}")
+    public void theLoanStatusShouldBe(String expectedStatus) {
+        Loan loan = loanRepository.findById(1L).orElseThrow();
+        assertThat(loan.getStatus().name()).isEqualTo(expectedStatus);
+    }
+
+    @And("the savings account balance should be {bigdecimal}")
+    public void theSavingsAccountBalanceShouldBe(BigDecimal expectedBalance) {
+        SavingsAccount account = savingsAccountRepository.findById(100L).orElseThrow();
+        assertThat(account.getBalance()).isEqualByComparingTo(expectedBalance);
+    }
+
+    @And("a disbursement transaction should be recorded")
+    public void aDisbursementTransactionShouldBeRecorded() {
+        assertThat(lastResult.getTransactionId()).isNotNull();
+    }
+
+    @Then("the disbursement should be rejected")
+    public void theDisbursementShouldBeRejected() {
+        assertThat(lastException).isInstanceOf(DisbursementException.class);
+    }
+
+    @And("the rejection reason should contain {string}")
+    public void theRejectionReasonShouldContain(String expectedText) {
+        assertThat(lastException.getMessage()).contains(expectedText);
+    }
+}
+----
+
+== Gradle Configuration
+
+[source,kotlin]
+----
+// build.gradle.kts
+dependencies {
+    testImplementation("io.cucumber:cucumber-java:7.15.0")
+    testImplementation("io.cucumber:cucumber-junit-platform-engine:7.15.0")
+    testImplementation("io.cucumber:cucumber-spring:7.15.0")
+    testImplementation("org.junit.platform:junit-platform-suite:1.10.2")
+}
+
+// Cucumber uses the JUnit Platform Suite engine
+tasks.test {
+    useJUnitPlatform {
+        includeTags("cucumber")
+    }
+}
+----
+
+[source,bash]
+----
+# Run Cucumber scenarios
+$ ./gradlew test --tags "cucumber"
+
+# Run a specific feature file
+$ ./gradlew test --tests "LoanDisbursementStepDefinitions"
+
+# Generate HTML report
+$ ./gradlew test -Pcucumber.plugin=html:build/reports/cucumber/index.html
+----
+
+NOTE: Keep step definitions stateless where possible. When state must be shared between steps, use a shared `ScenarioContext` class with `@ScenarioScope` rather than instance variables that leak across scenarios.

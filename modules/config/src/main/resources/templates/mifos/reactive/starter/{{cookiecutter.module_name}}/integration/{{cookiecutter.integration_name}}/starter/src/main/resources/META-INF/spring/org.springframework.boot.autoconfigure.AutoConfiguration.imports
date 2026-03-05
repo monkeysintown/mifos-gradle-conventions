@@ -1,0 +1,1 @@
+io.tachyon.{{module_name}}.integration.{{integration_name}}.starter.{{class_prefix}}Integration{{integration_name|capitalize}}AutoConfiguration

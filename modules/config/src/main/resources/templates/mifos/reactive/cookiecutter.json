@@ -1,0 +1,54 @@
+{
+  "project_description": "Tachyon",
+  "project_name": "tachyon",
+  "module_name": "dummy",
+  "integration_name": "conductor",
+  "usecase_name": "standard",
+  "templates": {
+    "core": {
+      "path": "./core",
+      "title": "Core Module",
+      "description": "Core Module"
+    },
+    "persistence": {
+      "path": "./persistence",
+      "title": "Persistence Module",
+      "description": "Persistence Module"
+    },
+    "mapping": {
+      "path": "./mapping",
+      "title": "Mapping Module",
+      "description": "Mapping Module"
+    },
+    "usecase": {
+      "path": "./usecase",
+      "title": "Usecase Module",
+      "description": "Usecase Module"
+    },
+    "orchestration": {
+      "path": "./orchestration",
+      "title": "Orchestration Module",
+      "description": "Orchestration Module"
+    },
+    "transporter": {
+      "path": "./transport",
+      "title": "Transport Module",
+      "description": "Transport Module"
+    },
+    "client": {
+      "path": "./client",
+      "title": "Client Module",
+      "description": "Client Module"
+    },
+    "starter": {
+      "path": "./starter",
+      "title": "Starter Module",
+      "description": "Starter Module"
+    },
+    "doc": {
+      "path": "./doc",
+      "title": "Documentation Module",
+      "description": "Documentation Module"
+    }
+  }
+}

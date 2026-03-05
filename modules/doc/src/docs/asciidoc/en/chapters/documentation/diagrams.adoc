@@ -1,0 +1,19 @@
+= Diagrams as Code
+
+Diagrams as code is the practice of defining diagrams using text-based languages that can be version-controlled, reviewed in pull requests, and automatically rendered as part of the documentation build. This approach stands in stark contrast to the traditional draw-and-export workflow, where a diagram is created in a visual tool, exported as an image, and committed to the repository—disconnected from its source.
+
+The problems with the draw-and-export approach are well-known: images cannot be diffed meaningfully in version control, so reviewers cannot see what changed. The original diagram source file (if it exists) is often stored outside the repository, on a contributor's local machine. When the system changes, no one remembers to update the diagram. The result is architectural documentation that is outdated the moment it is committed.
+
+Diagrams as code solves these problems. A PlantUML or Mermaid diagram is a text file that can be reviewed line-by-line in a pull request. When the architecture changes, the diagram source is updated alongside the code that implements the change. The CI pipeline renders the diagram automatically, ensuring that the published documentation always matches the current state of the codebase.
+
+The Mifos project supports multiple diagram-as-code tools, each suited to different use cases. PlantUML is preferred for detailed UML diagrams (class, sequence, state). Mermaid is preferred for simple diagrams that need to render natively on GitHub. Vega is preferred for data-driven visualizations. Draw.io and Excalidraw serve as visual editors for cases where text-based diagrams are impractical.
+
+include::diagrams-plantuml.adoc[leveloffset=+1]
+
+include::diagrams-vega.adoc[leveloffset=+1]
+
+include::diagrams-mermaid.adoc[leveloffset=+1]
+
+include::diagrams-drawio.adoc[leveloffset=+1]
+
+include::diagrams-excalidraw.adoc[leveloffset=+1]

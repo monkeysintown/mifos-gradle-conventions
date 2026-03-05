@@ -1,0 +1,102 @@
+= Antora
+
+Antora (https://antora.org) is a multi-repository documentation site generator designed for AsciiDoc. It assembles documentation from multiple Git repositories into a unified, navigable website with version selectors, cross-repository cross-references, and a consistent UI. For the Mifos project—where documentation is distributed across the core platform, individual modules, and integration guides—Antora provides the aggregation layer that makes the documentation feel like a single, cohesive book rather than a collection of disconnected READMEs.
+
+Antora operates on three key concepts:
+
+* *Component descriptor* (`antora.yml`): Each documentation source repository contains an `antora.yml` file that identifies the component name, version, and navigation structure.
+* *Playbook* (`antora-playbook.yml`): The playbook defines which repositories to aggregate, which branches to include, and where to write the generated site.
+* *Site generation*: Antora fetches content from the specified repositories, resolves cross-references, applies the UI, and generates a static site.
+
+.Component Descriptor (`antora.yml`)
+[source,yaml]
+----
+name: mifos-platform
+title: Mifos Platform
+version: '2.0'
+nav:
+  - modules/ROOT/nav.adoc
+----
+
+.Component Descriptor for a Module
+[source,yaml]
+----
+name: mifos-lending
+title: Mifos Lending Module
+version: '2.0'
+nav:
+  - modules/ROOT/nav.adoc
+----
+
+.Antora Playbook (`antora-playbook.yml`)
+[source,yaml]
+----
+site:
+  title: Mifos Developer Documentation
+  url: https://docs.mifos.org
+  start_page: mifos-platform::index.adoc
+
+content:
+  sources:
+    - url: https://github.com/openMF/mifos-platform.git
+      branches: [main, v2.0.x]
+      start_paths: [docs]
+    - url: https://github.com/openMF/mifos-lending.git
+      branches: [main]
+      start_paths: [docs]
+    - url: https://github.com/openMF/mifos-deposits.git
+      branches: [main]
+      start_paths: [docs]
+
+ui:
+  bundle:
+    url: https://gitlab.com/antora/antora-ui-default/-/jobs/artifacts/HEAD/raw/build/ui-bundle.zip?job=bundle-stable
+    snapshot: true
+
+output:
+  dir: ./build/site
+----
+
+.Building the Documentation Site
+[source,bash]
+----
+# Install Antora
+npm install -g @antora/cli @antora/site-generator
+
+# Generate the documentation site
+antora antora-playbook.yml
+
+# The output is written to build/site/
+# Open in a browser:
+open build/site/index.html
+
+# Or serve locally with live reload during development
+npx serve build/site
+----
+
+.Cross-Referencing Between Components
+[source,asciidoc]
+----
+// In mifos-platform documentation
+// Refer to the xref:mifos-lending::loan-origination.adoc[Loan Origination Guide]
+for details on the lending workflow.
+
+// In mifos-lending documentation
+// The client must exist in the xref:mifos-platform::client-management.adoc[Client Management module]
+before a loan application can be submitted.
+----
+
+.Antora Integration with Gradle
+[source,groovy]
+----
+// build.gradle.kts
+tasks.register("generateDocs", Exec::class) {
+    description = "Generate Antora documentation site"
+    commandLine("antora", "antora-playbook.yml")
+}
+
+tasks.register("serveDocs", Exec::class) {
+    description = "Serve documentation site locally"
+    commandLine("npx", "serve", "build/site")
+}
+----

@@ -1,0 +1,83 @@
+= Domain Driven Development
+
+_Domain-Driven Design: Tackling Complexity in the Heart of Software_ <<ddd>> should be required reading for all developers.
+
+Domain-Driven Design (DDD), as described by Eric Evans in *_Domain-Driven Design: Tackling Complexity in the Heart of Software_* <<ddd>>, provides the conceptual framework for organizing the Mifos codebase. DDD is not about a specific technology—it is about aligning software structure with business structure, ensuring that the code reflects the mental models of the domain experts who define financial inclusion products.
+
+The central DDD concept in Mifos is the **Bounded Context**. A bounded context defines a boundary within which a particular model applies consistently. In Mifos, the primary bounded contexts are:
+
+[source,terminaloutput]
+----
+┌──────────────────────────────────────────────────────────────┐
+│                    Mifos Bounded Contexts                    │
+├──────────────────────────────────────────────────────────────┤
+│                                                              │
+│  ┌───────────────┐  ┌──────────────┐  ┌─────────────────┐    │
+│  │   Client      │  │    Loan      │  │    Savings      │    │
+│  │  Management   │  │  Processing  │  │   Account       │    │
+│  │               │  │              │  │   Management    │    │
+│  │  - Client     │  │  - Loan App  │  │  - Deposit      │    │
+│  │  - Group      │  │  - Disburse  │  │  - Withdrawal   │    │
+│  │  - Center     │  │  - Repay     │  │  - Interest     │    │
+│  │  - KYC        │  │  - Write-off │  │  - Statement    │    │
+│  └──────┬────────┘  └──────┬───────┘  └────────┬────────┘    │
+│         │                  │                   │             │
+│         └──────────────────┼───────────────────┘             │
+│                            │                                 │
+│                     ┌──────▼───────┐                         │
+│                     │  Accounting  │                         │
+│                     │   (Shared    │                         │
+│                     │  Kernel)     │                         │
+│                     │              │                         │
+│                     │  - Journal   │                         │
+│                     │  - GL Accs   │                         │
+│                     │  - Closure   │                         │
+│                     └──────────────┘                         │
+│                                                              │
+└──────────────────────────────────────────────────────────────┘
+----
+
+Each bounded context has:
+
+* **Aggregates**: Transactional consistency boundaries. A `Loan` aggregate includes its repayment schedule, charges, and collateral. All modifications go through the aggregate root.
+* **Domain Events**: Significant state changes are published as events (`LoanAppliedEvent`, `SavingsAccountOpenedEvent`) that other contexts can subscribe to without tight coupling.
+* **Ubiquitous Language**: Within each bounded context, terms have a single, unambiguous meaning. "Disbursement" means the same thing to a loan officer and to the code in the Loan Processing context.
+
+In the Gradle project structure, bounded contexts map to modules:
+
+[source,terminaloutput]
+----
+fineract/
+├── fineract-client-management/    # Client Management context
+├── fineract-loan-processing/      # Loan Processing context
+├── fineract-savings/              # Savings Account context
+├── fineract-accounting/           # Accounting (Shared Kernel)
+├── fineract-infrastructure/       # Cross-cutting infrastructure
+└── fineract-provider/             # REST API composition layer
+----
+
+The `fineract-provider` module is the anti-corruption layer that composes responses from multiple bounded contexts into the REST API that the community app and mobile SDKs consume.
+
+See:
+
+- https://github.com/ddd-crew/ddd-starter-modelling-process
+- https://contextmapper.org
+
+== Service Types
+
+- Aggregate Service
+- Bounded Context Service
+- ???
+- Cross-cutting (infrastructure) services
+- Communication channels (queues...)
+
+See:
+
+- https://www.youtube.com/watch?v=T9dhGyA90-I
+- https://www.youtube.com/watch?v=f64tZ90Dntg
+- https://github.com/jbogard/presentations/tree/master/RefactoringToDistSysResilience
+- https://www.youtube.com/watch?v=rPNdlLwBnW4
+- Platform Engineering: https://www.youtube.com/watch?v=5Ai8UGx7QvQ
+- https://github.com/ddd-crew/ddd-starter-modelling-process
+- https://github.com/ddd-crew/context-mapping
+-

@@ -1,0 +1,54 @@
+plugins {
+    id "base"
+    // id "io.freefair.aggregate-javadoc"
+    id "com.palantir.java-format-idea"
+}
+
+configurations {
+    mifosConfig {
+        description = "Mifos Shared Configurations"
+    }
+}
+
+
+repositories {
+    mavenLocal()
+    mavenCentral().content {
+        excludeModule("javax.media", "jai_core")
+    }
+    maven {
+        url = uri("https://central.sonatype.com/repository/maven-snapshots")
+    }
+    maven {
+        url = uri("https://mifos.jfrog.io")
+    }
+    maven {
+        url = layout.buildDirectory.dir("staging-deploy")
+    }
+}
+
+dependencies {
+    mifosConfig "org.mifos:mifos-conventions-gradle-config:+:config@zip"
+
+//    rootProject.subprojects { subproject ->
+//        subproject.plugins.withId("java") {
+//            javadoc subproject
+//        }
+//    }
+}
+
+tasks.register("mifosConfigUnzip", Sync) {
+    group = "mifos"
+    description = "Unzip Common Mifos Build Configuration"
+
+    shouldRunAfter(clean)
+
+    var destDir = rootProject.layout.projectDirectory.dir(".mifos")
+    onlyIf { !destDir.asFile.exists() }
+
+    from zipTree(configurations.mifosConfig.singleFile)
+    into destDir
+}
+
+tasks.clean.dependsOn = [mifosConfigUnzip]
+tasks.build.dependsOn = [mifosConfigUnzip]

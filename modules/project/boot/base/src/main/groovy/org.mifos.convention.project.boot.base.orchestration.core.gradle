@@ -1,0 +1,12 @@
+plugins {
+    id "org.mifos.convention.project.boot.base"
+}
+
+dependencies {
+    /*
+    if(file("../../../core/build.gradle").exists()) {
+        api project(":${parts[0]}-core")
+    }
+    */
+    compileOnly "org.springframework.boot:spring-boot"
+}

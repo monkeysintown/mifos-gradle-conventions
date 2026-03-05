@@ -1,0 +1,21 @@
+description = "Mifos Initiative - Gradle Conventions - Configurations"
+
+tasks.register("mifosConfigZip", Zip) {
+    group = "mifos"
+    description = "Pack Common Mifos Build Configuration"
+    archiveBaseName = "mifos-conventions-gradle-config"
+
+    from("src/main/resources") {
+        into "config"
+    }
+}
+
+tasks.build.dependsOn mifosConfigZip
+
+publishing {
+    publications {
+        mavenZip(MavenPublication) {
+            artifact source: mifosConfigZip, classifier: "config", extension: "zip"
+        }
+    }
+}

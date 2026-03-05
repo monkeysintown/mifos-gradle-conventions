@@ -1,0 +1,99 @@
+@startuml target-architecture
+title Apache Fineract — Target Modular Architecture
+
+skinparam componentStyle rectangle
+skinparam nodesep 80
+skinparam ranksep 80
+
+package "fineract-core (shared infrastructure, NO business logic)" #LightGreen {
+    component [Data Validation] as DV
+    component [JDBC / JPA Support] as JDBC
+    component [Security Context] as SEC
+    component [API Infrastructure] as API
+    component [Exception Handling] as EXC
+    component [DTO Base Classes] as DTO
+    component [Audit Framework] as AUD
+}
+
+package "fineract-command (async cross-feature communication)" #LightBlue {
+    component [Command Bus] as CB
+    component [Event Bus] as EB
+    component [Command Definitions] as CD
+    component [Event Definitions] as ED
+}
+
+package "fineract-accounting" #White {
+    component [AccountingService] as F1
+}
+package "fineract-client" #White {
+    component [ClientService] as F2
+}
+package "fineract-group" #White {
+    component [GroupService] as F3
+}
+package "fineract-loan" #White {
+    component [LoanService] as F4
+}
+package "fineract-savings" #White {
+    component [SavingsService] as F5
+}
+package "fineract-fixeddeposit" #White {
+    component [FDService] as F6
+}
+package "fineract-recurringdeposit" #White {
+    component [RDService] as F7
+}
+package "fineract-shareaccounts" #White {
+    component [ShareService] as F8
+}
+package "fineract-charge" #White {
+    component [ChargeService] as F9
+}
+package "fineract-calendar" #White {
+    component [CalendarService] as F10
+}
+package "fineract-organisation" #White {
+    component [OrganisationService] as F13
+}
+package "fineract-teller" #White {
+    component [TellerService] as F14
+}
+package "fineract-report" #White {
+    component [ReportService] as F15
+}
+
+' --- All features depend only on core + command ---
+F1 --> DV
+F1 --> JDBC
+F2 --> DV
+F2 --> JDBC
+F3 --> DV
+F4 --> DV
+F4 --> JDBC
+F5 --> DV
+F5 --> JDBC
+F6 --> DV
+F7 --> DV
+F8 --> DV
+F9 --> DV
+F10 --> DV
+F13 --> DV
+F14 --> DV
+F15 --> JDBC
+
+' --- Cross-feature communication ONLY via command/event bus ---
+F4 -up-> CB : "publishes\nLoanDisbursedEvent"
+F4 -up-> EB : "subscribes to\nChargeCalculationCommand"
+F5 -up-> CB : "publishes\nSavingsActivatedEvent"
+F5 -up-> EB : "subscribes to\nChargeCalculationCommand"
+F1 -up-> EB : "subscribes to\nLoanDisbursedEvent\nSavingsActivatedEvent"
+F14 -up-> CB : "sends\nLoanRepaymentCommand\nSavingsDepositCommand"
+F6 -up-> EB : "subscribes to\nSavingsDomainEvents"
+
+'note across F1, F15
+'  **No feature-to-feature direct imports allowed**
+'  Cross-domain communication exclusively via
+'  fineract-command (Command/Event Bus)
+'end note
+
+@enduml

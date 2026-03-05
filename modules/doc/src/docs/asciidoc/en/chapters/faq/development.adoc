@@ -1,0 +1,79 @@
+= Development
+
+== What is an IDE?
+
+An Integrated Development Environment (IDE) is a software application that provides comprehensive facilities to computer programmers for software development. An IDE normally consists of at least a source code editor, build automation tools, and a debugger. Modern IDEs also include features such as intelligent code completion, integrated version control, refactoring tools, and plugin ecosystems that extend functionality.
+
+For Mifos development, we recommend IntelliJ IDEA as the primary IDE. IntelliJ IDEA provides best-in-class support for Java, Gradle, and Spring Boot, including intelligent navigation across the Mifos codebase, automatic import optimization, inline error detection, and seamless Gradle integration that allows you to run builds, tests, and application startup directly from the IDE. The Community Edition is free and sufficient for most Mifos development tasks; the Ultimate Edition adds advanced Spring Boot support, database tooling, and HTTP client features.
+
+VS Code is a lightweight alternative that works well for contributors who prefer a minimal setup or who are working on non-Java parts of the Mifos ecosystem (documentation, infrastructure scripts, frontend code). With the appropriate extensions (Java Extension Pack, Gradle for Java, Spring Boot Extension Pack), VS Code provides a capable development environment, though it lacks some of the deep refactoring and navigation features of IntelliJ IDEA. See <<development>> for setup instructions.
+
+== How do I set up my development environment?
+
+Follow the Environment section in <<development>>. The setup process is designed to be straightforward and reproducible:
+
+- Install SDKMan for JDK management: `curl -s "https://get.sdkman.io" | bash`
+- Install the required JDK version through SDKMan: `sdk install java 25-open`
+- Configure Git with your name and email: `git config --global user.name "Your Name"` and `git config --global user.email "your.email@example.com"`
+- Install and configure GPG for commit signing (required for `main` branch commits)
+- Install your preferred IDE (IntelliJ IDEA recommended)
+- Clone the repository: `git clone https://github.com/openmf/fineract.git`
+- Verify the build: `./gradlew check`
+
+The complete setup typically takes 30-60 minutes depending on your internet connection speed and whether you already have some tools installed. If you encounter issues, check the troubleshooting section in <<development>> or ask in the community Slack.
+
+== What Java version should I use?
+
+Mifos projects target Java 25 as the baseline. This version provides access to the latest language features (pattern matching, sealed classes, virtual threads, string templates) and performance improvements that benefit the Fineract platform's throughput and latency characteristics. Using SDKMan to install and manage JDK versions ensures that you can easily switch between Java versions for different projects:
+
+[source,bash]
+----
+# List available Java versions
+sdk list java
+
+# Install Java 25
+sdk install java 25-open
+
+# Set it as the default for the current terminal
+sdk use java 25-open
+
+# Always verify the active version
+java -version
+----
+
+Do not use Java versions older than 25 for Mifos development, as the codebase uses language features that are not available in earlier releases. If you need to maintain compatibility with older Java runtimes for deployment environments, discuss this with the team before making any changes to the build configuration.
+
+== What is the Gradle wrapper and why should I use it?
+
+The Gradle wrapper (`./gradlew` on Unix systems, `gradlew.bat` on Windows) is a script that downloads and executes a specific version of Gradle, ensuring that every developer builds the project with the exact same Gradle version. This eliminates the "works on my machine" class of problems that arise when developers use different Gradle versions with incompatible feature sets or API changes.
+
+The wrapper consists of three files that must be committed to version control: `gradlew` (Unix shell script), `gradlew.bat` (Windows batch script), and `gradle/wrapper/gradle-wrapper.properties` (configuration file specifying the Gradle version and distribution URL). Never use a system-installed Gradle to build Mifos projects; always invoke `./gradlew` from the project root. The Gradle version is centrally managed by the convention plugins and should not be modified by individual contributors.
+
+[source,bash]
+----
+# Correct: use the wrapper
+./gradlew build
+
+# Incorrect: uses system Gradle (may be a different version)
+gradle build
+
+# Update the wrapper to a new Gradle version (only done by build maintainers)
+./gradlew wrapper --gradle-version 8.12
+----
+
+== How do I contribute code?
+
+Contributing to Mifos follows a structured workflow that ensures code quality, maintains architectural consistency, and provides a clear audit trail for every change:
+
+- Fork the repository on GitHub by clicking the "Fork" button on the repository page.
+- Clone your fork locally: `git clone https://github.com/YOUR-USERNAME/fineract.git`
+- Create a feature branch from `alpha`: `git checkout -b feat/my-feature alpha`
+- Write code and tests following our conventions (see <<development>> and <<testing>>).
+- Ensure all tests pass: `./gradlew check`
+- Commit your changes using Conventional Commits format: `git commit -m "feat: add loan repayment API endpoint"`
+- Push your branch: `git push -u origin feat/my-feature`
+- Open a Pull Request against the `alpha` branch on GitHub.
+- Address review feedback and await approval from at least one reviewer.
+- Once approved, a maintainer will merge your PR.
+
+All contributions are subject to the project's code of conduct and contributor license agreement. See <<development>> for detailed contributing guidelines, including coding standards, testing requirements, and documentation expectations.

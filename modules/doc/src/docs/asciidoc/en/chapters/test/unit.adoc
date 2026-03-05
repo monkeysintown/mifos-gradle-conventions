@@ -1,0 +1,187 @@
+= Unit Testing
+
+Unit tests form the foundation of the Mifos testing pyramid. A unit test verifies a single class or method in isolation, replacing external dependencies with test doubles. The goal is speed and determinism: a unit test must run in milliseconds and produce the same result on every execution, regardless of network state or database contents.
+
+== Conventions
+
+|===
+| Convention | Rule
+
+| Framework | JUnit 5 (Jupiter)
+| Mocking | Mockito 5
+| Assertions | AssertJ (fluent API)
+| Naming | `should_doX_when_Y`
+| Structure | given / when / then comments
+| Directory | `src/test/java` mirroring `src/main/java`
+| Coverage gate | JaCoCo minimum 80% line coverage on new code
+|===
+
+Test class naming follows the pattern `<ProductionClass>Test`. For example, `LoanRepaymentService` is tested by `LoanRepaymentServiceTest`. Each test method name reads as a specification: `should_rejectDisbursement_when_accountIsFrozen`.
+
+The given/when/then structure makes tests self-documenting:
+
+* **given** — set up preconditions and test data
+* **when** — invoke the method under test
+* **then** — assert the expected outcome
+
+== Gradle Configuration
+
+[source,kotlin]
+----
+// build.gradle.kts
+dependencies {
+    testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
+    testImplementation("org.mockito:mockito-core:5.11.0")
+    testImplementation("org.mockito:mockito-junit-jupiter:5.11.0")
+    testImplementation("org.assertj:assertj-core:3.25.3")
+}
+
+tasks.test {
+    useJUnitPlatform {
+        includeTags("unit")                // run only unit tests by default
+        excludeTags("integration", "e2e")
+    }
+    maxParallelForks = Runtime.getRuntime().availableProcessors().div(2)
+    testLogging {
+        events("passed", "failed", "skipped")
+    }
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                minimum = "0.80".toBigDecimal()
+            }
+        }
+    }
+}
+----
+
+== Complete Unit Test Example
+
+[source,java]
+----
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.when;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+@Tag("unit")
+@ExtendWith(MockitoExtension.class)
+class LoanRepaymentServiceTest {
+
+    @Mock
+    private LoanRepository loanRepository;
+
+    @Mock
+    private AccountRepository accountRepository;
+
+    @InjectMocks
+    private LoanRepaymentService repaymentService;
+
+    private Loan activeLoan;
+    private SavingsAccount savingsAccount;
+
+    @BeforeEach
+    void setUp() {
+        activeLoan = Loan.builder()
+            .id(1L)
+            .principal(new BigDecimal("50000.00"))
+            .outstandingBalance(new BigDecimal("35000.00"))
+            .interestRate(new BigDecimal("0.12"))
+            .status(LoanStatus.ACTIVE)
+            .dueDate(LocalDate.of(2025, 12, 31))
+            .build();
+
+        savingsAccount = SavingsAccount.builder()
+            .id(100L)
+            .balance(new BigDecimal("45000.00"))
+            .status(AccountStatus.ACTIVE)
+            .build();
+    }
+
+    @Nested
+    @DisplayName("Successful repayments")
+    class SuccessfulRepayments {
+
+        @Test
+        void should_deductBalance_when_sufficientFunds() {
+            // given
+            when(loanRepository.findById(1L)).thenReturn(java.util.Optional.of(activeLoan));
+            when(accountRepository.findByClientId(anyLong()))
+                .thenReturn(java.util.Optional.of(savingsAccount));
+            BigDecimal repaymentAmount = new BigDecimal("10000.00");
+
+            // when
+            RepaymentResult result = repaymentService.repay(1L, 200L, repaymentAmount);
+
+            // then
+            assertThat(result.isSuccessful()).isTrue();
+            assertThat(result.getNewOutstandingBalance())
+                .isEqualByComparingTo(new BigDecimal("25000.00"));
+            assertThat(savingsAccount.getBalance())
+                .isEqualByComparingTo(new BigDecimal("35000.00"));
+        }
+    }
+
+    @Nested
+    @DisplayName("Failed repayments")
+    class FailedRepayments {
+
+        @Test
+        void should_rejectRepayment_when_insufficientFunds() {
+            // given
+            when(loanRepository.findById(1L)).thenReturn(java.util.Optional.of(activeLoan));
+            when(accountRepository.findByClientId(anyLong()))
+                .thenReturn(java.util.Optional.of(savingsAccount));
+            BigDecimal repaymentAmount = new BigDecimal("50000.00"); // more than balance
+
+            // when / then
+            assertThatThrownBy(() -> repaymentService.repay(1L, 200L, repaymentAmount))
+                .isInstanceOf(InsufficientFundsException.class)
+                .hasMessageContaining("Insufficient funds in savings account");
+        }
+
+        @Test
+        void should_rejectRepayment_when_loanIsClosed() {
+            // given
+            activeLoan.setStatus(LoanStatus.CLOSED);
+            when(loanRepository.findById(1L)).thenReturn(java.util.Optional.of(activeLoan));
+
+            // when / then
+            assertThatThrownBy(() -> repaymentService.repay(1L, 200L, BigDecimal.TEN))
+                .isInstanceOf(LoanNotActiveException.class);
+        }
+    }
+}
+----
+
+Run all unit tests from the command line:
+
+[source,bash]
+----
+# Run all unit tests
+$ ./gradlew test
+
+# Run a single test class
+$ ./gradlew :lending:test --tests "LoanRepaymentServiceTest"
+
+# Run only the nested "Failed repayments" spec
+$ ./gradlew :lending:test --tests "LoanRepaymentServiceTest\$FailedRepayments"
+----
+
+WARNING: Never use `Thread.sleep()` in unit tests to wait for asynchronous results. Use `Awaitility` or refactor the code to accept a configurable `Clock` or `Executor`.

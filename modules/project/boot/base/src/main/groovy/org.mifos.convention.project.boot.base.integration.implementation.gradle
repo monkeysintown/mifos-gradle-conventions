@@ -1,0 +1,25 @@
+plugins {
+    id "org.mifos.convention.project.boot.base"
+    id "org.mifos.convention.project.java.test.spring"
+}
+
+dependencies {
+    /*
+    if(file("../core/build.gradle").exists()) {
+        api project(":${parts[0]}-${parts[1]}-${parts[2]}-core")
+    }
+    if(file("../mapping/build.gradle").exists()) {
+        implementation project(":${parts[0]}-${parts[1]}-${parts[2]}-mapping")
+    }
+    if(file("../sdk/build.gradle").exists()) {
+        api project(":${parts[0]}-${parts[1]}-${parts[2]}-sdk")
+    }
+    */
+    implementation "org.springframework.boot:spring-boot-starter"
+    // TODO: make this conditional on package folder "../camel"
+    implementation "org.apache.camel.springboot:camel-spring-boot-starter"
+    implementation "org.apache.camel.springboot:camel-reactive-streams-starter"
+    implementation "org.apache.camel.springboot:camel-grpc-starter"
+
+    testImplementation "org.apache.camel:camel-test-spring-junit5"
+}

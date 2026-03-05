@@ -1,0 +1,9 @@
+plugins {
+    id "org.mifos.convention.project.boot.base.transport"
+}
+
+dependencies {
+    implementation "org.springframework.boot:spring-boot-starter-webmvc"
+    // TODO: enable when Spring Boot 4.1.x released
+    // implementation "org.springframework.grpc:spring-grpc-server-spring-boot-starter"
+}

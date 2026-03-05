@@ -1,0 +1,46 @@
+plugins {
+    id "org.mifos.convention.project.boot.base.application"
+    id "org.eclipse.jkube.kubernetes"
+    id "org.eclipse.jkube.openshift"
+}
+
+dependencies {
+    implementation "io.dekorate:kubernetes-spring-starter"
+    // implementation "io.dekorate:kubernetes-annotations"
+}
+
+kubernetes {
+    buildStrategy = "buildpacks"
+    offline = false
+    access {
+        namespace = "default"
+    }
+    enricher {
+        excludes = ["jkube-expose"]
+    }
+    generator {
+        includes = ["spring-boot"]
+        config {
+            "spring-boot" {
+                color = "always"
+            }
+        }
+    }
+    resources {
+        controllerName = "test"
+        configMap {
+            name = "config-map-name"
+            entries = [
+                    [name: "test", value: "value"]
+            ]
+        }
+    }
+}
+
+//openApi {
+//    apiDocsUrl = "http://localhost:8081/api/v3/api-docs"
+//    outputDir = file("$projectDir/build/docs")
+//    outputFileName = "openapi.yml"
+//    waitTimeInSeconds = 15
+//    // groupedApiMappings ["https://localhost:8081/v3/api-docs/groupA" to "swagger-groupA.json", "https://localhost:8081/v3/api-docs/groupB" to "swagger-groupB.json"]
+//}

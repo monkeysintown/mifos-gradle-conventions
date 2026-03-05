@@ -1,0 +1,77 @@
+project:
+  name: "mifos-conventions-gradle"
+  license: "MPL-2.0"
+  inceptionYear: "2026"
+  vendor: "Mifos Initiative"
+  copyright: "Copyright (c) 2026 Mifos Initiative"
+  authors:
+    - "Aleksandar Vidakovic"
+  links:
+    bugTracker: "https://mifos.org"
+    contribute: "https://mifos.org"
+    documentation: "https://mifos.org"
+    donation: "https://mifos.org"
+    faq: "https://mifos.org"
+    contact: "https://mifos.org"
+
+signing:
+  pgp:
+    active: ALWAYS
+    armored: true
+
+catalog:
+  sbom:
+    syft:
+      active: ALWAYS
+  swid:
+    mifos:
+      active: ALWAYS
+
+# The 'maven' distribution type auto-discovers from a Maven repo layout
+#distributions:
+#  mifos-conventions-gradle:
+#    # type: MAVEN
+#    maven:
+#      # JReleaser scans this directory for all Maven artifacts
+#      directory: "build/staging-deploy"
+#      # Auto-discovers groupId/artifactId/version from directory structure
+#      auto: true
+
+release:
+  github:
+    enabled: true
+    # TODO: change this to openMf
+    owner: "monkeysintown"
+    tagName: v{{projectVersion}}
+    overwrite: true
+    commitAuthor:
+      name: "Aleksandar Vidakovic"
+      email: "aleks@mifos.org"
+
+deploy:
+  maven:
+    artifactory:
+      mifosx-gradle-local:
+        active: ALWAYS
+        url: "https://mifos.jfrog.io/artifactory/mifosx-gradle-local"
+        snapshotSupported: true
+        username: "MIFOS_JFROG_USERNAME"
+        password: "MIFOS_JFROG_TOKEN"
+        applyMavenCentralRules: false
+        stagingRepository: "build/staging-deploy"
+
+#    mavenCentral:
+#      app:
+#        active: ALWAYS
+#        url: https://central.sonatype.com/api/v1/publisher
+#        stagingRepository: build/staging-deploy
+
+#    nexus2:
+#      snapshot-deploy:
+#        active: SNAPSHOT
+#        snapshotUrl: "https://central.sonatype.com/repository/maven-snapshots"
+#        applyMavenCentralRules: true
+#        snapshotSupported: true
+#        closeRepository: true
+#        releaseRepository: false
+#        stagingRepository: "build/staging-deploy"

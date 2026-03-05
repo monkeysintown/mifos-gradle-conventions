@@ -1,0 +1,10 @@
+= PostgreSQL
+
+TBD
+
+See:
+
+- https://www.postgresql.org/docs/current/auto-explain.html
+- https://www.postgresql.org/docs/current/pgstatstatements.html
+- https://www.pgexplain.dev/
+- https://github.com/dalibo/pev2

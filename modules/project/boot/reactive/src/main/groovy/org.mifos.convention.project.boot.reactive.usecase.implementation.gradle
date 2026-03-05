@@ -1,0 +1,7 @@
+plugins {
+    id "org.mifos.convention.project.boot.base.usecase.implementation"
+}
+
+dependencies {
+    testImplementation "org.mifos:mifos-common-boot-testing"
+}

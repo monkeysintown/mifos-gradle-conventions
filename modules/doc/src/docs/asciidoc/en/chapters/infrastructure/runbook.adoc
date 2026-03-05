@@ -1,0 +1,66 @@
+= Runbook
+
+A runbook is a documented procedure for responding to operational events—incidents, degradations, or routine maintenance tasks. In a financial platform, runbooks are essential because the cost of an incorrect response during an incident can be measured in real monetary impact on end users.
+
+Every Mifos service should have an associated runbook. Runbooks are written in AsciiDoc and stored in the `docs/runbooks/` directory of each repository.
+
+Runbook template:
+
+[source,asciidoc]
+----
+= Runbook: [Service Name]
+
+== Overview
+
+Brief description of the service, its purpose, and its dependencies.
+
+== Architecture
+
+// diagram or description of the service's place in the system
+
+== Key Metrics
+
+* **Latency p99**: < 500ms
+* **Error rate**: < 0.1%
+* **Uptime**: > 99.9%
+
+== Alerts
+
+=== [ALERT-001] High Error Rate
+
+*Condition*: Error rate exceeds 1% for 5 consecutive minutes.
+*Impact*: Loan applications and savings transactions may be rejected.
+*Investigation Steps*:
+
+* Check the service logs: `kubectl logs -l app=fineract-provider --since=10m`
+* Check database connectivity: `./gradlew dbHealthCheck`
+* Check downstream service status in Backstage
+* Review recent deployments: `kubectl rollout history deployment/fineract-provider`
+
+*Resolution*:
+
+* If database issue: failover to read replica, contact DBA
+* If downstream issue: activate circuit breaker, route to fallback
+* If deployment issue: rollback to previous version
+  `kubectl rollout undo deployment/fineract-provider`
+
+*Escalation*: On-call engineer → Team lead → CTO
+
+=== [ALERT-002] Disk Space Critical
+
+// additional alerts
+
+== Common Operations
+
+=== Restart Service
+
+// TODO: add cli instructions
+
+== Contacts
+
+* **On-call**: mifos-oncall@googlegroups.com
+* **Team lead**: See Backstage service catalog
+* **Slack**: #mifos-ops
+----
+
+Runbooks should be reviewed and updated after every post-incident review. Stale runbooks are dangerous—they can lead responders down the wrong path during a high-pressure incident. Set a quarterly review cadence for all runbooks and assign ownership to the service's on-call rotation.

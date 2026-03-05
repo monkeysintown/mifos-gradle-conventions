@@ -1,0 +1,19 @@
+= Talks
+
+WARNING: This is a tentative list
+
+TBD
+
+- we can showcase the new command processing... only a few people are aware
+- then I have another one... how to avoid a big ball of mud (of dependencies)
+- I can show the "build conventions" (and some project layout conventions)
+- let me know which one you'd like to do
+- new command processing is the "entry point"... and then I work my way "up" to the new project conventions...
+- we can also throw-in some "domain driven design" (DDD)... concept used underneath all this (currently Mansi is updating herself with those topics)... that would give us a "common language" for project architectures
+- explaining CQRS (in general) and how it relates to event sourcing could also be a topic (pretty sure one or the other needs an update there)
+- when Mansi is done with her project she could add 1-2 interesting topics... that would be for later in the year (September)... if she wants
+- ... and all these (except the initial new command processing one) are pure Mifos architecture topics
+- oh, and one more... because I see that the AI related projects are mostly done in Python: how to do that with Java... (part of the new common Mifos project conventions)
+- if we do this once a month then I think we can easily fill the next 6 months... and we should do proper presentations and prepare as if it was a for a conference... more stuff that we can put on the website, blogs, LinkedIn posts...
+- possible three part series on how to write apps with proper state management (state machine, workflow engines, abstract underlying tech stack with Saga design pattern); last part can be combined with this year's workflow project student
+- Glasgow talk about Fineract Modularity 2.0

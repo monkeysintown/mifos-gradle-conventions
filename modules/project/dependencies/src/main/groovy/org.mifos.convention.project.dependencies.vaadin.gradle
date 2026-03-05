@@ -1,0 +1,15 @@
+repositories {
+    maven {
+        url = "https://maven.vaadin.com/vaadin-prereleases"
+    }
+    maven {
+        url = "https://maven.vaadin.com/vaadin-addons"
+    }
+
+    dependencies {
+        implementation platform("com.vaadin:vaadin-bom:25.1.5")
+        constraints {
+            implementation "org.parttio:line-awesome:2.1.0"
+        }
+    }
+}

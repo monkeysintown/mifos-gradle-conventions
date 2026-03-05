@@ -1,0 +1,84 @@
+= FSIP-12: Event driven architecture
+
+This proposal addresses technical debt we've accumulated in relation to Fineract's module boundaries. Technically we do already have *build* modules, but the inclusion of sources in those modules is driven by dependencies and usage of classes and functions across domain boundaries. Currently, features packages (client, savings, account, loan etc.) can (and do) freely import each other feature packages' internal classes. While importing the business logic service interface across boundaries could still be acceptable, direct use of storage related (entity, repository) classes directly referenced outside the feature package/domain boundaries they belong to should be avoided.
+
+We want to formalize a framework that helps to refactor the current code base as well as with the design of new feature packages/modules to avoid these cross-dependencies between feature packages/domain boundaries as much as possible by introducing the following *tools*:
+
+- *typology* of module complexity/dependencies
+- internal *events* to avoid direct function calls
+- *abstractions* [TODO: flesh this out a bit more]
+- a set of *metrics* that show the current feature package complexity/dependencies and enforce better practices using Spring Modulith, jMolecular and ArchUnit
+
+Practical usability should be demonstrated with a few select packages/modules.
+
+== Status
+
+Under Development
+
+== Who is Involved
+
+- Mansi Maurya (proposal owner, lead developer)
+- Aleksandar Vidakovic (Reviewer)
+
+== Background / Motivation
+
+If you've ever tried to refactor something inside fineract-savings and then watched the loan tests break, you already know the problem. The codebase has accumulated a lot of direct cross-feature imports over the years, and at this point it's genuinely hard to work on one feature without touching another.
+
+The practical fallout:
+
+- Refactoring is risky. Change an internal class in one feature and you might silently break a consumer in a completely different module.
+- When three features all import the same repository directly, nobody's sure who's responsible for what. Adding a field, changing a query, deprecating a method, all of these become multi-team conversations they shouldn't be.
+- Testing in isolation is painful. To unit-test a single service, you end up pulling in the entire dependency graph of everything it imports.
+- Event-driven patterns are blocked.The root issue is that fineract-core and fineract-command exist in name, but there's no rule that actually enforces their use. A developer can bypass them entirely and nothing will stop a build from passing.
+
+== Goals
+
+- existing modules `fineract-core` and `fineract-command` are independent of any other module
+- ideally `fineract-core` does not contain any implementation logic, only business logic service Java interfaces (aka "contracts"), data transfer object classes aka DTOs and event classes
+- every feature package/module should only depend on `fineract-core` and`fineract-command`
+
+- Make fineract-core the single place for shared read-only contracts DTOs, projections, read-service
+interfaces, value objects. No business logic, no feature-owned entities.
+- Make fineract-command the single place for cross-feature behavioral contracts like commands, domain
+events, command/event bus, outbox/inbox, sagas.
+- Remove direct feature-to-feature imports across all modules, phased by risk starting with accounting
+and client, finishing with savings and loan.
+- Wire an ArchUnit rule into CI once the violations are gone, so the boundary can't silently erode again.
+- Keep the REST API fully backward-compatible throughout. No consumer-facing breakage.
+- Keep integration tests green at every phase boundary. Migration should never require a big-bang cutover.
+
+== Exclusions
+
+- The storage layer (JPA entities, schema, query performance) is out of scope, that's a separate effort.
+- No changes to existing REST API contracts or response shapes.
+- No external message brokers, the outbox/inbox pattern stays within the database transaction for now.
+- Performance tuning and async execution are not part of this proposal, though the event-driven boundaries we introduce will make those easier later.
+
+== Change Proposed
+
+=== fineract-core: shared read-only contracts
+
+The idea is straightforward: instead of module A importing module B's repository to do a read, module A
+depends on an interface in fineract-core and module B provides the implementation. We'll also add the DTOs
+that these interfaces return ClientSummaryDTO, OfficeDTO, ChargeDTO, LoanAccountSummaryDTO, and so
+on, so that the data crossing a module boundary is always a plain, stable projection rather than a live entity.
+
+=== fineract-command: cross-feature behavioral contracts
+
+For writes, features should stop calling each other's services directly. Instead, the calling feature dispatches a command or publishes a domain event. The owning feature handles it. fineract-command owns the command/event definitions, the bus infrastructure, outbox/inbox for reliability, and saga support for anything long-running.
+
+=== Migration approach
+
+We start with packages that have fewer dependencies and less traffic accounting -> organisation, client -> charge and work our way up to savings and loan, which have the largest cross-feature surfaces. Each phase is a set of PRs targeting a specific package. The dependency scanner gives us a before/after count so reviewers can see real progress. The ArchUnit enforcement rule only goes live once all violations are actually resolved.
+
+== Phases of Work
+
+- *Phase 1:* Inventory: run the cross-feature boundary scanner, classify each violation, decide which module owns what. Expand fineract-core: add DTOs, read-service interfaces, shared value objects. Expand fineract-command: command/event infrastructure, outbox/inbox, sagas, initial command and event catalogs.
+- *Phase 2:* Easy wins: decouple accounting, client, and user-administration from organisation/charge.
+- *Phase 3:* Mid-tier packages: group, account transfers, MIX, shareaccounts, batch.
+- *Phase 4:* Savings: replace savings -> accounting direct calls with domain events; switch all other
+dependencies to core DTOs and interfaces.
+- *Phase 5:* Loan: publish loan lifecycle events; replace all direct imports with commands, events, and core contracts. This is the biggest phase.
+- *Phase 6:* Deposits: break fixed/recurring deposit inheritance from savings; use AccountLifecycle and composition contracts instead.
+- *Phase 7:* Orchestrators: teller, reporting, notifications, and templates switch to command bus and read models.
+- *Phase 8:* Enforcement: activate the ArchUnit boundary rule in CI; track violation counts per PR going forward.

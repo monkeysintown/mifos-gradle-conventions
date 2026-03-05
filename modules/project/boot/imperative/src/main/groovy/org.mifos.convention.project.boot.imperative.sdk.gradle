@@ -1,0 +1,117 @@
+plugins {
+    id "org.mifos.convention.project.boot.base.sdk"
+}
+
+import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
+
+if(file("${projectDir}/src/main/resources/openapi").exists()) {
+    sourceSets.main.java.srcDirs += ["${projectDir}/build/generated/sources/openapi/src/main/java"]
+
+    file("${projectDir}/src/main/resources/openapi").listFiles().eachWithIndex { file, index  ->
+        var pkg = ext["mifos.projects.base.package"]
+        var module = ext["mifos.projects.module"]
+
+        tasks.register("openApiGenerateMifosSdk${index}", GenerateTask) {
+            group = "openapi tools"
+            generatorName = "spring"
+            verbose = false
+            validateSpec = false
+            skipValidateSpec = true
+            inputSpec = new File("${projectDir}/src/main/resources/openapi/${file.name}".toString())
+            outputDir = new File("${projectDir}/build/generated/sources/openapi")
+            // templateDir = "${projectDir}/src/main/resources/templates/java"
+            groupId = "${project.group}"
+            apiPackage = "${pkg}.sdk.${module}".toString()
+            invokerPackage = "${pkg}.sdk.${module}.invoker".toString()
+            modelPackage = "${pkg}.sdk.${module}.models".toString()
+            configOptions = [
+                    interfaceOnly: "true",
+                    useSpringBoot3: "false",
+                    useSpringBoot4: "true",
+                    useJspecify: "true",
+                    dateLibrary: "java8",
+                    annotationLibrary: "none",
+                    disableHtmlEscaping: "true",
+                    library: "spring-http-interface",
+                    openApiNullable: "false",
+                    serializableModel: "true",
+                    skipDefaultInterface: "true",
+                    reactive: "false",
+                    useBeanValidation: "false",
+                    useJakartaEe: "true",
+                    hideGenerationTimestamp: "true",
+                    containerDefaultToNull: "true",
+                    documentationProvider: "none"
+            ]
+            generateModelTests = false
+            generateApiTests = false
+            // generateSupportingFiles = false
+            generateApiDocumentation = false
+            ignoreFileOverride = new File("${rootDir}/.openapi-generator-ignore".toString())
+
+            finalizedBy = ["spotlessApply"]
+        }
+
+        tasks.build.dependsOn.add(tasks.named("openApiGenerateMifosSdk${index}").get())
+        tasks.sourcesJar.dependsOn.add(tasks.named("openApiGenerateMifosSdk${index}").get())
+        tasks.compileJava.dependsOn.add(tasks.named("openApiGenerateMifosSdk${index}").get())
+        // tasks.spotlessApply.dependsOn.add(tasks.named("openApiGenerateMifosSdk${index}").get())
+    }
+}
+
+if(file("${projectDir}/src/main/resources/proto").exists()) {
+    protobuf {
+        protoc {
+            // The artifact spec for the Protobuf Compiler
+            artifact = "com.google.protobuf:protoc:4.35.0"
+        }
+        plugins {
+            // Optional: an artifact spec for a protoc plugin, with "grpc" as
+            // the identifier, which can be referred to in the "plugins"
+            // container of the "generateProtoTasks" closure.
+            grpc {
+                artifact = "io.grpc:protoc-gen-grpc-java:1.81.0"
+            }
+        }
+
+        generateProtoTasks {
+            all().configureEach { task ->
+                task.plugins {
+                    // Apply the "grpc" plugin whose spec is defined above, without
+                    // options.  Note the braces cannot be omitted, otherwise the
+                    // plugin will not be added. This is because of the implicit way
+                    // NamedDomainObjectContainer binds the methods.
+                    grpc { }
+                }
+            }
+        }
+    }
+}
+
+dependencies {
+    implementation "org.springframework:spring-context"
+
+    if(file("${projectDir}/src/main/resources/openapi").exists()) {
+        implementation "tools.jackson.dataformat:jackson-dataformat-xml"
+        // TODO: remove when generator ready for Jackson 3
+        implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-xml"
+
+        api "org.springframework.boot:spring-boot-starter-webmvc"
+    }
+
+    if(file("${projectDir}/src/main/resources/proto").exists()) {
+        api "com.google.protobuf:protobuf-java"
+        api "io.grpc:grpc-stub"
+        api "io.grpc:grpc-protobuf"
+        api "io.grpc:grpc-netty"
+
+        // NOTE: workaround
+        if (JavaVersion.current().isJava9Compatible()) {
+            // Workaround for @javax.annotation.Generated
+            // see: https://github.com/grpc/grpc-java/issues/3633
+            implementation "javax.annotation:javax.annotation-api"
+        }
+
+        protobuf files("${projectDir}/src/main/resources/proto")
+    }
+}

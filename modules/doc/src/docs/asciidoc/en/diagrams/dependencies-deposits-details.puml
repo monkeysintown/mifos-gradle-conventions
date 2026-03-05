@@ -1,0 +1,59 @@
+@startuml deposits-detail
+title F6 fixeddeposit & F7 recurringdeposit — Dependency Detail (Ce=8, DD=4)
+
+package "fineract-fixeddeposit" #LightPink {
+    component [FDWriteService] as FDW
+    component [FDAssembler] as FDA
+}
+
+package "fineract-recurringdeposit" #LightPink {
+    component [RDWriteService] as RDW
+    component [RDAssembler] as RDA
+}
+
+package "fineract-core" #LightGreen {
+    component [CommandProcessing] as CMD
+}
+
+package "Other Features" #LightYellow {
+    component [accounting] as ACCT
+    component [client] as CL
+    component [group] as GR
+    component [savings] as SAV
+    component [charge] as CHG
+    component [calendar] as CAL
+    component [account-transfers] as AT
+    component [organisation] as ORG
+}
+
+FDA --> ACCT : #Red
+FDA --> CL   : #Red
+FDA --> GR   : #Red
+FDA --> SAV  : #Red "reuses savings base"
+FDA --> CHG  : #Red
+FDA --> CAL  : #Red
+FDA --> AT   : #Red
+FDA --> ORG  : #Red
+
+RDA --> ACCT : #Red
+RDA --> CL   : #Red
+RDA --> GR   : #Red
+RDA --> SAV  : #Red "reuses savings base"
+RDA --> CHG  : #Red
+RDA --> CAL  : #Red
+RDA --> AT   : #Red
+RDA --> ORG  : #Red
+
+' Transitive depth: FD -> savings -> accounting -> organisation = depth 4
+SAV -down-> ACCT : #Orange "transitive\n(depth contributor)"
+
+FDW ..> CMD : #Green
+RDW ..> CMD : #Green
+
+'note over SAV
+'  Deposits depend on savings,
+'  which depends on accounting,
+'  creating dependency depth = 4
+'end note
+
+@enduml

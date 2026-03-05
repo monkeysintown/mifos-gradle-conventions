@@ -1,0 +1,5 @@
+plugins {
+    id "io.m11n.project.reactive.orchestration.implementation"
+}
+
+description = "{{project_name|capitalize}} - {{module_name|capitalize}} - Use Case - {{orchestration_name|capitalize}}"

@@ -1,0 +1,5 @@
+plugins {
+    id "io.m11n.project.reactive.client.transport.rest"
+}
+
+description = "{{project_name|capitalize}} - {{module_name|capitalize}} - Client Transport REST"

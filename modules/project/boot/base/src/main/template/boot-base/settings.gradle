@@ -1,0 +1,21 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral().content {
+            excludeModule("javax.media", "jai_core")
+        }
+        gradlePluginPortal()
+        maven {
+            url = uri("https://central.sonatype.com/repository/maven-snapshots")
+        }
+        maven {
+            url = uri("https://mifos.jfrog.io/artifactory")
+        }
+    }
+
+    dependencies {
+        classpath "org.mifos:mifos-conventions-gradle-project-boot-layout:0.1.0-SNAPSHOT"
+    }
+}
+
+apply plugin: "org.mifos.convention.project.boot.layout"

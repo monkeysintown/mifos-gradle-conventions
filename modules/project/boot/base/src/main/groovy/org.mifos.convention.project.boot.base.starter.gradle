@@ -1,0 +1,55 @@
+plugins {
+    id "org.mifos.convention.project.boot.base"
+}
+
+dependencies {
+    /*
+    if(file("../core/build.gradle").exists()) {
+        implementation project(":${parts[0]}-core")
+    }
+    if(file("../mapping/build.gradle").exists()) {
+        implementation project(":${parts[0]}-mapping")
+    }
+    if(file("../persistence/build.gradle").exists()) {
+        implementation project(":${parts[0]}-persistence")
+    }
+    if(file("../ai/starter/build.gradle").exists()) {
+        implementation project(":${parts[0]}-ai-starter")
+    }
+    file("../transport").listFiles().each {
+        if(!it.name.containsIgnoreCase("build")) {
+            if(file("../transport/${it.name}/build.gradle").exists()) {
+                implementation project(":${parts[0]}-transport-${it.name}")
+            }
+        }
+    }
+    file("../usecase").listFiles().each {
+        if(!it.name.containsIgnoreCase("build")) {
+            if(file("../usecase/${it.name}/starter/build.gradle").exists()) {
+                implementation project(":${parts[0]}-usecase-${it.name}-starter")
+            }
+        }
+    }
+    file("../integration").listFiles().each {
+        if(!it.name.containsIgnoreCase("build")) {
+            if(file("../integration/${it.name}/starter/build.gradle").exists()) {
+                implementation project(":${parts[0]}-integration-${it.name}-starter")
+            }
+        }
+    }
+    file("../orchestration").listFiles().each {
+        if(!it.name.containsIgnoreCase("build")) {
+            if(file("../orchestration/${it.name}/starter/build.gradle").exists()) {
+                implementation project(":${parts[0]}-orchestration-${it.name}-starter")
+            }
+        }
+    }
+    if(file("../ui/vaadin/build.gradle").exists()) {
+        implementation project(":${parts[0]}-ui-vaadin")
+    }
+    */
+
+    implementation "org.springframework.boot:spring-boot-starter"
+    implementation "org.springframework.boot:spring-boot-autoconfigure"
+    // implementation "org.springframework.boot:spring-boot-starter-security"
+}

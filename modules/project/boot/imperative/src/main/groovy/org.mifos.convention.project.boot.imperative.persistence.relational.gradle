@@ -1,0 +1,23 @@
+plugins {
+    id "org.mifos.convention.project.boot.base.persistence"
+}
+
+dependencies {
+    implementation "org.mifos:mifos-common-boot-persistence-relational-imperative"
+
+    api "org.springframework.boot:spring-boot-starter-data-jdbc"
+    api "com.infobip:infobip-spring-data-jdbc-querydsl-boot-starter"
+
+    // implementation "io.github.openfeign.querydsl:querydsl-sql-spring"
+    // implementation "io.github.openfeign.querydsl:querydsl-spatial"
+
+    implementation "io.github.openfeign.querydsl:querydsl-sql-spatial"
+    implementation "io.github.openfeign.querydsl:querydsl-collections"
+
+    implementation "org.postgresql:postgresql"
+    implementation "net.postgis:postgis-jdbc"
+    implementation "net.postgis:postgis-jdbc-jts"
+    implementation "net.postgis:postgis-jdbc-java2d"
+
+    testImplementation "org.mifos:mifos-common-boot-testing"
+}

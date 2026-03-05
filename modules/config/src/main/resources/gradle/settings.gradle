@@ -1,0 +1,38 @@
+pluginManagement {
+    repositories {
+        mavenLocal()
+        mavenCentral().content {
+            excludeModule("javax.media", "jai_core")
+        }
+        gradlePluginPortal()
+        maven {
+            url = uri("https://central.sonatype.com/repository/maven-snapshots")
+        }
+    }
+}
+
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral().content {
+            excludeModule("javax.media", "jai_core")
+        }
+        gradlePluginPortal()
+        maven {
+            url = uri("https://central.sonatype.com/repository/maven-snapshots")
+        }
+    }
+
+    // NOTE: this is necessary, because JReleaser is using an outdated JGit version 5.x
+    configurations.all {
+        resolutionStrategy {
+            force("org.eclipse.jgit:org.eclipse.jgit:6.10.1.202505221210-r")
+        }
+    }
+
+    dependencies {
+        classpath "org.mifos:mifos-conventions-gradle-project-boot-layout:0.1.0-SNAPSHOT"
+    }
+}
+
+apply plugin: "org.mifos.convention.project.boot.layout.standard"

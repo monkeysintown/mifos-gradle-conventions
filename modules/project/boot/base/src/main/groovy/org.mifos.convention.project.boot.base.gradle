@@ -1,0 +1,29 @@
+plugins {
+    // id "org.mifos.convention.project.base.publish"
+    id "org.mifos.convention.project.java"
+}
+
+dependencies {
+    constraints {
+        // TODO: reactive? imperative?
+        implementation "org.mifos:mifos-common-boot-core:${project.version.toString()}"
+        implementation "org.mifos:mifos-common-boot-mapping:${project.version.toString()}"
+        implementation "org.mifos:mifos-common-boot-persistence-relational-imperative:${project.version.toString()}"
+        implementation "org.mifos:mifos-common-boot-persistence-relational-reactive:${project.version.toString()}"
+        implementation "org.mifos:mifos-common-boot-persistence-jpa-imperative:${project.version.toString()}"
+        implementation "org.mifos:mifos-common-boot-persistence-jpa-reactive:${project.version.toString()}"
+        implementation "org.mifos:mifos-common-boot-persistence-mongo-imperative:${project.version.toString()}"
+        implementation "org.mifos:mifos-common-boot-persistence-mongo-reactive:${project.version.toString()}"
+        implementation "org.mifos:mifos-common-boot-persistence-redis-imperative:${project.version.toString()}"
+        implementation "org.mifos:mifos-common-boot-persistence-redis-reactive:${project.version.toString()}"
+        implementation "org.mifos:mifos-common-boot-transport-rest-imperative:${project.version.toString()}"
+        implementation "org.mifos:mifos-common-boot-transport-rest-reactive:${project.version.toString()}"
+        implementation "org.mifos:mifos-common-boot-transport-grpc-imperative:${project.version.toString()}"
+        implementation "org.mifos:mifos-common-boot-transport-grpc-reactive:${project.version.toString()}"
+        implementation "org.mifos:mifos-common-boot-migration:${project.version.toString()}"
+        implementation "org.mifos:mifos-common-boot-application:${project.version.toString()}"
+        implementation "org.mifos:mifos-common-boot-starter-imperative:${project.version.toString()}"
+        implementation "org.mifos:mifos-common-boot-starter-reactive:${project.version.toString()}"
+        implementation "org.mifos:mifos-common-boot-testing:${project.version.toString()}"
+    }
+}

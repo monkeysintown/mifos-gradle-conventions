@@ -1,0 +1,115 @@
+= Benchmark Testing
+
+Performance matters in financial systems that process thousands of transactions per second. Benchmark testing measures the throughput and latency of critical code paths under controlled conditions. The Java Microbenchmark Harness (JMH) is the standard tool for writing reliable benchmarks on the JVM.
+
+JMH addresses challenges that naive timing measurements cannot:
+
+* **JVM warmup** — The Just-In-Time compiler optimizes hot paths over time. JMH runs warmup iterations before taking measurements, ensuring that JIT compilation has stabilized.
+* **Dead code elimination** — The JVM may eliminate code whose results are never used. JMH provides `Blackhole` to consume results and prevent optimization.
+* **OSR and inlining** — JMH controls for on-stack replacement and method inlining artifacts that distort informal benchmarks.
+
+== When to Write Benchmarks
+
+Not every method needs a benchmark. Write JMH benchmarks when:
+
+* The code is on a hot path (transaction processing, interest calculation, report generation).
+* You are comparing two algorithms or data structures and need data to choose.
+* A performance regression has been reported and you need a reproducible measurement.
+* You are optimizing an existing method and want to verify the improvement quantitatively.
+
+== Gradle Configuration
+
+[source,kotlin]
+----
+// build.gradle.kts
+plugins {
+    id("me.champeau.jmh") version "0.7.2"
+}
+
+dependencies {
+    jmh("org.openjdk.jmh:jmh-core:1.37")
+    jmh("org.openjdk.jmh:jmh-generator-annprocess:1.37")
+}
+
+jmh {
+    iterations.set(3)
+    warmupIterations.set(5)
+    fork.set(2)
+    benchmarkMode.set(listOf("avgt"))       // average time
+    timeUnit.set("us")
+    resultFormat.set("JSON")
+    resultsFile.set(file("${layout.buildDirectory.get()}/reports/jmh/results.json"))
+}
+----
+
+== JMH Benchmark Example
+
+[source,java]
+----
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.concurrent.TimeUnit;
+import org.openjdk.jmh.annotations.Benchmark;
+import org.openjdk.jmh.annotations.BenchmarkMode;
+import org.openjdk.jmh.annotations.Level;
+import org.openjdk.jmh.annotations.Mode;
+import org.openjdk.jmh.annotations.OutputTimeUnit;
+import org.openjdk.jmh.annotations.Scope;
+import org.openjdk.jmh.annotations.Setup;
+import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.infra.Blackhole;
+
+@State(Scope.Benchmark)
+@BenchmarkMode(Mode.AverageTime)
+@OutputTimeUnit(TimeUnit.MICROSECONDS)
+public class InterestCalculationBenchmark {
+
+    private BigDecimal principal;
+    private BigDecimal rate;
+    private static final int ITERATIONS = 10_000;
+
+    @Setup(Level.Iteration)
+    public void setUp() {
+        principal = new BigDecimal("150000.00");
+        rate = new BigDecimal("0.0975");
+    }
+
+    @Benchmark
+    public void compoundInterest_calculation(Blackhole bh) {
+        BigDecimal amount = principal;
+        for (int i = 0; i < 12; i++) {
+            BigDecimal interest = amount.multiply(rate)
+                .divide(BigDecimal.valueOf(12), 2, RoundingMode.HALF_EVEN);
+            amount = amount.add(interest);
+        }
+        bh.consume(amount);
+    }
+
+    @Benchmark
+    public void simpleInterest_calculation(Blackhole bh) {
+        BigDecimal interest = principal
+            .multiply(rate)
+            .multiply(BigDecimal.valueOf(12))
+            .divide(BigDecimal.valueOf(12), 2, RoundingMode.HALF_EVEN);
+        bh.consume(interest);
+    }
+}
+----
+
+Run benchmarks from Gradle:
+
+[source,bash]
+----
+# Run all JMH benchmarks
+$ ./gradlew jmh
+
+# Run a specific benchmark class
+$ ./gradlew jmh --jmhInclude "InterestCalculationBenchmark"
+
+# Results are written to build/reports/jmh/results.json
+$ cat build/reports/jmh/results.json | python3 -m json.tool | head -40
+----
+
+TIP: Always run benchmarks on a quiet machine with no other heavy processes. Background CPU load can introduce variance that makes results unreliable.
+
+WARNING: Never benchmark in a CI environment for absolute numbers. CI machines are noisy and shared. Instead, compare benchmarks locally before and after a change, and use CI only to catch major regressions via threshold checks.

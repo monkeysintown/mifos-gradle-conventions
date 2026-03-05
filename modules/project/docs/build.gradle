@@ -1,0 +1,5 @@
+plugins {
+    id "org.mifos.convention.internal.project.template"
+}
+
+description = "Mifos Initiative - Gradle Conventions - Project - Documentation"

@@ -1,0 +1,9 @@
+plugins {
+    id "org.mifos.convention.project.boot.base.application"
+}
+
+dependencies {
+    implementation "com.h2database:h2"
+    // testImplementation "org.testcontainers:jdbc"
+    testImplementation "org.mifos:mifos-common-boot-testing"
+}

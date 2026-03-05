@@ -1,0 +1,28 @@
+= Architectural Topic Templates
+
+== Links
+
+- Definitions
+- Relevant ADRs
+- Reading material
+- ...
+
+== Why
+
+Short one-liner explaining the motivation
+
+== When - Then - Question 1
+
+- The question should describe a high-level aspect of the topic
+- For each use case relevant to the question create when-then
+- Add examples from existing solutions or technical debt
+
+== When - Then - Question 2
+
+- The question should describe a high-level aspect of the topic
+- For each use case relevant to the question create when-then
+- Add examples from existing solutions or technical debt
+
+See:
+
+- https://www.youtube.com/watch?v=T9dhGyA90-I
