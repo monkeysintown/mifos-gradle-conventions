@@ -1,0 +1,16 @@
+[dedication]
+= Dedication
+
+This book is dedicated to my cat, Garfield who has sat on my keyboard through every Gradle build, deployed at least three broken commits by stepping on the spacebar, and never once offered to review a pull request.
+
+But more importantly, this book is dedicated to the Mifos open-source community, the countless contributors across every time zone who donate their evenings, weekends, and coffee breaks to making financial inclusion a reality for the two billion people the world has left behind.
+
+Every line of code you write, every bug you triage, every translation you submit matters.  You are the reason a community bank in rural Kenya can process a loan in seconds, and a microfinance institution in the Philippines can serve ten times the clients it once could.
+
+To Garfield, for the purrs and the occasional `./gradlew clean` when I least expected it.
+
+image::{imagesdir}/garfield.png[Garfield, width=100%]
+
+And to you, dear contributor, for showing up again and again.
+
+Thank you.

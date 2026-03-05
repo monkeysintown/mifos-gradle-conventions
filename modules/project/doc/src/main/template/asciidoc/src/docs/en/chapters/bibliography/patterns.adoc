@@ -1,0 +1,10 @@
+[bibliography]
+= Design Patterns
+
+* [[[pp]]] Andy Hunt & Dave Thomas. _The Pragmatic Programmer: From Journeyman to Master_. Addison-Wesley. 1999. The foundational text on software craftsmanship, covering topics from personal responsibility and career development to architectural techniques and algorithm selection. The principles of "Don't Repeat Yourself" (DRY) and "Orthogonality" have directly shaped the Mifos convention plugin architecture, where shared build logic is expressed once and applied consistently across all projects.
+
+* [[[gof]]] Erich Gamma, Richard Helm, Ralph Johnson & John Vlissides. _Design Patterns: Elements of Reusable Object-Oriented Software_. Addison-Wesley. 1994. The seminal catalog of twenty-three design patterns that has influenced object-oriented software design for three decades. The Command, Strategy, and Observer patterns are extensively used in the Mifos Fineract codebase, particularly in the command processing pipeline, the tenant isolation strategy, and the event notification system. Understanding these patterns is essential for contributing to the platform's core modules.
+
+* [[[peaa]]] Martin Fowler. _Patterns of Enterprise Application Architecture_. Addison-Wesley. 2002. A comprehensive catalog of patterns for building enterprise applications, including Service Layer, Repository, Unit of Work, and Data Mapper. These patterns form the architectural backbone of Mifos Fineract, where the Service Layer pattern organizes business logic, the Repository pattern abstracts data access, and the Unit of Work pattern manages transactional consistency across domain operations.
+
+* [[[clean]]] Robert C. Martin. _Clean Code: A Handbook of Agile Software Craftsmanship_. Prentice Hall. 2008. A practical guide to writing readable, maintainable, and testable code. The Mifos coding standards incorporate many of the principles described in this book, including meaningful naming conventions, small function sizes, and the discipline of leaving the codebase cleaner than you found it.

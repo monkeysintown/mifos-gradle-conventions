@@ -1,0 +1,33 @@
+= Architecture Decision Records
+
+An Architecture Decision Record (ADR) captures a single architectural decision, the context in which it was made, and the consequences of that decision. ADRs are the institutional memory of a software project—they answer the perennial question: "Why did we do it this way?" Without ADRs, teams repeat the same debates, reverse decisions without understanding the original rationale, and onboarding takes weeks longer than necessary.
+
+The ADR concept was formalized by Michael Nygard and is widely discussed in the software architecture community. Key references include:
+
+* https://github.com/architecture-decision-record/architecture-decision-record[Architecture Decision Record GitHub Organization] — the canonical repository for ADR templates and tooling
+* https://martinfowler.com/bliki/ArchitectureDecisionRecord.html[Martin Fowler's Bliki on ADRs] — a concise explanation of the practice
+* https://adr.github.io[adr.github.io] — tools, templates, and community resources
+
+In the Mifos project, every significant architectural decision should be accompanied by an ADR. "Significant" means any decision that would be expensive to reverse, affects multiple modules, or constrains future choices. Choosing a build tool, selecting a persistence framework, adopting a messaging infrastructure—these are all ADR-worthy decisions.
+
+When to write an ADR:
+
+* When you are about to make a decision that affects the architecture
+* When a discussion on an issue or PR reveals competing approaches
+* When you discover an undocumented decision that has significant consequences
+* When a decision is made that not all stakeholders agree with (the ADR records the dissent)
+
+== Template
+
+<<<
+
+[source,asciidoc]
+----
+include::concepts-adr-template.adoc[]
+----
+
+== Other Sources
+
+- https://github.com/architecture-decision-record/architecture-decision-record
+- https://martinfowler.com/bliki/ArchitectureDecisionRecord.html
+- https://adr.github.io

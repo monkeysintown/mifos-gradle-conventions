@@ -1,0 +1,68 @@
+= Internationalization
+
+Internationalization (i18n) is not an afterthought in a platform that serves financial institutions across dozens of countries and languages. Mifos follows a strict convention that every user-facing string must be externalized into resource bundles, and no English text may appear directly in Java code or templates.
+
+Resource bundles follow the standard Java naming convention, with the two-letter ISO 639 language code and optional ISO 3166 country code:
+
+[source,terminaloutput]
+----
+src/main/resources/
+├── messages.properties          # Default (fallback) locale
+├── messages_en.properties       # English
+├── messages_fr.properties       # French
+├── messages_sw.properties       # Swahili
+├── messages_hi.properties       # Hindi
+└── messages_pt_BR.properties    # Brazilian Portuguese
+----
+
+Keys in resource bundles use a dot-separated hierarchical naming scheme that mirrors the module and feature:
+
+[source,properties]
+----
+# messages_en.properties
+loan.product.create.success=Loan product created successfully.
+loan.product.create.failure=Failed to create loan product: {0}
+loan.repayment.schedule.header=Repayment Schedule for {0}
+client.search.no.results=No clients found matching ''{0}''.
+error.insufficient.balance=Account {0} has insufficient balance. Required: {1}, Available: {2}.
+validation.field.required={0} is a required field.
+----
+
+In Spring, use `MessageSource` to resolve messages:
+
+[source,java]
+----
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.stereotype.Service;
+
+@Service
+public class LocalizedMessageService {
+
+    private final MessageSource messageSource;
+
+    public LocalizedMessageService(MessageSource messageSource) {
+        this.messageSource = messageSource;
+    }
+
+    public String getMessage(String key, Object... args) {
+        return messageSource.getMessage(
+            key,
+            args,
+            LocaleContextHolder.getLocale()
+        );
+    }
+}
+----
+
+For complex message formatting—pluralization, gender agreement, selective translation—Mifos uses **ICU4J** (`com.ibm.icu:icu4j`) through Spring's `MessageSource` with ICU message format:
+
+[source,properties]
+----
+# ICU4J plural formatting
+loan.repayments.due={count, plural, =0 {No repayments due} =1 {One repayment due} other {# repayments due}}
+----
+
+IMPORTANT: All resource bundle files must be encoded in **UTF-8**. The Gradle build enforces this through the `java` plugin's `encoding` setting. Non-ASCII characters must be represented directly (not as Unicode escapes) for readability and translation tooling compatibility.
+
+Never concatenate translated strings to form sentences—word order varies between languages. Always use parameterized messages with positional arguments (`{0}`, `{1}`).

@@ -1,0 +1,184 @@
+= Infrastructure Providers
+
+Mifos is a cloud-agnostic platform. While we provide reference architectures for several cloud providers, the application layer is designed to be portable. The choice of infrastructure provider depends on the deployment context: enterprise customers may have existing cloud agreements, community deployments may prioritize cost, and data-intensive workloads may benefit from specific provider capabilities.
+
+== Github
+
+GitHub serves as the foundational infrastructure layer for the entire Mifos development and delivery pipeline. Beyond source code hosting, GitHub provides the compute, storage, and orchestration capabilities that power our continuous integration and delivery workflows. Understanding GitHub as infrastructure—rather than merely as a code repository—is essential for every Mifos contributor.
+
+**GitHub Actions** provides the CI/CD compute platform. Every push, pull request, and tag triggers workflows that build, test, analyze, and release Mifos artifacts. The platform offers generous free-tier minutes for open-source projects, and we leverage both GitHub-hosted runners for standard builds and self-hosted runners for workloads requiring special hardware or network access (such as integration tests against a live database). Workflow definitions live in `.github/workflows/` and are version-controlled alongside the application code, ensuring that the build pipeline evolves in lockstep with the code it builds.
+
+**GitHub Packages** hosts our internal Docker images, Maven artifacts, and npm packages. While public releases target Maven Central and Docker Hub, pre-release and snapshot artifacts are published to GitHub Packages for internal consumption. The `ghcr.io` container registry is the default registry for Mifos Docker images, and the GitHub Packages Maven repository is used for snapshot builds consumed by downstream projects.
+
+**GitHub Pages** hosts the project documentation website. The Antora-generated documentation site is built from AsciiDoc sources in the repository and deployed to GitHub Pages on every merge to `main`. This ensures that the public documentation is always current with the latest release.
+
+**GitHub as the single source of truth** means that every artifact, configuration, and decision is captured in the repository. Issues track bugs and features, pull requests track code changes, Discussions track design decisions, and Releases track published versions. If it is not in GitHub, it does not exist.
+
+== Codeberg
+
+TBD
+
+== AWS
+
+Amazon Web Services (AWS) is the most widely used cloud provider for Mifos production deployments, particularly among enterprise customers and financial institutions that require AWS's extensive compliance certifications (SOC 2, PCI DSS, ISO 27001). The Mifos reference architecture on AWS is designed for high availability, fault tolerance, and regulatory compliance.
+
+**Compute**: Amazon EC2 provides virtual machines for traditional deployments, while Amazon ECS (Elastic Container Service) and EKS (Elastic Kubernetes Service) orchestrate containerized Mifos workloads. ECS with Fargate is the recommended approach for teams that want containerized deployments without the operational overhead of managing a Kubernetes control plane. EKS is preferred for large-scale deployments that require advanced scheduling, service mesh integration, or multi-tenant isolation.
+
+**Database**: Amazon RDS for PostgreSQL or MySQL provides managed relational databases with automated backups, point-in-time recovery, and read replicas for reporting workloads. Amazon Aurora offers MySQL- and PostgreSQL-compatible engines with higher throughput and lower replication lag, making it suitable for multi-region deployments where the primary and standby databases are geographically separated.
+
+**Storage**: Amazon S3 stores binary documents (loan agreements, KYC uploads), static assets, and database backups. S3 lifecycle policies automatically transition infrequently accessed documents to lower-cost storage tiers, and S3 Versioning provides an audit trail for document changes.
+
+**CDN**: Amazon CloudFront serves as the global content delivery network for the Mifos web application and API endpoints, reducing latency for users in regions far from the primary deployment.
+
+**Security**: AWS IAM manages access control with the principle of least privilege. IAM roles are assigned to ECS tasks and EC2 instances, eliminating the need for static credentials. AWS KMS manages encryption keys for data at rest, and AWS Certificate Manager provisions TLS certificates for data in transit.
+
+The following Terraform example provisions a basic Mifos ECS cluster:
+
+[source,hcl]
+----
+resource "aws_ecs_cluster" "mifos" {
+  name = "mifos-production"
+
+  setting {
+    name  = "containerInsights"
+    value = "enabled"
+  }
+}
+
+resource "aws_ecs_task_definition" "fineract" {
+  family                   = "fineract"
+  network_mode             = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
+  cpu                      = "1024"
+  memory                   = "2048"
+
+  container_definitions = jsonencode([
+    {
+      name      = "fineract"
+      image     = "openmf/fineract:latest"
+      essential = true
+      portMappings = [
+        {
+          containerPort = 8443
+          protocol      = "tcp"
+        }
+      ]
+      environment = [
+        { name = "MIFOS_DB_HOST", value = aws_db_instance.fineract.address }
+      ]
+      secrets = [
+        { name = "MIFOS_DB_PASSWORD", valueFrom = aws_secretsmanager_secret.db_password.arn }
+      ]
+    }
+  ])
+}
+----
+
+== Azure
+
+Microsoft Azure is the preferred cloud provider for Mifos deployments within organizations that have existing Microsoft enterprise agreements or that require Azure-specific compliance certifications. Azure's tight integration with Microsoft identity services (Azure Active Directory / Entra ID) simplifies authentication and authorization in enterprise environments, and Azure's Government Cloud provides compliance pathways for public-sector financial institutions.
+
+**Azure App Service** provides a fully managed platform for deploying the Mifos web application and API services. App Service supports automatic scaling, deployment slots for zero-downtime releases, and built-in authentication through Azure Easy Auth. For containerized deployments, **Azure Container Apps** offers a serverless container orchestration platform built on top of Kubernetes but without the operational complexity of managing a full AKS cluster.
+
+**Azure SQL Database** is the managed relational database offering, compatible with SQL Server and PostgreSQL. Azure SQL provides built-in high availability, automated backups, and advanced threat detection. For teams already invested in the SQL Server ecosystem, Azure SQL Managed Instance provides full SQL Server compatibility with the benefits of a managed service.
+
+**Azure Key Vault** centralizes the management of secrets, certificates, and encryption keys. All sensitive configuration—database passwords, API keys, TLS certificates—is stored in Key Vault and accessed by Mifos services via managed identities, eliminating hardcoded secrets in configuration files or environment variables.
+
+Choose Azure over AWS when your organization has an existing Enterprise Agreement with Microsoft, when you need Azure Government Cloud for public-sector compliance, or when tight integration with Microsoft identity services is a requirement. Azure's hybrid cloud capabilities (Azure Arc) also make it attractive for organizations that need to manage both cloud and on-premises infrastructure from a single pane of glass.
+
+== GCP
+
+Google Cloud Platform (GCP) is the preferred provider for Mifos deployments that emphasize data analytics, machine learning, or Kubernetes-native operations. GCP's strengths in data processing make it particularly suitable for deployments that need to analyze transaction patterns, detect fraud, or generate regulatory reports at scale.
+
+**Cloud Run** is GCP's serverless container platform and the recommended compute option for most Mifos workloads on GCP. Cloud Run automatically scales to zero when there is no traffic and scales up to handle peak loads, making it cost-effective for deployments with variable traffic patterns typical of microfinance institutions. Each Mifos service can be deployed as an independent Cloud Run service with its own scaling configuration.
+
+**Google Kubernetes Engine (GKE)** is the managed Kubernetes offering and is widely regarded as the best-managed Kubernetes service in the industry. GKE Autopilot mode removes the need to manage node pools entirely, and GKE's integration with Cloud Build, Artifact Registry, and Cloud Monitoring provides a complete DevOps platform. Choose GKE over Cloud Run when you need advanced scheduling, stateful workloads, or service mesh capabilities.
+
+**Cloud SQL** provides managed PostgreSQL and MySQL databases with automatic failover, point-in-time recovery, and private connectivity via VPC. **BigQuery** is GCP's serverless data warehouse and is used for analytics workloads: transaction reports, portfolio analysis, and regulatory reporting can be offloaded from the operational database to BigQuery for fast, cost-effective analysis without impacting production performance.
+
+**Cloud Storage (GCS)** stores binary documents, backups, and static assets with lifecycle management and object versioning.
+
+Choose GCP when your deployment involves significant data analytics workloads, when you want the best managed Kubernetes experience, or when you are leveraging Google's AI/ML APIs for fraud detection or credit scoring.
+
+== Digital Ocean
+
+Digital Ocean provides a cost-effective cloud platform that is particularly well-suited for Mifos community editions, small-scale deployments, and development environments. While it lacks the breadth of services offered by AWS, Azure, or GCP, Digital Ocean's simplicity and transparent pricing make it an excellent choice for organizations that are just beginning their digital transformation journey or that do not need the complexity of a hyperscaler.
+
+**App Platform** is Digital Ocean's managed platform-as-a-service offering. It supports deploying Mifos directly from a Docker image or a Git repository, with automatic SSL, custom domains, and horizontal scaling. App Platform is the simplest way to get a Mifos instance running on Digital Ocean and is recommended for community deployments and proof-of-concept installations.
+
+**Droplets** are Digital Ocean's virtual machines, available in shared-CPU and dedicated-CPU configurations. For deployments that require full operating system control—such as those running custom monitoring agents, VPN gateways, or legacy integration layers—Droplets provide the flexibility of a traditional server with the convenience of cloud provisioning.
+
+**Managed Databases** offer PostgreSQL and MySQL with automated backups, point-in-time recovery, and read replicas. The managed database service eliminates the operational burden of database administration, which is particularly valuable for small teams that lack a dedicated DBA.
+
+Choose Digital Ocean when cost is a primary concern, for community edition hosting, for development and staging environments, or for deployments in regions where hyperscaler presence is limited. Digital Ocean's predictable pricing (no surprise bills from data transfer charges) is a significant advantage for budget-conscious organizations.
+
+== Fly.io
+
+Fly.io is an edge computing platform that deploys Mifos containers to data centers around the world, bringing the application closer to end users. For financial inclusion deployments in regions with limited internet infrastructure—rural Africa, Southeast Asia, South America—edge deployment can dramatically reduce latency and improve the user experience.
+
+Fly.io deploys Docker containers to edge locations, automatically routing user requests to the nearest instance. Each Mifos service runs as a Fly.io application with its own configuration, scaling policy, and geographic distribution. The platform handles TLS certificate provisioning, DNS management, and Anycast routing automatically.
+
+The Fly.io configuration is defined in a `fly.toml` file:
+
+[source,toml]
+----
+app = "mifos-fineract"
+primary_region = "nbo"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  MIFOS_SERVER_PORT = "8443"
+  MIFOS_LOGGING_LEVEL = "INFO"
+
+[deploy]
+  strategy = "bluegreen"
+
+[http_service]
+  internal_port = 8443
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 1
+
+[[http_service.checks]]
+  interval = "15s"
+  grace_period = "30s"
+  method = "get"
+  path = "/fineract-provider/actuator/health"
+  protocol = "https"
+  timeout = "10s"
+
+[mounts]
+  source = "fineract_data"
+  destination = /data
+----
+
+Deploy to Fly.io with the following commands:
+
+[source,bash]
+----
+# Install the Fly.io CLI
+curl -L https://fly.io/install.sh | sh
+
+# Authenticate
+fly auth login
+
+# Launch a new application (first time only)
+fly launch --config fly.toml
+
+# Deploy the latest version
+fly deploy
+
+# Scale to multiple regions
+fly regions add nbo sjc ams
+
+# Monitor deployment status
+fly status
+
+# View application logs
+fly logs
+----
+
+Choose Fly.io when your deployment serves users in regions with limited connectivity, when you need global distribution without the complexity of multi-region Kubernetes, or when you want a simple deployment model that does not require infrastructure management expertise.

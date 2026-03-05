@@ -1,0 +1,56 @@
+@startuml
+title Refactoring: From Tight Coupling to Decoupled Adapter
+
+' --- Scenario 1: Tight Coupling (Anti-Pattern) ---
+participant "High-Level Module\n(Client)" as Client
+participant "Low-Level Module\n(Adaptee)" as Legacy
+
+box "Problem: Tight Coupling" #LightCoral
+    participant Client
+    participant Legacy
+end box
+
+note over Client, Legacy: **BEFORE REFACTORING**
+Client -> Legacy : specificRequest()\n<color:red><b>Client knows internal details!</b></color>
+activate Legacy
+Legacy --> Client : data
+deactivate Legacy
+
+' --- Divider ---
+== Refactoring Intervention ==
+
+' --- Scenario 2: Decoupled (Adapter Pattern) ---
+participant "High-Level Module\n(Client)" as Client_New
+participant "Target Interface" as Interface
+participant "Adapter" as Adapter
+participant "Low-Level Module\n(Adaptee)" as Legacy_New
+
+box "Solution: Decoupled Adapter" #LightGreen
+    participant Client_New
+    participant Interface
+    participant Adapter
+    participant Legacy_New
+end box
+
+note over Client_New, Legacy_New: **AFTER REFACTORING**
+
+Client_New -> Interface : request()\n<color:green><b>Client speaks generic language</b></color>
+activate Interface
+
+Interface -> Adapter : request()
+activate Adapter
+
+note right of Adapter : **Translation Layer**\nConverts generic request\nto specific call
+Adapter -> Legacy_New : specificRequest()
+activate Legacy_New
+
+Legacy_New --> Adapter : data
+deactivate Legacy_New
+
+Adapter --> Interface : data
+deactivate Adapter
+
+Interface --> Client_New : data
+deactivate Interface
+
+@enduml

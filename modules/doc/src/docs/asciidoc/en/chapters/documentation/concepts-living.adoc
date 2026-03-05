@@ -1,0 +1,226 @@
+= Living Documentation
+
+Living documentation is documentation that evolves continuously with the codebase, generated from code and tests rather than written by hand and left to rot. The term captures a fundamental truth: static documentation—manually written guides, design documents, and wikis—degrades inevitably as the system changes. The moment a developer modifies behavior without updating the corresponding documentation, that documentation becomes misleading. Living documentation avoids this fate by deriving documentation directly from the source of truth: the code itself.
+
+The concept draws from the Behaviour-Driven Development (BDD) community, where executable specifications serve simultaneously as tests and as documentation. When a test passes, the documentation is confirmed accurate. When a test fails, the documentation is flagged as out of date. This creates a tight feedback loop that keeps documentation synchronized with implementation.
+
+In the Mifos project, living documentation takes several forms:
+
+* *Test-generated documentation*: Integration tests that describe behavior in natural language, rendered into human-readable reports by tools like Cluecumber or Serenity BDD.
+* *Code-embedded documentation*: Annotations and interfaces that express architectural intent directly in code, processed by tools like jMolecules into structural diagrams and reports.
+* *Module-structure documentation*: Automatically generated documentation of Spring Boot module boundaries, event publications, and dependency graphs via Spring Modulith.
+* *API documentation*: OpenAPI specifications generated from Spring Boot controller annotations, rendered into interactive documentation by Swagger UI or Redoc.
+
+The key principle is *derive, don't write*. Whenever documentation can be mechanically generated from code, it should be. Hand-written documentation should be reserved for content that cannot be derived: narratives, explanations, tutorials, and decision records. This division of labor ensures that reference documentation is always accurate (because it is generated) and that explanatory documentation is always valuable (because it covers what generated documentation cannot).
+
+== Spring Modulith
+
+Spring Modulith (https://spring.io/projects/spring-modulith) is a framework for developing modular Spring Boot applications with built-in documentation capabilities. It provides module detection, verification of module boundaries, and automatic documentation generation that reflects the actual structure of the codebase—making it a powerful tool for living documentation in the Mifos platform.
+
+Spring Modulith detects modules based on package conventions. A module is identified as a top-level package beneath the application's base package, and Spring Modulith infers its API (the types exposed to other modules) and its internal implementation (the types hidden within the module). This detection is not merely structural—it is enforced at runtime and test time, ensuring that module boundaries are respected.
+
+.Module Configuration Example
+[source,java]
+----
+package org.mifos.platform;
+
+import org.springframework.modulith.Modulith;
+import org.springframework.modulith.Modulithic;
+
+@Modulithic
+public class MifosPlatform {
+
+    // Modules are detected automatically from packages:
+    // org.mifos.platform.lending
+    // org.mifos.platform.deposits
+    // org.mifos.platform.customers
+    // org.mifos.platform.reporting
+}
+----
+
+.Event Publication Documentation
+[source,java]
+----
+package org.mifos.platform.lending;
+
+import org.springframework.modulith.ApplicationModule;
+import org.springframework.modulith.EventPublication;
+
+@ApplicationModule(type = ApplicationModule.Type.OPEN)
+public class LendingModule {
+
+    @EventPublication
+    public record LoanApprovedEvent(
+        String loanId,
+        String clientId,
+        java.math.BigDecimal principal,
+        java.time.LocalDate approvalDate
+    ) {}
+
+    @EventPublication
+    public record LoanDisbursedEvent(
+        String loanId,
+        java.math.BigDecimal disbursedAmount,
+        java.time.LocalDate disbursementDate
+    ) {}
+}
+----
+
+Spring Modulith generates documentation in several formats. The most immediately useful is the Canvas, an HTML page for each module that summarizes its API, internal components, event publications, event listeners, and dependencies on other modules. Running the documentation generation is straightforward:
+
+[source,bash]
+----
+# Generate Spring Modulith documentation
+./gradlew generateModulithDocumentation
+
+# Output is written to build/modulith-docs/
+# Each module gets a canvas page, and an aggregate diagram
+# shows inter-module dependencies
+----
+
+The generated output includes a module dependency diagram that reveals which modules depend on which, helping architects identify coupling that violates the intended module boundaries. Spring Modulith also verifies that module boundaries are respected at test time:
+
+[source,java]
+----
+package org.mifos.platform.lending;
+
+import org.springframework.modulith.test.ModuleTest;
+import org.springframework.modulith.test.PublishedEvents;
+import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+@ModuleTest
+class LendingModuleTest {
+
+    @Test
+    void publishesLoanApprovedEvent(LoanService loanService,
+                                     PublishedEvents events) {
+        loanService.approveLoan("LOAN-001");
+
+        assertThat(events.ofType(LoanApprovedEvent.class))
+            .hasSize(1)
+            .matching(event -> event.loanId().equals("LOAN-001"));
+    }
+}
+----
+
+By integrating Spring Modulith documentation generation into the CI pipeline, the Mifos project ensures that module structure documentation is always current—updated every time a pull request is merged.
+
+== jMolecules
+
+jMolecules (https://jmolecules.org/) is a library that allows developers to express architectural concepts directly in code through annotations and interfaces. Rather than relying on external documentation that drifts from reality, jMolecules encodes intent in the code itself—intent that can be verified by tools, visualized in diagrams, and processed into living documentation.
+
+The core jMolecules annotations map to Domain-Driven Design (DDD) concepts: `@Repository`, `@Service`, `@DomainEventHandler`, `@ValueObject`, `@Entity`, and `@AggregateRoot`. These annotations serve a dual purpose: they document the architectural role of each class, and they enable tool-based verification that the architecture is respected.
+
+.jMolecules in a Mifos Domain Model
+[source,java]
+----
+package org.mifos.platform.lending.domain;
+
+import org.jmolecules.ddd.annotation.AggregateRoot;
+import org.jmolecules.ddd.annotation.Entity;
+import org.jmolecules.ddd.annotation.ValueObject;
+import org.jmolecules.ddd.annotation.Identity;
+import org.jmolecules.event.annotation.DomainEventHandler;
+
+@AggregateRoot
+public class Loan {
+
+    @Identity
+    private LoanId loanId;
+    private ClientId clientId;
+    private LoanStatus status;
+    private Money principal;
+    private InterestRate interestRate;
+    private RepaymentSchedule repaymentSchedule;
+
+    // Domain event handler: reacts to events from other modules
+    @DomainEventHandler
+    public void on(ClientAddressChangedEvent event) {
+        if (this.clientId.equals(event.clientId())) {
+            // Update loan correspondence address
+            this.correspondenceAddress = event.newAddress();
+        }
+    }
+
+    public LoanApprovedEvent approve() {
+        if (status != LoanStatus.SUBMITTED) {
+            throw new IllegalStateTransitionException(
+                "Cannot approve loan in status: " + status);
+        }
+        this.status = LoanStatus.APPROVED;
+        return new LoanApprovedEvent(
+            loanId, clientId, principal, LocalDate.now());
+    }
+}
+
+@ValueObject
+public record Money(
+    BigDecimal amount,
+    String currency
+) {
+    public Money {
+        if (amount.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException(
+                "Money amount cannot be negative");
+        }
+    }
+}
+
+@Entity
+public class RepaymentSchedule {
+    @Identity
+    private ScheduleId id;
+    private List<Installment> installments;
+}
+----
+
+.jMolecules Repository Annotation
+[source,java]
+----
+package org.mifos.platform.lending.infrastructure;
+
+import org.jmolecules.ddd.annotation.Repository;
+import org.mifos.platform.lending.domain.Loan;
+import org.mifos.platform.lending.domain.LoanId;
+
+@Repository
+public interface LoanRepository {
+    Loan findById(LoanId id);
+    void save(Loan loan);
+    boolean existsById(LoanId id);
+}
+----
+
+jMolecules integrates with ArchUnit to enforce architectural rules at test time. For example, you can verify that only `@Repository`-annotated classes access the database, or that `@AggregateRoot` classes do not depend on infrastructure concerns:
+
+[source,java]
+----
+package org.mifos.platform.architecture;
+
+import com.tngtech.archunit.junit.AnalyzeClasses;
+import com.tngtech.archunit.junit.ArchTest;
+import com.tngtech.archunit.lang.ArchRule;
+import org.jmolecules.archunit.JMoleculesArchRules;
+
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.*;
+
+@AnalyzeClasses(packages = "org.mifos.platform")
+class LendingArchitectureTest {
+
+    @ArchTest
+    static ArchRule repositoriesMustNotBeAccessedByDomain =
+        noClasses()
+            .that().resideInAPackage("..domain..")
+            .should().dependOnClassesThat()
+            .areAnnotatedWith(Repository.class);
+
+    @ArchTest
+    static ArchRule jMoleculesRules =
+        JMoleculesArchRules.ensureAll();
+}
+----
+
+The combination of jMolecules annotations and ArchUnit verification creates a self-documenting, self-enforcing architecture. When a developer adds a `@Repository` annotation, they are simultaneously documenting the class's architectural role and enabling automated verification that the role is respected. The documentation is always accurate because it _is_ the code.
+

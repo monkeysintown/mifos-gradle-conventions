@@ -1,0 +1,50 @@
+= Testing
+
+== What testing framework does Mifos use?
+Mifos uses a layered testing strategy with different frameworks optimized for each layer:
+
+* **JUnit 5** is the primary test framework for unit and integration tests. JUnit 5's extension model allows us to integrate Spring Boot test contexts, parameterized tests, and conditional test execution seamlessly.
+* **Mockito** provides mocking capabilities for isolating units under test. Use Mockito to mock external dependencies (repositories, HTTP clients, message queues) so that tests remain focused on the logic under test without requiring a full application context.
+* **AssertJ** offers fluent assertions that produce readable error messages. We prefer AssertJ over JUnit's built-in assertions for its chainable API and expressive failure messages: `assertThat(result.getStatus()).isEqualTo(LoanStatus.APPROVED)`.
+* **Cucumber** supports Behavior-Driven Development (BDD) with Gherkin-style specifications. Acceptance tests written in Cucumber serve as living documentation of the system's expected behavior and are particularly valuable for complex business rules in loan processing and account management.
+* **Testcontainers** provides lightweight, disposable Docker containers for integration tests that require real databases, message brokers, or other infrastructure. Testcontainers ensures that integration tests run against the same database engine used in production, eliminating false positives from in-memory databases.
+
+See <<testing>> for detailed configuration examples and best practices for each framework.
+
+== What test coverage is required?
+
+We aim for a minimum of 80% line coverage for new code. This threshold is enforced by JaCoCo in the CI pipeline—the build will fail if coverage drops below the configured minimum. Critical business logic—loan processing, account management, payment transactions—should target 90%+ coverage, as failures in these areas have direct financial impact on end users.
+
+Coverage is measured per module, not per line. This means that utility classes with low business impact (string helpers, date formatters) do not need to meet the 90% threshold, while core domain classes must. Use the `@Generated` annotation or JaCoCo exclusions to skip coverage analysis for code that does not warrant testing (data classes, auto-generated code, simple delegation).
+
+[source,bash]
+----
+# Run tests and generate coverage report
+./gradlew check jacocoTestReport
+
+# View the HTML coverage report
+open build/reports/jacoco/test/html/index.html
+
+# Verify coverage meets the minimum threshold
+./gradlew jacocoTestCoverageVerification
+----
+
+TIP: Do not chase 100% coverage at the expense of test quality. A meaningful test that validates business behavior is worth more than ten tests that merely exercise getters and setters. Focus on testing the "happy path," edge cases, and error conditions that matter to users.
+
+== How do I run a specific test?
+Gradle provides fine-grained control over test execution. Use the `--tests` flag to run a specific test class or method:
+
+[source,bash]
+----
+# Run all tests in a class
+./gradlew test --tests "org.mifos.fineract.loan.LoanServiceTest"
+
+# Run a specific test method
+./gradlew test --tests "org.mifos.fineract.loan.LoanServiceTest.testApproveLoan"
+
+# Run all tests matching a pattern
+./gradlew test --tests "*LoanService*"
+
+# Run tests in a specific subproject
+./gradlew :fineract-provider:test --tests "*LoanService*"
+----

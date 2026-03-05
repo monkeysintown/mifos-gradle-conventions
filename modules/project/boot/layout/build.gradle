@@ -1,0 +1,47 @@
+plugins {
+    id "org.mifos.convention.internal.project.template"
+}
+
+description = "Mifos Initiative - Gradle Conventions - Project - Boot - Layout"
+
+dependencies {
+    api project(":mifos-conventions-gradle-project-boot-imperative")
+    api project(":mifos-conventions-gradle-project-boot-reactive")
+}
+
+gradlePlugin {
+    plugins {
+        MifosProjectBootLayoutPlugin {
+            id = "org.mifos.convention.project.boot.layout"
+            implementationClass = "org.mifos.convention.project.boot.layout.MifosProjectBootLayoutPlugin"
+        }
+        MifosProjectBootPersistenceLayoutPlugin {
+            id = "org.mifos.convention.project.boot.persistence.layout"
+            implementationClass = "org.mifos.convention.project.boot.layout.MifosProjectBootPersistenceLayoutPlugin"
+        }
+        MifosProjectBootSdkLayoutPlugin {
+            id = "org.mifos.convention.project.boot.sdk.layout"
+            implementationClass = "org.mifos.convention.project.boot.layout.MifosProjectBootSdkLayoutPlugin"
+        }
+        MifosProjectBootUseCaseLayoutPlugin {
+            id = "org.mifos.convention.project.boot.usecase.layout"
+            implementationClass = "org.mifos.convention.project.boot.layout.MifosProjectBootUseCaseLayoutPlugin"
+        }
+        MifosProjectBootServiceLayoutPlugin {
+            id = "org.mifos.convention.project.boot.service.layout"
+            implementationClass = "org.mifos.convention.project.boot.layout.MifosProjectBootServiceLayoutPlugin"
+        }
+        MifosProjectBootFlowLayoutPlugin {
+            id = "org.mifos.convention.project.boot.flow.layout"
+            implementationClass = "org.mifos.convention.project.boot.layout.MifosProjectBootFlowLayoutPlugin"
+        }
+        MifosProjectBootTransportLayoutPlugin {
+            id = "org.mifos.convention.project.boot.transport.layout"
+            implementationClass = "org.mifos.convention.project.boot.layout.MifosProjectBootTransportLayoutPlugin"
+        }
+        MifosProjectDocLayoutPlugin {
+            id = "org.mifos.convention.project.boot.doc.layout"
+            implementationClass = "org.mifos.convention.project.boot.layout.MifosProjectDocLayoutPlugin"
+        }
+    }
+}

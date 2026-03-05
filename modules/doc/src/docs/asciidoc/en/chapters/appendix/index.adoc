@@ -1,0 +1,11 @@
+= Appendix
+
+include::properties.adoc[leveloffset=+1]
+
+include::envs.adoc[leveloffset=+1]
+
+include::gradle.adoc[leveloffset=+1]
+
+include::acknowledgement.adoc[leveloffset=+1]
+
+// include::{commondir}/appendix-about.adoc[leveloffset=+1]

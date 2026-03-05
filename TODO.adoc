@@ -1,0 +1,5 @@
+= TODOs
+
+- add support for configuration caching
+- intellij plugin build configuration: https://github.com/asciidoctor/asciidoctor-intellij-plugin/blob/main/build.gradle.kts
+- migrate build scripts to kotlin syntax

@@ -1,0 +1,35 @@
+plugins {
+    id "base"
+    id "maven-publish"
+}
+
+description = "Mifos Initiative - Gradle Conventions - Configurations"
+
+tasks.register("mifosConfigZip", Zip) {
+    group = "mifos"
+    description = "Pack Common Mifos Build Configuration"
+    archiveBaseName = "mifos-conventions-gradle-config"
+
+    from("src/main/config") {
+        into "config"
+    }
+}
+
+group = "org.mifos"
+version = rootProject.version
+
+tasks.build.dependsOn mifosConfigZip
+
+publishing {
+    publications {
+        mavenZip(MavenPublication) {
+            artifact source: mifosConfigZip, classifier: "config", extension: "zip"
+        }
+    }
+    repositories {
+        maven {
+            url = layout.buildDirectory.dir("staging-deploy")
+        }
+        // mavenLocal()
+    }
+}

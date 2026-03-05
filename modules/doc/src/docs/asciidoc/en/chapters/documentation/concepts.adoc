@@ -1,0 +1,45 @@
+= Documentation Concepts
+
+Understanding documentation as a discipline requires familiarity with several foundational concepts that shape how we create, maintain, and consume documentation in the Mifos project.
+
+*Documentation debt* is the accumulated cost of undocumented decisions, outdated guides, and missing references. Like technical debt, it compounds over time. Every shortcut taken—skipping the ADR for a technology choice, omitting the Javadoc for a public API, leaving a README stale after a major refactor—adds to the burden. Paying down documentation debt requires deliberate investment, just like refactoring. The key insight is that documentation debt is often invisible until it becomes critical: a new contributor who cannot build the project, a production incident where no one can trace the reasoning behind a configuration value.
+
+The *documentation lifecycle* mirrors the software lifecycle. Documentation is created, reviewed, published, maintained, and eventually retired. Each stage has its own quality gates. A new feature's documentation should be reviewed alongside its code. Published documentation must be versioned to match the software it describes. When a feature is deprecated, its documentation must be updated or removed—stale documentation is worse than no documentation because it actively misleads.
+
+*Keeping docs close to code* is a pragmatic principle: documentation that resides next to the code it describes is more likely to be updated when the code changes. This is why we favor in-repository AsciiDoc files over external wikis, ADRs in the `docs/adr/` directory over design documents in a shared drive, and inline code annotations over separate specification documents.
+
+The *documentation as code* philosophy extends this principle further. Documentation is written in plain-text formats (AsciiDoc), stored in version control, reviewed through pull requests, built by CI pipelines, and deployed automatically. This approach brings all the benefits of software engineering practices—branching, diffing, blame, rollback—to documentation. The toolchain that supports this includes Asciidoctor for rendering, Antora for site generation, PlantUML and Mermaid for diagrams, and Gradle for orchestrating the build.
+
+include::concepts-diataxis.adoc[leveloffset=+1]
+
+include::concepts-adr.adoc[leveloffset=+1]
+
+include::concepts-archimate.adoc[leveloffset=+1]
+
+include::concepts-living.adoc[leveloffset=+1]
+
+== Other Sources
+
+The following resources provide additional guidance and inspiration for documentation practices in the Mifos project:
+
+* **Awesome Docs** (https://github.com/testthedocs/awesome-docs[testthedocs/awesome-docs]) — A curated list of documentation tools, frameworks, and best practices. Covers everything from static site generators to API documentation tools, style guides, and documentation testing frameworks. An excellent starting point for exploring the documentation tooling landscape.
+
+* **Awesome Documentation** (https://github.com/vipulgupta2048/awesome-documentation[vipulgupta2048/awesome-documentation]) — Another curated collection, with a stronger emphasis on open-source documentation practices, contribution guides, and community documentation standards. Particularly useful for projects like Mifos that rely on community contributions.
+
+* **The Art of Writing Good Documentation** (https://medium.com/analysts-corner/the-art-of-writing-good-documentation-6e4ce4cd3126[Medium]) — A practical article covering the principles of clear, maintainable documentation. Emphasizes audience awareness, structural organization, and the importance of examples. Useful as a quick reference for contributors who are new to technical writing.
+
+* **Documentation Done Right: A Developer's Guide** (https://github.blog/developer-skills/documentation-done-right-a-developers-guide/[GitHub Blog]) — GitHub's guide to writing effective documentation for open-source projects. Covers README files, CONTRIBUTING guides, code of conduct, and issue/PR templates—directly applicable to the Mifos contribution workflow.
+
+* **Google Technical Writing** (https://developers.google.com/tech-writing[developers.google.com/tech-writing]) — Google's free technical writing courses, covering fundamentals and advanced topics. Includes exercises on clear sentences, paragraphs, and document structure. Recommended for any Mifos contributor who wants to improve their writing skills.
+
+* **arc42 Architecture Documentation** (https://docs.arc42.org[docs.arc42.org]) — A pragmatic template for architecture documentation that complements ADRs. arc42 provides a structured approach to documenting building blocks, interfaces, cross-cutting concerns, and architectural decisions. The template is format-agnostic and works well with AsciiDoc.
+
+See:
+
+- https://github.com/testthedocs/awesome-docs
+- https://github.com/vipulgupta2048/awesome-documentation
+- https://medium.com/analysts-corner/the-art-of-writing-good-documentation-6e4ce4cd3126
+- https://github.blog/developer-skills/documentation-done-right-a-developers-guide/
+- https://developers.google.com/tech-writing
+- https://docs.arc42.org
+- https://www.sonarsource.com/blog/introducing-architecture-in-sonarqube/

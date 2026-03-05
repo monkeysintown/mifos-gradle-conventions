@@ -1,0 +1,140 @@
+= Corporate Design
+
+The Mifos corporate identity is the visual embodiment of our mission to create a world of financial inclusion. Every touchpoint with the Mifos brand—from the website and documentation to conference presentations and partner communications—should reinforce our identity as a professional, trustworthy, and globally-minded open-source organization. Consistency in branding is not merely an aesthetic preference; it is a strategic imperative for a platform that handles the financial data of millions of users across dozens of countries. When a partner, regulator, or community member encounters the Mifos brand, they should immediately recognize it and associate it with reliability, openness, and innovation.
+
+The corporate design files are maintained in the `mifos-branding` repository on GitHub, which serves as the single source of truth for all brand assets. The repository contains logo files in multiple formats (SVG, PNG, PDF), color palettes, font packages, presentation templates, and detailed usage guidelines. All team members and community contributors should consult this repository before creating any branded material.
+
+== Logo Usage Guidelines
+
+The Mifos logo consists of the wordmark and the accompanying icon. These elements must always appear together in their prescribed arrangement unless explicitly authorized for specific use cases (such as app icons or favicons).
+
+**Clear Space**: The logo must maintain a minimum clear space equal to the height of the letter "M" in the wordmark on all sides. No other graphic elements, text, or page edges may intrude into this clear space zone. This ensures that the logo remains visually distinct and is not crowded by adjacent content.
+
+**Minimum Size**: The wordmark must never appear smaller than 120 pixels wide in digital applications or 30mm wide in print. Below these sizes, the text becomes illegible and the brand recognition is compromised. For applications where space is severely constrained (mobile app headers, small badges), use the icon alone at a minimum size of 32×32 pixels.
+
+**Color Variants**: The logo is available in three color variants:
+
+* **Primary** (full color): Use on white or light backgrounds. The wordmark appears in Mifos Blue (#1A3C6E) and the icon uses the full color palette.
+* **Reverse** (white): Use on dark backgrounds, photographs, or colored surfaces. The entire logo appears in white (#FFFFFF).
+* **Monochrome** (single color): Use when full color reproduction is not available (stamps, engravings, fax headers). The logo appears in a single color, typically black (#000000) or Mifos Blue (#1A3C6E).
+
+Never modify, distort, rotate, or add effects to the logo. Do not place the logo on busy photographic backgrounds without a solid-color overlay or container. Do not change the logo colors outside of the approved variants listed above.
+
+== Brand Colors
+
+The Mifos color palette is designed to convey trust, stability, and inclusivity. The primary colors are used for headings, navigation, and key interface elements. The secondary colors provide variety for data visualization, status indicators, and accent elements. The neutral colors are used for body text, backgrounds, and borders.
+
+.Primary Brand Colors
+|===
+|Color Name |Hex Code |RGB |Usage
+
+|Mifos Blue
+|`#1A3C6E`
+|26, 60, 110
+|Primary headings, navigation, links, brand elements
+
+|Mifos Teal
+|`#0D9488`
+|13, 148, 136
+|Secondary accent, call-to-action buttons, highlights
+
+|Mifos Gold
+|`#D97706`
+|217, 119, 6
+|Tertiary accent, warnings, important callouts
+
+|Mifos White
+|`#FFFFFF`
+|255, 255, 255
+|Backgrounds, reverse logo, text on dark surfaces
+|===
+
+.Neutral Colors
+|===
+|Color Name |Hex Code |Usage
+
+|Dark Gray
+|`#1F2937`
+|Body text, headings on light backgrounds
+
+|Medium Gray
+|`#6B7280`
+|Secondary text, captions, disabled states
+
+|Light Gray
+|`#F3F4F6`
+|Backgrounds, code blocks, table stripes
+
+|Border Gray
+|`#D1D5DB`
+|Borders, dividers, subtle separators
+|===
+
+== Typography
+
+Typography is a critical component of the Mifos visual identity. The chosen typefaces balance professionalism with accessibility, ensuring that content is legible across devices and screen sizes.
+
+**Primary Typeface — Inter**: Inter is used for all body text, navigation, and interface elements. It is an open-source typeface designed for computer screens, with excellent legibility at small sizes and a wide range of weights for creating clear typographic hierarchies. Inter is available from Google Fonts and is licensed under the SIL Open Font License.
+
+**Secondary Typeface — Source Serif 4**: Source Serif 4 is used for headings and display text where a more distinctive personality is desired. Its traditional serif forms convey authority and trustworthiness—qualities that are essential for a financial platform. Source Serif 4 is also available from Google Fonts under the SIL Open Font License.
+
+**Monospace Typeface — JetBrains Mono**: Used exclusively for code blocks, command-line examples, and technical content where character alignment and distinction matter. The ligature support and clear character differentiation make it an excellent choice for documentation that contains frequent code examples.
+
+.Font Hierarchy
+|===
+|Element |Typeface |Weight |Size (Desktop) |Size (Mobile)
+
+|H1 Heading
+|Source Serif 4
+|Bold (700)
+|36px
+|28px
+
+|H2 Heading
+|Source Serif 4
+|SemiBold (600)
+|28px
+|22px
+
+|H3 Heading
+|Source Serif 4
+|SemiBold (600)
+|22px
+|18px
+
+|Body Text
+|Inter
+|Regular (400)
+|16px
+|16px
+
+|Code
+|JetBrains Mono
+|Regular (400)
+|14px
+|13px
+
+|Caption
+|Inter
+|Regular (400)
+|12px
+|12px
+|===
+
+== Icon Style
+
+Icons in the Mifos design system follow a consistent style: outline-based with 1.5px stroke weight, rounded corners (2px radius), and a 24×24 pixel grid. The outline style ensures that icons remain legible at small sizes and work well in both light and dark themes. Icons should be drawn on the 20×20 pixel live area within the 24×24 pixel grid, leaving 2px padding on all sides.
+
+Use the Material Symbols (outlined variant) as the default icon library. For domain-specific icons (loans, savings, payments) that are not available in Material Symbols, create custom icons following the same style guidelines and contribute them to the `mifos-branding` repository.
+
+== Photography Style
+
+Photography used in Mifos materials should reflect the communities we serve: diverse, global, and empowered. Preferred imagery shows people engaged in financial activities—entrepreneurs running small businesses, families managing household budgets, community groups accessing financial services. Avoid imagery that portrays subjects as helpless or dependent; instead, emphasize agency, capability, and progress.
+
+All photographs must be properly licensed for commercial use. Preferred sources are Unsplash, Pexels, and the Mifos community photo library (available in the `mifos-branding` repository under `photos/`). When using photographs of real people, ensure that appropriate model releases have been obtained.
+
+== Presentation Templates
+
+Conference presentations, internal talks, and community webinars should use the official Mifos presentation template, available in the `mifos-branding` repository in both Google Slides and PowerPoint formats. The template includes pre-designed layouts for title slides, content slides, code examples, and closing slides, all using the brand colors and typography defined above.
+
+IMPORTANT: Never create branded materials using unauthorized templates or colors. If you need a template format that is not currently available, open an issue in the `mifos-branding` repository and the design team will create one. Consistency across all touchpoints is what builds a recognizable and trustworthy brand.

@@ -1,0 +1,58 @@
+// import pl.allegro.tech.build.axion.release.domain.VersionConfig
+// import pl.allegro.tech.build.axion.release.domain.properties.TagProperties
+// import pl.allegro.tech.build.axion.release.domain.scm.ScmPosition
+
+plugins {
+    id "base"
+    id "pl.allegro.tech.build.axion-release"
+    // id "io.freefair.aggregate-javadoc"
+    id "com.palantir.java-format-idea"
+}
+
+description = "Mifos Initiative - Gradle Conventions"
+
+scmVersion {
+    tag {
+        prefix = "v"
+        versionSeparator = ""
+    }
+    nextVersion {
+        suffix = "alpha"
+        separator = "-"
+    }
+
+    // Branch-specific version decoration — pure JGit graph walking
+    branchVersionIncrementer = [
+            "main": { context ->
+                // Stable: use tag exactly as-is (e.g., 1.2.0)
+                context.currentVersion
+            },
+            "dev": { context ->
+                // Dev: append -SNAPSHOT (e.g., 1.3.0-SNAPSHOT)
+                "${context.currentVersion}-SNAPSHOT"
+            },
+            "alpha/.*": { context ->
+                // Alpha: tag-alpha.<commits-since-tag>
+                "${context.currentVersion}-alpha.${context.scmPosition.distance}"
+            },
+            "beta/.*": { context ->
+                "${context.currentVersion}-beta.${context.scmPosition.distance}"
+            },
+            "rc/.*": { context ->
+                "${context.currentVersion}-rc.${context.scmPosition.distance}"
+            }
+    ]
+
+    // JGit-based sanity checks (no "git status" shell calls)
+    checks {
+        uncommittedChanges = true
+        aheadOfRemote = true
+        snapshotDependencies = true
+    }
+
+    // JGit transport for push
+    localOnly = false
+    // pushTagsOnly = false
+}
+
+version = scmVersion.version

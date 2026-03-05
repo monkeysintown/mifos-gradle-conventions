@@ -1,0 +1,5 @@
+= Interesting Blogs and Websites
+
+- Hacker News
+- https://netflixtechblog.com/
+- https://engineering.atspotify.com

@@ -1,0 +1,9 @@
+= Use WASM for extensions
+
+TBD
+
+See:
+
+- https://github.com/dylibso/chicory
+- https://chicory.dev/blog/syntax-highlight
+-

@@ -1,0 +1,16 @@
+dependencies {
+    implementation platform("tech.uom.lib:uom-lib:2.2")
+    constraints {
+        implementation "tech.uom.lib:uom-lib-jackson:2.1"
+        implementation "tech.uom.lib:uom-lib-yasson:2.1"
+        implementation "tech.uom.lib:uom-lib-assertj:2.1"
+
+        implementation "tech.units:indriya:2.2.3"
+        implementation "javax.measure:unit-api:2.2"
+
+        implementation "systems.uom:systems-unicode:2.2"
+        implementation "systems.uom:systems-ucum:2.2"
+        implementation "systems.uom:systems-quantity:2.2"
+        implementation "systems.uom:systems-common:2.2"
+    }
+}

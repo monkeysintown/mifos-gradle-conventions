@@ -1,0 +1,128 @@
+= Introduction
+
+In financial technology, software defects are not merely inconvenient—they can result in monetary losses, regulatory penalties, and erosion of customer trust. The Mifos Initiative, serving financially excluded populations across the globe, carries an especially weighty responsibility: every transaction, every balance calculation, and every audit record must be correct. Testing is therefore not an afterthought but a first-class engineering discipline embedded in every phase of development.
+
+The Mifos testing philosophy rests on three pillars:
+
+* **Correctness is non-negotiable.** Financial calculations, account state transitions, and regulatory reporting must behave exactly as specified. Tests serve as executable specifications that guard against regressions.
+* **Security is a testable property.** Penetration tests, input fuzzing, and architecture enforcement tests ensure that security controls are not accidentally weakened by future changes.
+* **Auditability through automation.** Every test run produces a traceable report. Combined with CI pipelines, this gives auditors confidence that the software has been verified before deployment.
+
+The testing pyramid guides how we distribute effort. At the base, a broad suite of fast unit tests validates individual classes and methods in isolation. Above that, integration tests verify that components collaborate correctly—database access, message queues, and external service calls all work together. Near the top, end-to-end and acceptance tests exercise complete user workflows through the API or UI. At the apex, a small number of performance, penetration, and chaos tests confirm non-functional properties under realistic conditions.
+
+An unbalanced pyramid—many slow tests and few fast ones—leads to long feedback loops and fragile CI pipelines. Mifos conventions therefore mandate the following approximate ratios:
+
+[cols="1,4,1"]
+|===
+| Layer | Purpose | Target %
+
+| Unit | Logic, calculations, state machines | 60-70%
+| Integration | Component collaboration, persistence | 20-25%
+| E2E / Acceptance | User workflows, BDD scenarios | 5-10%
+| Performance / Security | Load, fuzzing, penetration | 5%
+
+|===
+
+Every feature branch must include tests at the appropriate level before merge. A pull request without tests will be rejected by the CI pipeline.
+
+== Test Driven Development
+
+Test Driven Development (TDD) is a development practice where you write a failing test before writing production code. The cycle follows three disciplined steps:
+
+1. **Red** — Write a test that expresses the desired behavior and watch it fail. The failure confirms the test is meaningful.
+2. **Green** — Write the minimal production code required to make the test pass. Do not over-engineer.
+3. **Refactor** — Improve the design of both test and production code while keeping all tests green.
+
+In financial software, TDD is especially valuable because correctness is critical. A missing boundary check in an interest calculation can silently corrupt account balances. TDD forces developers to think about edge cases—zero balances, negative amounts, currency rounding—before the implementation exists, reducing the chance that those edge cases are forgotten.
+
+When to practice strict TDD versus test-after:
+
+* **Strict TDD** for core domain logic: interest calculations, loan repayment schedules, account state transitions, and any code that directly affects financial outcomes.
+* **Test-after** acceptable for: straightforward CRUD endpoints, boilerplate configuration, and UI layout code where the behavior is obvious and the risk of subtle bugs is low.
+
+The following example demonstrates the TDD cycle for a simple interest calculation in the Mifos lending module:
+
+[source,java]
+----
+// Step 1: RED — write the failing test
+class InterestCalculatorTest {
+
+    private InterestCalculator calculator;
+
+    @BeforeEach
+    void setUp() {
+        calculator = new InterestCalculator();
+    }
+
+    @Test
+    void should_calculateSimpleInterest_when_principalRateAndTermProvided() {
+        // given
+        BigDecimal principal = new BigDecimal("10000.00");
+        BigDecimal annualRate = new BigDecimal("0.085"); // 8.5%
+        int termInMonths = 12;
+
+        // when
+        BigDecimal interest = calculator.simpleInterest(principal, annualRate, termInMonths);
+
+        // then
+        assertThat(interest).isEqualByComparingTo(new BigDecimal("850.00"));
+    }
+}
+----
+
+Running the test fails because `InterestCalculator` does not exist yet:
+
+[source,bash]
+----
+$ ./gradlew :lending:test --tests InterestCalculatorTest
+> Task :lending:test FAILED
+
+InterestCalculatorTest > should_calculateSimpleInterest_when_principalRateAndTermProvided FAILED
+    java.lang.UnsupportedOperationException at InterestCalculator.java:12
+1 test completed, 1 failed
+----
+
+[source,java]
+----
+// Step 2: GREEN — minimal implementation
+public class InterestCalculator {
+
+    public BigDecimal simpleInterest(BigDecimal principal,
+                                     BigDecimal annualRate,
+                                     int termInMonths) {
+        return principal
+            .multiply(annualRate)
+            .multiply(BigDecimal.valueOf(termInMonths))
+            .divide(BigDecimal.valueOf(12), 2, RoundingMode.HALF_EVEN);
+    }
+}
+----
+
+[source,bash]
+----
+$ ./gradlew :lending:test --tests InterestCalculatorTest
+> Task :lending:test
+InterestCalculatorTest PASSED
+BUILD SUCCESSFUL
+----
+
+[source,java]
+----
+// Step 3: REFACTOR — extract constant, improve naming, add edge-case tests
+@Test
+void should_returnZero_when_principalIsZero() {
+    BigDecimal interest = calculator.simpleInterest(
+        BigDecimal.ZERO, new BigDecimal("0.085"), 12);
+    assertThat(interest).isEqualByComparingTo(BigDecimal.ZERO);
+}
+
+@Test
+void should_throwException_when_negativePrincipal() {
+    assertThatThrownBy(() -> calculator.simpleInterest(
+        new BigDecimal("-100"), new BigDecimal("0.085"), 12))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("Principal must be non-negative");
+}
+----
+
+TIP: Always add edge-case tests during the refactor step. Financial software must handle zero, negative, and overflow scenarios explicitly.

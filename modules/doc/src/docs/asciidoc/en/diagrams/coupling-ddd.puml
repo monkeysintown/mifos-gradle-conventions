@@ -1,0 +1,69 @@
+@startuml
+title DDD & Clean Architecture: Fixing Violations with Adapter Pattern
+
+' --- STYLING ---
+skinparam backgroundColor #FEFEFE
+skinparam boxBorderColor #CCCCCC
+skinparam arrowColor #333333
+skinparam participantBorderColor #333333
+
+' --- SCENARIO 1: VIOLATIONS ---
+box "Scenario A: Architecture Violations" #LightCoral
+    participant "High-Level Module\n<color:white><b>(Domain Layer)</color>" as Domain_Bad
+    participant "Low-Level Module\n<color:white><b>(Infrastructure Layer)</color>" as Infra_Bad
+end box
+
+Domain_Bad -> Infra_Bad : <color:white><b>saveToOracleDB(data)</b></color>
+
+activate Infra_Bad
+Infra_Bad --> Domain_Bad : <color:white>SQL Result
+deactivate Infra_Bad
+
+== Refactoring to Adapter Pattern ==
+
+' --- SCENARIO 2: COMPLIANCE ---
+box "Scenario B: Clean Architecture Compliance" #LightGreen
+    participant "High-Level Module\n<b>(Domain Layer)" as Domain_Good
+    participant "Interface\n<b>(Application Boundary)" as Interface
+    participant "Adapter\n<b>(Infrastructure Layer)" as Adapter
+    participant "Low-Level Module\n<b>(External Service)" as Infra_Good
+end box
+
+Domain_Good -> Interface : <b>saveReport(data)</b>
+activate Interface
+
+Interface -> Adapter : <b>saveReport(data)</b>
+activate Adapter
+
+note right of Adapter
+    **Clean Architecture:**
+    Adapter acts as the
+    **Anti-Corruption Layer**
+    It translates Domain intent
+    into Technical details.
+end note
+
+Adapter -> Infra_Good : <b>INSERT INTO...</b>
+activate Infra_Good
+Infra_Good --> Adapter : <b>ResultSet
+deactivate Infra_Good
+
+Adapter --> Interface : <b>Success
+deactivate Adapter
+
+Interface --> Domain_Good : <b>Confirmation
+deactivate Interface
+
+note right of Domain_Bad
+    **Clean Code Violation:**
+    Dependency Rule Broken
+    (Domain depends on Infrastructure)
+end note
+
+note right of Domain_Good
+    **DIP Respected:**
+    High-Level defines the Interface.
+    Low-Level conforms to it.
+end note
+
+@enduml

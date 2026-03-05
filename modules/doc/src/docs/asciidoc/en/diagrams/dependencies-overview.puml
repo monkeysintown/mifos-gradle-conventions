@@ -1,0 +1,126 @@
+@startuml fineract-current-overview
+skinparam componentStyle rectangle
+skinparam nodesep 60
+skinparam ranksep 60
+
+title Apache Fineract — Current Cross-Feature Dependencies\n(Red = violation of target boundary rule)
+
+' --- Fully independent (already compliant) ---
+package "✅ Already Independent" #LightGreen {
+    [F9  charge] as F9
+    [F10 calendar] as F10
+    [F11 rate] as F11
+    [F13 organisation] as F13
+    [F19 notifications] as F19
+    [F20 template] as F20
+}
+
+' --- Near-independent ---
+package "🟢 Near-Independent" #PaleGreen {
+    [F1  accounting] as F1
+    [F2  client] as F2
+    [F12 account-transfers] as F12
+    [F16 useradministration] as F16
+    [F17 mix] as F17
+}
+
+' --- Moderate coupling ---
+package "🟡 Moderate" #LightYellow {
+    [F3  group] as F3
+    [F8  shareaccounts] as F8
+    [F14 teller] as F14
+    [F15 report] as F15
+    [F18 batch] as F18
+}
+
+' --- Highly coupled ---
+package "🔴 Highly Coupled" #LightPink {
+    [F4  loan] as F4
+    [F5  savings] as F5
+    [F6  fixeddeposit] as F6
+    [F7  recurringdeposit] as F7
+}
+
+' --- Allowed dependencies ---
+package "Allowed" #E8E8E8 {
+    [fineract-core] as CORE
+    [fineract-command] as CMD
+}
+
+' --- Cross-feature violations ---
+F1 --> F13 : #Red
+F2 --> F9 : #Red
+F2 --> F13 : #Red
+F3 --> F2 : #Red
+F3 --> F9 : #Red
+F3 --> F13 : #Red
+F4 --> F1 : #Red
+F4 --> F2 : #Red
+F4 --> F3 : #Red
+F4 --> F5 : #Red
+F4 --> F9 : #Red
+F4 --> F10 : #Red
+F4 --> F11 : #Red
+F4 --> F12 : #Red
+F4 --> F13 : #Red
+F5 --> F1 : #Red
+F5 --> F2 : #Red
+F5 --> F3 : #Red
+F5 --> F9 : #Red
+F5 --> F10 : #Red
+F5 --> F12 : #Red
+F5 --> F13 : #Red
+F6 --> F1 : #Red
+F6 --> F2 : #Red
+F6 --> F3 : #Red
+F6 --> F5 : #Red
+F6 --> F9 : #Red
+F6 --> F10 : #Red
+F6 --> F12 : #Red
+F6 --> F13 : #Red
+F7 --> F1 : #Red
+F7 --> F2 : #Red
+F7 --> F3 : #Red
+F7 --> F5 : #Red
+F7 --> F9 : #Red
+F7 --> F10 : #Red
+F7 --> F12 : #Red
+F7 --> F13 : #Red
+F8 --> F1 : #Red
+F8 --> F2 : #Red
+F8 --> F3 : #Red
+F8 --> F9 : #Red
+F8 --> F13 : #Red
+F12 --> F4 : #Red
+F12 --> F5 : #Red
+F14 --> F1 : #Red
+F14 --> F2 : #Red
+F14 --> F4 : #Red
+F14 --> F5 : #Red
+F14 --> F13 : #Red
+F15 --> F1 : #Red
+F15 --> F2 : #Red
+F15 --> F4 : #Red
+F15 --> F5 : #Red
+F15 --> F13 : #Red
+F16 --> F13 : #Red
+F17 --> F1 : #Red
+F17 --> F13 : #Red
+F18 --> F2 : #Red
+F18 --> F4 : #Red
+F18 --> F5 : #Red
+
+' --- Allowed (grey, all go to CORE) ---
+F1 ..> CORE : #Green
+F2 ..> CORE : #Green
+F4 ..> CORE : #Green
+F5 ..> CORE : #Green
+F13 ..> CORE : #Green
+
+legend right
+  |= Color |= Meaning |
+  | <#Red> | Cross-feature violation |
+  | <#Green> | Allowed dependency (core/command) |
+endlegend
+
+@enduml

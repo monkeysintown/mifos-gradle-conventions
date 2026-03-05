@@ -1,0 +1,165 @@
+= Git Version Control
+
+TBD
+
+== Configuration
+
+A properly configured Git installation is the foundation of a smooth contribution workflow. The following settings are recommended for all Mifos contributors:
+
+[source,bash]
+----
+# Set your identity (must match your GitHub account)
+git config --global user.name "Your Name"
+git config --global user.email "you@mifos.org"
+
+# Sign commits with GPG (see the GnuPG section)
+git config --global commit.gpgsign true
+git config --global user.signingkey ABCD1234EFGH5678
+
+# Line ending handling (cross-platform consistency)
+# Linux/macOS:
+git config --global core.autocrlf input
+# Windows:
+git config --global core.autocrlf true
+
+# Rebase by default on pull (avoids merge commits)
+git config --global pull.rebase true
+
+# Push only the current branch
+git config --global push.default current
+
+# Automatically prune deleted remote branches
+git config --global fetch.prune true
+
+# Better diff algorithm for renames
+git config --global diff.algorithm histogram
+
+# Use a conventional commit template
+git config --global commit.template ~/.gitmessage
+----
+
+The commit template (`~/.gitmessage`) encourages conventional commit messages:
+
+[source,terminaloutput]
+----
+# <type>(<scope>): <subject>
+#
+# <body>
+#
+# <footer>
+# ----
+# Types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert
+# Scope: optional module or concern
+# Subject: imperative mood, no period, 50 chars max
+# Body: wrap at 72 chars, explain what and why
+# Footer: Fixes #123, Breaking-Change: description
+----
+
+TODO: upstream sync, gpg...
+
+== Conventional Changelog
+
+Mifos follows the https://www.conventionalcommits.org[Conventional Commits] specification for all commit messages. This discipline enables automated changelog generation, semantic versioning, and structured release notes. A conventional commit message has the following structure:
+
+[source,terminaloutput]
+----
+<type>(<scope>): <description>
+
+[optional body]
+
+[optional footer(s)]
+----
+
+The recognized types are:
+
+[cols="1,4"]
+|===
+|Type |Purpose
+
+|`feat` |A new feature for the user (triggers MINOR version bump)
+|`fix` |A bug fix for the user (triggers PATCH version bump)
+|`docs` |Documentation-only changes
+|`style` |Formatting, whitespace, semicolons—no code change
+|`refactor` |Code restructuring without changing behavior
+|`perf` |Performance improvement
+|`test` |Adding or correcting tests
+|`build` |Build system or dependency changes (Gradle, Maven)
+|`ci` |CI configuration changes (GitHub Actions, Jenkins)
+|`chore` |Maintenance tasks that don't fit other categories
+|`revert` |Reverts a previous commit
+|===
+
+Examples of well-formed commit messages:
+
+[source,terminaloutput]
+----
+feat(loans): add repayment schedule generation endpoint
+
+Implement the REST endpoint that generates a repayment schedule
+for a given loan product and principal amount. The schedule
+accounts for grace periods and irregular installments.
+
+Fixes #4521
+----
+
+[source,terminaloutput]
+----
+fix(savings): correct interest calculation for leap years
+
+The daily interest formula was using a fixed 365-day divisor,
+causing underpayment on February 29. This commit uses the
+actual year length from the account calendar.
+
+Fixes #3987
+----
+
+[source,terminaloutput]
+----
+chore(deps): bump Spring Boot to 3.4.1
+----
+
+IMPORTANT: Breaking changes must include a `BREAKING CHANGE:` footer or a `!` after the type/scope (e.g., `feat(api)!: redesign client endpoint`). This triggers a MAJOR version bump.
+
+== Branching Model
+
+Mifos uses **GitHub Flow** as its primary branching model, supplemented by the release branch strategy described in the Releases chapter. GitHub Flow is intentionally simple: every change is made on a feature branch, reviewed through a pull request, and merged into `main`. The `main` branch is always deployable.
+
+....
+┌─────────────────────────────────────────────────────────┐
+│                     GitHub Flow                         │
+├─────────────────────────────────────────────────────────┤
+│                                                         │
+│  main ─────●─────────────●─────────────●──────→         │
+│             \           / \           /                 │
+│              \         /   \         /                  │
+│   feature/    ●───●───●     ●───●───●                   │
+│   add-loan                feature/                      │
+│                           fix-interest                  │
+│                                                         │
+│  1. Create branch from main                             │
+│  2. Make commits with conventional messages             │
+│  3. Open pull request against main                      │
+│  4. CI checks must pass                                 │
+│  5. At least one approving review                       │
+│  6. Squash-merge or merge-commit into main              │
+│  7. Delete the feature branch                           │
+│                                                         │
+└─────────────────────────────────────────────────────────┘
+....
+
+Release branches (`alpha`, `beta`, `rc`) are cut from `main` at predetermined milestones as described in the Releases chapter. Hotfixes are applied directly to the relevant release branch and then cherry-picked back to `main`.
+
+Branch naming conventions:
+
+* `feature/<short-description>` — new features
+* `fix/<short-description>` — bug fixes
+* `docs/<short-description>` — documentation changes
+* `refactor/<short-description>` — code refactoring
+* `chore/<short-description>` — maintenance tasks
+
+See:
+
+- Github Flow
+- Semantic Release
+- worktrees
+

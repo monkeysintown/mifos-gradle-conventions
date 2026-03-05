@@ -1,0 +1,22 @@
+dependencies {
+    implementation platform("io.netty:netty-bom:4.2.16.Final")
+
+    implementation platform("com.linecorp.armeria:armeria-bom:1.40.0")
+
+    implementation platform("io.grpc:grpc-bom:1.82.2")
+    implementation platform("com.google.protobuf:protobuf-bom:4.36.0-RC1")
+
+    constraints {
+        implementation "io.netty:netty-tcnative:2.0.75.Final"
+        implementation "io.netty:netty-tcnative-classes:2.0.75.Final"
+        implementation "io.netty:netty-tcnative-boringssl-static:2.0.75.Final"
+
+        implementation "com.salesforce.servicelibs:reactive-grpc-common:1.2.4"
+        implementation "com.salesforce.servicelibs:reactor-grpc:1.2.4"
+        implementation "com.salesforce.servicelibs:reactor-grpc-stub:1.2.4"
+        implementation "com.salesforce.servicelibs:reactor-grpc-retry:1.2.4"
+
+        implementation "com.beanit:asn1bean:1.14.0"
+        implementation "com.beanit:asn1bean-compiler:1.14.0"
+    }
+}

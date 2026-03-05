@@ -1,0 +1,28 @@
+[appendix]
+= About {organization}
+
+{organization}(R) was created to make the alarm response industry easier and faster. We saw a need in the industry, and made it our mission to simplify the process for all key stakeholders while keeping customers’ safety and peace of mind the priority.
+
+____
+Mifos X is an extended platform for delivering the complete range of financial services needed for an effective financial inclusion solution.
+____
+
+== Flexible Platform
+
+As the industry’s only open platform for financial inclusion, we provide affordable, adaptable and accessible solutions for any segment of the market, new and small financial institutions can easily start with our community app in a hosted environment, medium and large institutions that are evolving into full-service providers of financial inclusion can use our global network of IT partners to configure a Mifos X solution, and innovators can build and scale entirely new solutions on our API-driven platform.
+
+== Global Community
+
+The Mifos community collectively creates, supports, and sustains innovation worldwide. Our open distributed development model and collaborative support network enable Mifos X users to access and share the knowledge of our global community. local IT partners to provide technology services for financial inclusion, global volunteers to contribute to and extend the platform, and local chapters built around to educate on best practices for technology-enabled financial inclusion.
+
+== Product Success
+
+The Mifos X platform contains all the functionality needed for deploying a complete financial inclusion solution and can be configured for any combination of financial services, for any market or demographic, and for any organizational type.
+
+== Mission Success
+
+Mifos X keeps your focus on the success of your social mission by allowing you to grow the solution by adding apps, start simple with minimum needed functionality, and evolve into a complete solution for financial inclusion.
+
+== Deployment Success
+
+The modern Mifos X design of platform + apps + cloud delivers flexibility, low cost, ease of deployment, and ease of integration with accessibility in any environment.

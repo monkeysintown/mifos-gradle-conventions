@@ -1,0 +1,78 @@
+repositories {
+    maven {
+        url = "https://repo.osgeo.org/repository/release/"
+    }
+
+    dependencies {
+        implementation platform("com.graphhopper:jsprit:2.0.0")
+        implementation(platform("au.gov.amsa.risky:risky-bom:0.6.19")) {
+            exclude group: "junit", module: "junit"
+        }
+
+        constraints {
+            implementation "org.locationtech.jts:jts-io:1.20.0"
+            implementation "org.locationtech.jts.io:jts-io-common:1.20.0"
+            implementation "org.locationtech.jts:jts-core:1.20.0"
+            implementation "org.locationtech.jts:jts-modules:1.20.0"
+            implementation "org.locationtech.spatial4j:spatial4j:0.8"
+
+            implementation "org.geotools:gt-mongodb:31.0"
+            implementation "org.geotools:gt-complex:31.0"
+            implementation "org.geotools:gt-swing:31.0"
+            implementation "org.geotools:gt-main:31.0"
+            implementation "org.geotools:gt-shapefile:31.0"
+            implementation "org.geotools:gt-referencing:31.0"
+            implementation "org.geotools:gt-opengis:31.0"
+            implementation "org.geotools:gt-geojson:31.0"
+            implementation "org.geotools:gt-cql:31.0"
+            implementation "org.geotools:gt-coverage:31.0"
+            implementation "org.geotools:gt-api:31.0"
+            implementation "org.geotools:gt-data:31.0"
+            implementation "org.geotools:gt-metadata:31.0"
+            implementation "org.geotools:gt-render:31.0"
+            implementation "org.geotools:gt-tile-client:31.0"
+            implementation "org.geotools:gt-epsg-hsql:31.0"
+            implementation "org.geotools.jdbc:gt-jdbc-postgis:31.0"
+            implementation "org.geotools.jdbc:gt-jdbc-h2:31.0"
+            implementation "org.geotools.jdbc:gt-jdbc-oracle:31.0"
+            implementation "org.geotools.jdbc:gt-jdbc-sqlserver:31.0"
+            implementation "org.geotools.jdbc:gt-jdbc-mysql:31.0"
+            implementation "org.geotools.jdbc:gt-jdbc-teradata:31.0"
+            implementation "org.geotools.jdbc:gt-jdbc-db2:31.0"
+            implementation "org.geotools.jdbc:gt-jdbc-informix:31.0"
+            implementation "org.geotools.jdbc:gt-jdbc-h2gis:31.0"
+            implementation "org.geotools.jdbc:gt-jdbc-hana:31.0"
+
+            implementation "com.graphhopper:graphhopper-core:10.0"
+            implementation "com.graphhopper:graphhopper-api:10.0"
+            implementation "com.graphhopper:graphhopper-isochrone:10.0"
+            implementation "com.graphhopper:graphhopper-map-matching:10.0"
+            implementation "com.graphhopper:graphhopper-map-matching-core:10.0"
+            implementation "com.graphhopper:graphhopper-map-matching-web:10.0"
+            implementation "com.graphhopper:graphhopper-web:10.0"
+            implementation "com.graphhopper:graphhopper-web-api:10.0"
+            implementation "com.graphhopper:graphhopper-reader-gtfs:10.0"
+            implementation "com.graphhopper:graphhopper-reader-json:0.10.3"
+            implementation "com.graphhopper:graphhopper-reader-overlay-data:0.8.2"
+            implementation "com.graphhopper:graphhopper-reader-osm:3.0-pre3"
+            implementation "com.graphhopper:graphhopper-reader-shp:0.12.0-pre1"
+            implementation "com.graphhopper:graphhopper-tools:10.0"
+            implementation "com.graphhopper:directions-api-client-hc:10.0"
+            implementation "com.graphhopper:hmm-lib-external:10.0"
+            implementation "com.graphhopper.external:jackson-datatype-jts:2.14"
+
+            implementation "org.bremersee:geojson-spring-data-mongodb:3.1.1"
+
+            implementation "org.gavaghan:geodesy:1.1.3"
+
+            implementation "org.bytedeco:libpostal:1.1-1.5.8"
+            implementation "org.bytedeco:libpostal-platform:1.1-1.5.8"
+            implementation "com.mammb:jpostal:0.5.0"
+            implementation "net.placemarkt:address-formatter-java:0.0.12"
+
+            implementation "mil.nga.geopackage:geopackage-core:6.6.7"
+            implementation "mil.nga.geopackage:geopackage:6.6.5"
+            implementation "mil.nga.geopackage:geopackage-android:6.7.4"
+        }
+    }
+}

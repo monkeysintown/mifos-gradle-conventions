@@ -1,0 +1,13 @@
+= Lorem Chapter
+
+// .Vega Example 3
+// [vega,rendered-vega-image3,svg,subs=attributes+]
+// ----
+// include::{diagramsdir}/diagram-vega-example.vg.json[]
+// ----
+
+include::foo.adoc[leveloffset=+1]
+
+include::bar.adoc[leveloffset=+1]
+
+include::baz.adoc[leveloffset=+1]

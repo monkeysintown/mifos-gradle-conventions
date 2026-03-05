@@ -1,0 +1,156 @@
+@startuml
+skinparam packageStyle rectangle
+
+title VSLA Service Package Structure
+
+package "com.example.vsla" {
+    [VslaServiceApplication] as App
+
+    package "api" as API {
+        [SelfFundedGroupController]
+        [MeetingController]
+        [InternalLoanController]
+        [DashboardController]
+        [MobileSyncController]
+        [PaymentWebhookController]
+    }
+
+    package "application" as APP {
+        package "command" as CMD {
+            [CommandBus]
+            [CommandHandler]
+            [CommandMiddleware]
+            [CreateSelfFundedGroupCommand]
+            [PurchaseSharesCommand]
+            [ApplyInternalLoanCommand]
+            [ReceiveMobilePaymentCommand]
+        }
+
+        package "handler" as HND {
+            [CreateSelfFundedGroupHandler]
+            [PurchaseSharesHandler]
+            [ApplyInternalLoanHandler]
+        }
+
+        package "middleware" as MID {
+            [JakartaValidationMiddleware]
+            [UserGroupMappingMiddleware]
+            [IdempotencyMiddleware]
+            [OfflineConflictDetectionMiddleware]
+            [TransactionMiddleware]
+            [OutboxPersistenceMiddleware]
+        }
+
+        package "service" as SVC {
+            [GroupDashboardQueryService]
+            [MemberDashboardQueryService]
+            [GroupCorpusQueryService]
+            [ShareOutCalculator]
+        }
+
+        package "event" as EVT {
+            [DomainEventPublisher]
+            [VslaEventPublisher]
+            [VslaDomainEvent]
+            [SelfFundedGroupCreated]
+            [SharesPurchased]
+            [InternalLoanRepaid]
+        }
+    }
+
+    package "domain" as DOM {
+        package "group" as GRP {
+            [SelfFundedGroup]
+            [MemberEnrollment]
+            [GroupMeeting]
+            [MeetingSchedule]
+            [ShareSpecification]
+            [SelfFundedGroupRepository]
+        }
+
+        package "capital" as CAP {
+            [GroupCapital]
+            [ShareLedgerEntry]
+            [GroupCapitalRepository]
+        }
+
+        package "lending" as LND {
+            [InternalLoan]
+            [LoanRepayment]
+            [LoanEligibilityRule]
+            [MemberVote]
+            [InternalLoanRepository]
+        }
+
+        package "accounting" as ACC {
+            [GroupLedger]
+            [ChartOfAccounts]
+            [TrialBalance]
+            [GroupLedgerRepository]
+        }
+
+        package "shared" as SHD {
+            [Money]
+            [GroupId]
+            [MemberId]
+            [LoanId]
+        }
+    }
+
+    package "infrastructure" as INF {
+        package "config" as CFG {
+            [VslaProperties]
+            [VslaFineractProperties]
+        }
+
+        package "fineract" as FIN {
+            [FineractClientConfig]
+            [FineractOutboxProcessor]
+            [FineractMappingService]
+            [FineractCommandHandler]
+            [FineractSavingsHandler]
+            [FineractLoanHandler]
+            [FineractJournalEntryHandler]
+        }
+
+        package "outbox" as OBX {
+            [OutboxEvent]
+            [OutboxRepository]
+            [OutboxStatus]
+        }
+
+        package "persistence" as PER {
+            [JPA Config]
+        }
+
+        package "mobile" as MOB {
+            [OfflineCommandQueue]
+            [MobilePushService]
+            [ConflictResolver]
+        }
+
+        package "payment" as PAY {
+            [YapePaymentAdapter]
+            [PlinPaymentAdapter]
+        }
+    }
+
+    package "exception" as EXC {
+        [GroupNotFoundException]
+        [LoanEligibilityException]
+        [InvalidGroupTypeException]
+        [FineractSyncException]
+    }
+}
+
+API --> CMD : uses
+CMD --> HND : dispatches to
+HND --> DOM : loads aggregates
+MID --> CMD : wraps
+EVT --> OBX : persists
+EVT --> SVC : projects
+FIN --> OBX : polls
+MOB --> CMD : queues
+PAY --> CMD : triggers
+
+@enduml

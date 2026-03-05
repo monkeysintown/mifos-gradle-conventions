@@ -1,0 +1,53 @@
+@startuml
+skinparam componentStyle rectangle
+
+title VSLA Service Architecture Topology
+
+cloud "Mobile App / Web UI" as Mobile {
+    [Offline-First Client]
+    [YAPE/PLIN SDK]
+}
+
+node "VSLA Service" as VSLA {
+    package "Bounded Contexts" {
+        [Group Lifecycle] as GL
+        [Capital & Shares] as CS
+        [Internal Lending] as IL
+        [Group Accounting] as GA
+        [Mobile & Payments] as MP
+    }
+
+    package "Infrastructure" {
+        [Typed Command Bus] as CB
+        [Domain Event Store] as ES
+        [CQRS Read Models] as CQRS
+        [Outbox Processor] as OP
+    }
+}
+
+node "Apache Fineract Core" as Fineract {
+    package "Portfolio" {
+        [Clients (Members)] as Clients
+        [Savings Accounts] as Savings
+        [Loans (External)] as Loans
+    }
+    package "Accounting" {
+        [GL / Journal Entries] as GL_Acc
+    }
+}
+
+Mobile --> VSLA : REST / WebSocket
+VSLA --> Fineract : HTTP (Retrofit2)
+fineract-client
+
+GL --> CS : domain events
+CS --> IL : domain events
+IL --> GA : domain events
+MP --> CB : commands
+CB --> ES : events
+OP --> Savings : POST /savingsaccounts/...
+OP --> Clients : POST /clients
+OP --> Loans : POST /loans
+OP --> GL_Acc : POST /journalentries
+
+@enduml

@@ -1,0 +1,15 @@
+= Install SDKMan
+
+Open a terminal and execute:
+
+[source,bash]
+----
+curl -s "https://get.sdkman.io" | bash
+----
+
+Open a new terminal to apply the changes from the installation and install the JReleaser tool:
+
+[source,bash]
+----
+sdk install jreleaser
+----

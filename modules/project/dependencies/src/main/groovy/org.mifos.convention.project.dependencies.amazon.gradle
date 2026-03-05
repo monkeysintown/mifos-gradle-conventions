@@ -1,0 +1,8 @@
+dependencies {
+    implementation platform("software.amazon.awssdk:bom:2.49.0")
+
+    constraints {
+        implementation "software.amazon.awssdk.crt:aws-crt:0.33.11"
+        implementation "software.amazon.awssdk.crt:aws-crt-android:0.33.11"
+    }
+}

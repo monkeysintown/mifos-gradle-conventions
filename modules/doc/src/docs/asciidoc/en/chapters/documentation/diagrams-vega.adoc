@@ -1,0 +1,151 @@
+= Vega
+
+Vega (https://vega.github.io/vega/) is a declarative visualization grammar for creating data-driven charts and graphics. While PlantUML excels at structural and behavioral diagrams (class, sequence, state), Vega excels at quantitative visualizations: bar charts, line charts, scatter plots, heatmaps, and geographic maps. If your diagram involves data points, axes, and scales rather than boxes and arrows, Vega is the right tool.
+
+Vega specifications are written in JSON, defining the data source, scales, axes, marks (visual elements), and interactions. The following example shows a bar chart of loan disbursements by product type:
+
+[source,json]
+----
+{
+  "$schema": "https://vega.github.io/schema/vega/v5.json",
+  "description": "Loan disbursements by product type",
+  "width": 500,
+  "height": 300,
+  "padding": 5,
+  "data": [
+    {
+      "name": "disbursements",
+      "values": [
+        {"product": "Micro Loan", "count": 4200},
+        {"product": "Small Business", "count": 3100},
+        {"product": "Agricultural", "count": 2800},
+        {"product": "Housing", "count": 1500},
+        {"product": "Education", "count": 900}
+      ]
+    }
+  ],
+  "scales": [
+    {
+      "name": "xscale",
+      "type": "band",
+      "domain": {"data": "disbursements", "field": "product"},
+      "range": "width",
+      "padding": 0.15
+    },
+    {
+      "name": "yscale",
+      "type": "linear",
+      "domain": {"data": "disbursements", "field": "count"},
+      "range": "height",
+      "nice": true
+    }
+  ],
+  "axes": [
+    {"orient": "bottom", "scale": "xscale", "title": "Product Type"},
+    {"orient": "left", "scale": "yscale", "title": "Number of Disbursements"}
+  ],
+  "marks": [
+    {
+      "type": "rect",
+      "from": {"data": "disbursements"},
+      "encode": {
+        "enter": {
+          "x": {"scale": "xscale", "field": "product"},
+          "width": {"scale": "xscale", "band": 1},
+          "y": {"scale": "yscale", "field": "count"},
+          "y2": {"scale": "yscale", "value": 0}
+        },
+        "update": {
+          "fill": {"value": "#0066CC"}
+        },
+        "hover": {
+          "fill": {"value": "#FF6600"}
+        }
+      }
+    }
+  ]
+}
+----
+
+.Integration with AsciiDoc
+
+To embed Vega diagrams in AsciiDoc, the asciidoctor-diagram extension must be configured with the correct paths. The following configuration is required:
+
+[source,asciidoc]
+----
+// Set the Vega directory attribute at the top of your document
+----
+
+.Gradle Configuration for Vega
+
+Add the following to `gradle.properties`:
+
+[source,properties]
+----
+# Path to the Vega CLI (vg2svg) binary directory
+mifos.asciidoc.diagram.vg.dir=/home/user/.local/share/node/bin
+----
+
+.Environment Variable Setup
+
+For IDE integration and Spring Boot applications that render documentation at runtime, set the following environment variable:
+
+[source,bash]
+----
+# Add to ~/.bashrc or ~/.zshrc
+export VEGA_NODE_BIN_DIR="$HOME/.local/share/node/bin"
+export PATH="$VEGA_NODE_BIN_DIR:$PATH"
+
+# Verify Vega CLI is available
+vg2svg --help
+
+# Render a Vega spec to SVG
+vg2svg charts/disbursements.json output/disbursements.svg
+----
+
+For Spring Boot applications, the environment variable can be set in `application.yml`:
+
+[source,yaml]
+----
+mifos:
+  asciidoc:
+    diagram:
+      vg:
+        dir: ${VEGA_NODE_BIN_DIR:${user.home}/.local/share/node/bin}
+----
+
+== Configuration
+
+TBD
+
+- Set attribute `:vgdir: ~/.local/share/node/bin` (this is a custom attribute, we use it to derive all necessary paths for the Vega CLI tools)
+- make sure to enable `subs=attributes+` when you load data via url attributes in the Vega JSON file. This replaces any placeholders (in this case `datadir` with the respective attribute)
+- make sure your `~/.gradle/gradle.properties` contain the property `mifos.asciidoc.diagram.vg.dir` pointing to the local bin folder that contains the Vega CLI tools
+- For Linux/macOS: Create a shell script (e.g., idea.sh) in the IDE's bin directory that exports the desired variables before launching the IDE. Alternatively, add variables to /etc/environment and restart the system.
+- For Windows: Set the variable in the system Environment Variables settings.  IntelliJ typically picks these up automatically, but if not, you may need to restart the IDE.
+- For Spring Boot: You can enable EnvFile support in the run configuration to load variables from a .env file directly.
+
+.Vega CLI tools installation
+
+
+.Vega Example 1
+[vega,rendered-vega-image1,svg]
+----
+include::{diagramsdir}/diagram-vega-example1.vg.json[]
+----
+
+.Vega Example 2
+[vega,rendered-vega-image2,svg]
+----
+include::{diagramsdir}/diagram-vega-example2.vg.json[]
+----
+
+.Vega Example 3
+[vega,rendered-vega-image3,svg,subs=attributes+]
+----
+include::{diagramsdir}/diagram-vega-example3.vg.json[]
+----
+
+See:
+
+* https://vega.github.io/vega/examples/

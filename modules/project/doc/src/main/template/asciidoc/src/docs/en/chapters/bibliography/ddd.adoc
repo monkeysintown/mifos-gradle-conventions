@@ -1,0 +1,8 @@
+[bibliography]
+= Domain Driven Design
+
+* [[[ddd]]] Eric Evans. _Domain-Driven Design: Tackling Complexity in the Heart of Software_ ("Blue Book"). Addison-Wesley Professional. 2003. The foundational text on Domain-Driven Design, introducing the concepts of Ubiquitous Language, Bounded Context, Aggregates, Domain Events, and Context Mapping. The Mifos platform's modular architecture is directly informed by DDD principles: each module represents a bounded context with its own domain model, and inter-module communication occurs through well-defined domain events rather than shared database tables. Every contributor to the Mifos platform should read at least Part I (Putting the Domain Model to Work) and Part II (The Building Blocks of a Model-Driven Design).
+
+* [[[iddd]]] Vaughn Vernon. _Implementing Domain-Driven Design_. Addison-Wesley Professional. 2013. A practical implementation guide that translates Eric Evans' strategic and tactical DDD patterns into concrete code examples using Java and the Spring Framework. This book is particularly relevant for Mifos contributors because it demonstrates how to implement Aggregates, Domain Events, and Event Sourcing using the same technology stack that the Mifos platform is built on. The chapter on CQRS and Event Sourcing provides the theoretical foundation for the Mifos command processing pipeline.
+
+* [[[idddmi]]] Vaughn Vernon. _Domain-Driven Design Distilled_. Addison-Wesley Professional. 2016. A concise introduction to DDD that distills the core concepts into a format accessible to developers who are new to the approach. If the Blue Book feels daunting, start here to understand the fundamental principles before diving into the comprehensive treatment.

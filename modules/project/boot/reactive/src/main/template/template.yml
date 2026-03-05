@@ -1,0 +1,31 @@
+templateId: "project-boot-reactive"
+groupId: "org.mifos.conventions"
+description: "Mifos Spring Boot Reactive Template"
+author: "Aleksandar Vidakovic <aleks@mifos.org>"
+parameters:
+  project_name:
+    prompt: "Project Name (one word!)"
+    type: "string"
+    value: "changeme"
+  project_description:
+    prompt: "Project Description"
+    type: "string"
+    value: "Mifos Spring Boot Project [CHANGE ME!]"
+  project_base_package:
+    prompt: "Project Base Package"
+    type: "string"
+    value: "org.mifos"
+  project_base_path:
+    type: "interpolated"
+    value: "{{project_base_package|replace,.,/}}"
+  project_module_folder:
+    prompt: "Project Module Folder"
+    type: "string"
+    value: "modules"
+  project_module:
+    prompt: "Project Module"
+    type: "string"
+    value: "changeme"
+  class_prefix:
+    type: "interpolated"
+    value: "{{project_name|capitalize}}{{project_name|capitalize}}"

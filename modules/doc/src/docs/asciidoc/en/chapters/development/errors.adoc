@@ -1,0 +1,223 @@
+= Errors
+
+Error handling in a financial platform must be deliberate, consistent, and informative—both for developers debugging issues and for end users trying to understand what went wrong. Mifos adopts a structured error handling philosophy that distinguishes between business errors (expected conditions like "insufficient balance") and system errors (unexpected failures like a database connection loss).
+
+**Business errors** use result objects rather than exceptions. This makes the error path explicit in the type signature and forces calling code to handle both outcomes:
+
+[source,java]
+----
+import java.util.Optional;
+
+public sealed interface LoanResult {
+    record Success(Loan loan) implements LoanResult {}
+    record Failure(String errorCode, String message) implements LoanResult {}
+}
+
+public class LoanService {
+
+    public LoanResult createLoan(CreateLoanCommand command) {
+        var validation = validate(command);
+        if (!validation.isValid()) {
+            return new LoanResult.Failure(
+                "MIFOS-1001",
+                validation.getErrorMessage()
+            );
+        }
+
+        var client = clientRepository.findById(command.clientId());
+        if (client.isEmpty()) {
+            return new LoanResult.Failure(
+                "MIFOS-2001",
+                "Client not found: " + command.clientId()
+            );
+        }
+
+        var loan = Loan.create(command, client.get());
+        loanRepository.save(loan);
+        return new LoanResult.Success(loan);
+    }
+}
+----
+
+**Error codes** follow the convention `MIFOS-XXXX` where the first digit indicates the domain:
+
+|===
+|Range |Domain
+
+|1000–1999 |Validation errors
+|2000–2999 |Client management errors
+|3000–3999 |Loan processing errors
+|4000–4999 |Savings account errors
+|5000–5999 |Accounting errors
+|9000–9999 |System and infrastructure errors
+|===
+
+**API error responses** follow a consistent JSON structure:
+
+[source,json]
+----
+{
+  "timestamp": "2025-06-15T09:30:00Z",
+  "status": 422,
+  "error": "Unprocessable Entity",
+  "errorCode": "MIFOS-3001",
+  "message": "Loan amount exceeds the maximum allowed for this product",
+  "detail": "Requested: 500000.00, Maximum: 250000.00 for product SHORT_TERM",
+  "path": "/api/v1/loans",
+  "requestId": "req-7f3a2b1c"
+}
+----
+
+The `message` field is safe for end-user display (localized through the i18n system). The `detail` field is for developer debugging and should never be shown to end users. The `requestId` enables log correlation across distributed services.
+
+== Exceptions
+
+While business logic errors use result objects, exceptional conditions—things that should not happen under normal operation—still use Java exceptions. Mifos defines a structured exception hierarchy that ensures consistent handling, logging, and error response formatting across all modules.
+
+The base exception class:
+
+[source,java]
+----
+/**
+ * Base exception for all Mifos application exceptions.
+ * Subclasses should be unchecked (extend RuntimeException) to avoid
+ * polluting service method signatures with implementation details.
+ */
+public class MifosException extends RuntimeException {
+
+    private final String errorCode;
+
+    public MifosException(String errorCode, String message) {
+        super(message);
+        this.errorCode = errorCode;
+    }
+
+    public MifosException(String errorCode, String message, Throwable cause) {
+        super(message, cause);
+        this.errorCode = errorCode;
+    }
+
+    public String getErrorCode() {
+        return errorCode;
+    }
+}
+----
+
+Domain-specific exceptions extend the base class:
+
+[source,java]
+----
+/** Thrown when a loan operation violates business rules. */
+public class LoanProcessingException extends MifosException {
+
+    private final Long loanId;
+
+    public LoanProcessingException(Long loanId, String errorCode, String message) {
+        super(errorCode, message);
+        this.loanId = loanId;
+    }
+
+    public Long getLoanId() {
+        return loanId;
+    }
+}
+
+/** Thrown when a platform resource is not found. */
+public class PlatformResourceNotFoundException extends MifosException {
+
+    private final String resourceType;
+    private final String resourceId;
+
+    public PlatformResourceNotFoundException(String resourceType, String resourceId) {
+        super("MIFOS-9001",
+              resourceType + " with identifier " + resourceId + " does not exist");
+        this.resourceType = resourceType;
+        this.resourceId = resourceId;
+    }
+}
+----
+
+Conventions for exception handling:
+
+* **Checked vs. unchecked**: All Mifos application exceptions are **unchecked** (extend `RuntimeException`). Checked exceptions are reserved for truly recoverable conditions where the caller can take meaningful action. In practice, this is rare in a web application context.
+* **Catch at boundaries**: Exceptions should be caught at architectural boundaries—REST controllers, message listeners, and scheduled tasks—never in intermediate service layers. A global `@RestControllerAdvice` translates exceptions into structured API responses.
+* **Never swallow exceptions**: Catching an exception and doing nothing (empty catch block) is a code review rejection. At minimum, log the exception at `WARN` or `ERROR` level.
+* **Wrap don't lose**: When wrapping an exception, always pass the cause: `new MifosException("MIFOS-9000", "Database error", cause)`. Never discard the original stack trace.
+
+[source,java]
+----
+// Global exception handler
+@RestControllerAdvice
+public class MifosExceptionHandler {
+
+    private static final Logger LOG = LoggerFactory.getLogger(MifosExceptionHandler.class);
+
+    @ExceptionHandler(MifosException.class)
+    public ResponseEntity<ApiError> handleMifosException(MifosException ex) {
+        LOG.warn("Business exception: [{}] {}", ex.getErrorCode(), ex.getMessage());
+        return ResponseEntity.unprocessableEntity()
+            .body(new ApiError(
+                Instant.now(),
+                422,
+                ex.getErrorCode(),
+                ex.getMessage(),
+                null
+            ));
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiError> handleUnexpected(Exception ex) {
+        LOG.error("Unexpected error", ex);
+        return ResponseEntity.internalServerError()
+            .body(new ApiError(
+                Instant.now(),
+                500,
+                "MIFOS-9999",
+                "An unexpected error occurred. Please contact support.",
+                null
+            ));
+    }
+}
+----
+
+== Best Practices
+
+Error messages are a critical touchpoint between the software and its users. In a financial inclusion platform, a confusing error message can mean the difference between a loan officer completing a transaction and abandoning it—potentially denying service to someone who needs it most.
+
+The Mifos project draws inspiration from the https://www.wix.com/ux-design/blog/writing-error-messages[Wix UX guide on error messages] and distills the principles into four rules:
+
+**1. Be Specific**
+
+Tell the user exactly what went wrong and which field or value caused the problem.
+
+ BAD:  `Invalid input.`
+ GOOD: `The loan amount must be between $100 and $250,000.`
+
+**2. Be Helpful**
+
+Provide a clear next step. Don't just report the problem—help solve it.
+
+ BAD:  `Transaction failed.`
+ GOOD: `This account has insufficient funds. The minimum required balance is $50. You can deposit funds or reduce the withdrawal amount.`
+
+**3. Be Human**
+
+Write in plain language. Avoid jargon, technical codes, and blame.
+
+ BAD:  `NullPointerException at LoanService.java:142`
+ GOOD: `We couldn't process your loan application. Our team has been notified and will contact you within 24 hours.`
+
+**4. Be Concise**
+
+Respect the user's time. Lead with the most important information.
+
+ BAD:  `An error occurred while attempting to process the request that you submitted for the creation of a new savings account for the client with ID 12345 because the interest rate that you entered is not within the allowed range.`
+ GOOD: `Interest rate must be between 1% and 25%. You entered 30%.`
+
+These principles apply equally to API error responses, UI error messages, and log entries. For API consumers, include both a human-readable `message` and a machine-readable `errorCode`. For UI users, surface the localized message and hide the technical detail behind a collapsible section. For operators, ensure logs contain the full context including request IDs and tenant identifiers.
+
+See:
+
+- https://wix-ux.com/when-life-gives-you-lemons-write-better-error-messages-46c5223e1a2f
+- https://www.baeldung.com/spring-boot-return-errors-problemdetail
+- https://www.rfc-editor.org/rfc/rfc9457.html

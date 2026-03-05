@@ -1,0 +1,114 @@
+plugins {
+    id "application"
+    id "distribution"
+    id "org.springframework.boot"
+    id "org.mifos.convention.project.boot.base"
+}
+
+//openApi {
+//    apiDocsUrl.set("http://localhost:8081/api/v3/api-docs")
+//    // outputDir file("${projectDir}/build/docs")
+//    // outputFileName "openapi.json"
+//    // waitTimeInSeconds 15
+//    // groupedApiMappings ["https://localhost:8081/v3/api-docs/groupA" to "swagger-groupA.json", "https://localhost:8081/v3/api-docs/groupB" to "swagger-groupB.json"]
+//}
+
+rewrite {
+    activeRecipe("org.openrewrite.java.spring.boot4.UpgradeSpringBoot_4_0")
+    setExportDatatables(true)
+}
+
+dependencies {
+    implementation "org.mifos:mifos-commons-java-boot-application:0.1.0-SNAPSHOT"
+
+    implementation "org.springframework.boot:spring-boot-starter"
+    implementation "org.springframework.boot:spring-boot-autoconfigure"
+    implementation "org.springframework.boot:spring-boot-starter-aspectj"
+    implementation "org.springframework.boot:spring-boot-starter-validation"
+    implementation "org.springframework.modulith:spring-modulith-starter-core"
+
+    developmentOnly "org.springframework.boot:spring-boot-devtools"
+
+    rewrite platform("org.openrewrite.recipe:rewrite-recipe-bom:latest.release")
+    rewrite "org.openrewrite.recipe:rewrite-spring"
+
+    testImplementation "org.springframework.modulith:spring-modulith-starter-test"
+}
+
+springBoot {
+    buildInfo {
+        properties {
+            artifact = "${base.archivesName}"
+            version = "${project.version}"
+            group = "${project.group}"
+            name = "${project.description}"
+        }
+    }
+}
+
+var appMain = ext["mifos.projects.application.main"]
+
+bootJar {
+    mainClass = appMain.toString()
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    archiveClassifier = "boot"
+
+    classpath configurations.developmentOnly
+}
+
+bootRun {
+    systemProperty "springAot", "true"
+    systemProperty "reactor.netty.http.server.accessLogEnabled", "true"
+    sourceResources sourceSets.main
+    environment = [
+            "SPRING_CLOUD_CONFIG_DISCOVERY_ENABLED": "false"
+    ]
+}
+
+bootBuildImage {
+    buildpacks = [
+            "paketobuildpacks/ca-certificates",
+            // "paketobuildpacks/bellsoft-liberica",
+            "paketobuildpacks/azul-zulu",
+            // see: https://paketo.io/docs/howto/sbom/
+            "paketobuildpacks/syft",
+            "paketobuildpacks/executable-jar",
+            "paketobuildpacks/dist-zip",
+            "paketobuildpacks/spring-boot",
+            "paketobuildpacks/environment-variables",
+    ]
+
+    environment["BP_JVM_VERSION"] = "25"
+    environment["BP_JVM_TYPE"] = "JRE"
+    environment["BPE_DELIM_JAVA_TOOL_OPTIONS"] = " "
+    environment["BPE_APPEND_JAVA_TOOL_OPTIONS"] = "-XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8 -Duser.timezone=UTC -Djava.security.egd=file:/dev/./urandom"
+    // environment["JAVA_TOOL_OPTIONS"] = ""
+    environment["BP_JVM_JLINK_ENABLED"] = "true"
+    environment["BP_NATIVE_IMAGE"] = "false"
+    environment["BP_SPRING_CLOUD_BINDINGS_DISABLED"] = "true"
+//    environment["BP_EMBED_CERTS"] = "true"
+//    environment["BP_ENABLE_RUNTIME_CERT_BINDING"] = "false"
+//    environment["BP_RUNTIME_CERT_BINDING_DISABLED"] = "true"
+
+    imageName = "mifos/${project.name}"
+    tags = [
+        "mifos/${project.name}:${project.version}"
+    ]
+
+    buildCache {
+        volume {
+            name = "cache-${project.name}.build"
+        }
+    }
+    launchCache {
+        volume {
+            name = "cache-${project.name}.launch"
+        }
+    }
+}
+
+tasks.named("dependencyUpdates").configure {
+    rejectVersionIf {
+        isNonStable(it.candidate.version)
+    }
+}

@@ -1,0 +1,10 @@
+= Modularity
+
+TBD
+
+See:
+
+- https://plugins.jetbrains.com/plugin/13959-metricstree
+- https://martinfowler.com/articles/break-monolith-into-microservices.html
+- https://endive.run
+- https://bytecodealliance.org

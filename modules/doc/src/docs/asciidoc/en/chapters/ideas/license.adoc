@@ -1,0 +1,179 @@
+= Functional Requirements: Mifos Certificate-Based License Management
+
+IMPORTANT: This document is enhanced using AI tools.
+
+== 1. Core License Management
+
+|===
+| ID | Requirement | Priority
+
+| FR-1
+| Generate X.509 license certificates signed by company CA
+| P0
+
+| FR-2
+| Embed license metadata in certificate custom extensions (product ID, customer ID, max instances, hardware fingerprint)
+| P0
+
+| FR-3
+| Define certificate validity period (NotBefore/NotAfter date range)
+| P0
+
+| FR-4
+| Export license as password-protected PKCS#12 keystore for customer distribution
+| P0
+
+| FR-5
+| Support revocation checking via Certificate Revocation List (CRL)
+| P1
+|===
+
+== 2. License Validation
+
+|===
+| ID | Requirement | Priority
+
+| FR-6
+| Validate certificate chain against embedded trust store (CA certificate)
+| P0
+
+| FR-7
+| Verify certificate temporal validity against current system time
+| P0
+
+| FR-8
+| Extract and parse embedded license metadata from certificate extensions
+| P0
+
+| FR-9
+| Validate product ID binding (license must match specific product)
+| P0
+
+| FR-10
+| Verify cryptographic proof of private key possession (prevent license sharing)
+| P0
+
+| FR-11
+| Support optional hardware fingerprint binding
+| P1
+
+| FR-12
+| Perform validation entirely offline without license server
+| P0
+|===
+
+== 3. Spring Boot Integration
+
+|===
+| ID | Requirement | Priority
+
+| FR-13
+| Execute license validation before Spring context refresh (before bean scanning)
+| P0
+
+| FR-14
+| Hook into `SpringApplicationRunListener.starting()` for earliest possible validation
+| P0
+
+| FR-15
+| Implement `EnvironmentPostProcessor` to inject license properties into environment
+| P0
+
+| FR-16
+| Implement `BeanDefinitionRegistryPostProcessor` as gatekeeper for protected beans
+| P0
+
+| FR-17
+| Block application startup with clear error message if validation fails
+| P0
+
+| FR-18
+| Support periodic re-validation for long-running applications
+| P1
+|===
+
+== 4. Tamper Resistance
+
+|===
+| ID | Requirement | Priority
+
+| FR-19
+| Verify JAR file digital signatures on all protected classes
+| P0
+
+| FR-20
+| Detect unsigned or unexpectedly signed classes in protected packages
+| P0
+
+| FR-21
+| Cross-verify presence and integrity of critical license components
+| P0
+
+| FR-22
+| Verify expected method signatures on critical classes
+| P1
+
+| FR-23
+| Verify call graph between license components (prevent no-op stub replacement)
+| P1
+
+| FR-24
+| Detect system clock tampering via secure monotonic clock
+| P0
+
+| FR-25
+| Maintain tamper-evident state file with cryptographic checksum
+| P0
+
+| FR-26
+| Support optional native library (JNI) for verification
+| P2
+|===
+
+== 5. Deployment & Configuration
+
+|===
+| ID | Requirement | Priority
+
+| FR-27
+| Accept license file path via configuration property (`license.file`)
+| P0
+
+| FR-28
+| Accept license password via configuration property (`license.password`)
+| P0
+
+| FR-29
+| Support classpath-embedded license for bundled deployments
+| P1
+
+| FR-30
+| Load trust store from protected JAR classpath
+| P0
+
+| FR-31
+| Provide clear error messages for each failure mode
+| P0
+|===
+
+== 6. Operational
+
+|===
+| ID | Requirement | Priority
+
+| FR-32
+| Log license validation events (success/failure)
+| P1
+
+| FR-33
+| Expose license metadata (customer ID, expiry) to application via environment
+| P1
+
+| FR-34
+| Graceful handling of license expiration during runtime
+| P1
+
+| FR-35
+| Support license renewal/replacement without application redeployment
+| P2
+|===

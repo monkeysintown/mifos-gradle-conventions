@@ -1,0 +1,930 @@
+/* ============================================================
+   Asciidoctor default stylesheet | MIT License | https://asciidoctor.org
+
+   DRAMATIC ASCIIDOC HTML SKIN
+   Palette: 00193a-002b53-023f73-034780-7a0213-a10220-bf0a26-cd0c2b-131313-262626
+   Usage: asciidoctor -a stylesheet=dramatic.css doc.adoc
+   ============================================================ */
+
+@import url(//asciidoctor.org/stylesheets/asciidoctor.css); /* Default asciidoc style framework - important */
+
+/* ------------------------------------------------------------
+   CSS VARIABLES
+   ------------------------------------------------------------ */
+:root {
+    /* Navy family */
+    --navy-deepest:   #00193A;
+    --navy-dark:      #002B53;
+    --navy-medium:    #023F73;
+    --navy-bright:    #034780;
+
+    /* Red family */
+    --red-dark:       #7A0213;
+    --red-strong:     #A10220;
+    --red-bright:     #BF0A26;
+    --red-vivid:      #CD0C2B;
+
+    /* Neutral family */
+    --black:          #131313;
+    --dark-gray:      #262626;
+    --mid-gray:       #4A4A4A;
+    --light-gray:     #8A8A8A;
+    --lighter-gray:   #BDBDBD;
+
+    /* Background tints */
+    --navy-tint:      #E6EEF7;
+    --red-tint:       #FDE8EC;
+    --gray-tint:      #F5F5F5;
+    --white:          #FFFFFF;
+    --off-white:      #FAFAFA;
+
+    /* Typography */
+    --font-serif:      "Georgia", "Noto Serif", "Merriweather", serif;
+    --font-sans:       "Segoe UI", "Helvetica Neue", "Noto Sans", "Roboto", sans-serif;
+    --font-mono:       "SF Mono", "Fira Code", "Source Code Pro", "Noto Mono", monospace;
+
+    /* Spacing scale */
+    --space-xs:  0.25rem;
+    --space-sm:  0.5rem;
+    --space-md:  1rem;
+    --space-lg:  1.5rem;
+    --space-xl:  2rem;
+    --space-2xl: 3rem;
+    --space-3xl: 4rem;
+}
+
+/* ------------------------------------------------------------
+   RESET & BASE
+   ------------------------------------------------------------ */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: var(--font-serif);
+    font-size: 1rem;
+    line-height: 1.7;
+    color: var(--black);
+    background-color: var(--off-white);
+    margin: 0;
+    padding: 0;
+}
+
+/* ------------------------------------------------------------
+   LAYOUT WRAPPER
+   ------------------------------------------------------------ */
+#header,
+#content,
+#footer,
+#footnotes {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 var(--space-lg);
+}
+
+#header {
+    padding-top: var(--space-3xl);
+    padding-bottom: var(--space-xl);
+    border-bottom: 3px solid var(--navy-deepest);
+    margin-bottom: var(--space-2xl);
+}
+
+#content {
+    padding-bottom: var(--space-3xl);
+}
+
+#footer {
+    border-top: 1px solid var(--lighter-gray);
+    padding-top: var(--space-lg);
+    padding-bottom: var(--space-xl);
+    font-family: var(--font-sans);
+    font-size: 0.8125rem;
+    color: var(--light-gray);
+}
+
+/* ------------------------------------------------------------
+   TYPOGRAPHY — HEADINGS
+   ------------------------------------------------------------ */
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-sans);
+    font-weight: 700;
+    line-height: 1.25;
+    margin-top: var(--space-2xl);
+    margin-bottom: var(--space-md);
+    color: var(--navy-deepest);
+    letter-spacing: -0.01em;
+}
+
+h1 {
+    font-size: 2.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-top: 0;
+    margin-bottom: var(--space-lg);
+    padding-bottom: var(--space-md);
+    border-bottom: 4px solid var(--navy-bright);
+}
+
+h2 {
+    font-size: 1.875rem;
+    color: var(--navy-dark);
+    padding-bottom: var(--space-sm);
+    border-bottom: 2px solid var(--navy-tint);
+}
+
+h3 {
+    font-size: 1.5rem;
+    color: var(--navy-medium);
+}
+
+h4 {
+    font-size: 1.25rem;
+    color: var(--navy-bright);
+    font-style: italic;
+}
+
+h5 {
+    font-size: 1rem;
+    color: var(--red-strong);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+h6 {
+    font-size: 0.875rem;
+    color: var(--red-dark);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+}
+
+/* Section numbers */
+.sect1 > h2::before,
+.sect2 > h3::before,
+.sect3 > h4::before {
+    color: var(--navy-bright);
+    font-weight: 700;
+    margin-right: var(--space-sm);
+}
+
+/* ------------------------------------------------------------
+   TYPOGRAPHY — BODY
+   ------------------------------------------------------------ */
+p {
+    margin: 0 0 var(--space-md) 0;
+    text-align: justify;
+    hyphens: auto;
+}
+
+p.lead {
+    font-size: 1.125rem;
+    font-style: italic;
+    color: var(--navy-dark);
+    line-height: 1.6;
+    margin-bottom: var(--space-xl);
+}
+
+/* ------------------------------------------------------------
+   LINKS
+   ------------------------------------------------------------ */
+a {
+    color: var(--navy-bright);
+    text-decoration: underline;
+    text-decoration-color: var(--navy-bright);
+    text-underline-offset: 0.15em;
+    transition: color 0.15s ease, text-decoration-color 0.15s ease;
+}
+
+a:hover {
+    color: var(--red-bright);
+    text-decoration-color: var(--red-bright);
+}
+
+a:visited {
+    color: var(--navy-medium);
+}
+
+/* ------------------------------------------------------------
+   LISTS
+   ------------------------------------------------------------ */
+ul, ol {
+    margin: 0 0 var(--space-md) 0;
+    padding-left: var(--space-xl);
+}
+
+li {
+    margin-bottom: var(--space-xs);
+}
+
+li > p {
+    margin-bottom: var(--space-xs);
+}
+
+ul li {
+    list-style-type: none;
+    position: relative;
+}
+
+ul li::before {
+    content: "▸";
+    color: var(--navy-bright);
+    font-weight: 700;
+    position: absolute;
+    left: -1.25rem;
+    top: 0.05rem;
+}
+
+ol li {
+    list-style-type: decimal;
+    color: var(--red-strong);
+}
+
+ol li > * {
+    color: var(--black);
+}
+
+/* Definition lists */
+dl {
+    margin: 0 0 var(--space-lg) 0;
+}
+
+dt {
+    font-family: var(--font-sans);
+    font-weight: 700;
+    color: var(--navy-deepest);
+    margin-top: var(--space-md);
+    margin-bottom: var(--space-xs);
+}
+
+dd {
+    margin-left: var(--space-lg);
+    margin-bottom: var(--space-sm);
+}
+
+/* ------------------------------------------------------------
+   HORIZONTAL RULE
+   ------------------------------------------------------------ */
+hr {
+    border: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--navy-bright), transparent);
+    margin: var(--space-2xl) 0;
+}
+
+/* ------------------------------------------------------------
+   CODE
+   ------------------------------------------------------------ */
+/* Inline code */
+code {
+    font-family: var(--font-mono);
+    font-size: 0.875em;
+    background-color: var(--gray-tint);
+    color: var(--red-strong);
+    padding: 0.15em 0.4em;
+    border-radius: 4px;
+    border: 1px solid var(--lighter-gray);
+}
+
+/* Code blocks */
+pre {
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    line-height: 1.6;
+    background-color: var(--navy-deepest);
+    color: var(--white);
+    padding: var(--space-lg);
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: 0 0 var(--space-lg) 0;
+    border: 1px solid var(--navy-dark);
+}
+
+pre code {
+    background: none;
+    color: inherit;
+    padding: 0;
+    border: none;
+    font-size: inherit;
+}
+
+/* Syntax highlighting overrides (rouge / highlight.js) */
+pre .hljs,
+pre .highlight {
+    background: transparent !important;
+}
+
+/* Code block title */
+.listingblock .title {
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--navy-tint);
+    background-color: var(--navy-dark);
+    padding: var(--space-sm) var(--space-lg);
+    border-radius: 8px 8px 0 0;
+    margin-bottom: 0;
+}
+
+.listingblock .title + pre {
+    border-radius: 0 0 8px 8px;
+    margin-top: 0;
+}
+
+/* Callouts in code */
+.conum {
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--white);
+    background-color: var(--navy-bright);
+    border-radius: 50%;
+    width: 1.25rem;
+    height: 1.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+    margin-right: var(--space-xs);
+}
+
+.colist {
+    font-size: 0.875rem;
+    margin-bottom: var(--space-lg);
+}
+
+.colist ol li::before {
+    content: none;
+}
+
+.colist ol li {
+    list-style-type: none;
+    color: var(--black);
+}
+
+/* ------------------------------------------------------------
+   TABLES
+   ------------------------------------------------------------ */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0 0 var(--space-lg) 0;
+    font-size: 0.9375rem;
+    background-color: var(--white);
+    border: 1px solid var(--lighter-gray);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+table thead {
+    background-color: var(--navy-deepest);
+    color: var(--white);
+}
+
+table thead th {
+    font-family: var(--font-sans);
+    font-weight: 700;
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    text-align: left;
+    padding: var(--space-sm) var(--space-md);
+    border-bottom: 2px solid var(--navy-bright);
+}
+
+table tbody tr {
+    border-bottom: 1px solid var(--lighter-gray);
+}
+
+table tbody tr:nth-child(even) {
+    background-color: var(--gray-tint);
+}
+
+table tbody tr:last-child {
+    border-bottom: none;
+}
+
+table tbody td {
+    padding: var(--space-sm) var(--space-md);
+    vertical-align: top;
+}
+
+table tbody td p {
+    margin: 0;
+    text-align: left;
+}
+
+table tfoot {
+    background-color: var(--navy-tint);
+    font-weight: 700;
+}
+
+table tfoot td {
+    padding: var(--space-sm) var(--space-md);
+    color: var(--navy-deepest);
+}
+
+/* Table caption */
+.tableblock caption {
+    font-family: var(--font-sans);
+    font-size: 0.8125rem;
+    font-style: italic;
+    color: var(--light-gray);
+    text-align: center;
+    margin-bottom: var(--space-sm);
+    caption-side: top;
+}
+
+/* ------------------------------------------------------------
+   ADMONITIONS
+   ------------------------------------------------------------ */
+.admonitionblock {
+    margin: 0 0 var(--space-lg) 0;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--lighter-gray);
+    background-color: var(--white);
+}
+
+.admonitionblock table {
+    width: 100%;
+    border: none;
+    margin: 0;
+    border-radius: 0;
+}
+
+.admonitionblock table td {
+    padding: var(--space-md) var(--space-lg);
+    vertical-align: top;
+}
+
+.admonitionblock table td.icon {
+    width: 3.5rem;
+    text-align: center;
+    padding: var(--space-md);
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--white);
+    line-height: 1.4;
+}
+
+.admonitionblock table td.icon .title {
+    font-size: 0.6875rem;
+    font-weight: 700;
+}
+
+.admonitionblock table td.content {
+    padding-left: var(--space-lg);
+}
+
+.admonitionblock table td.content > .title {
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--navy-deepest);
+    margin-bottom: var(--space-xs);
+}
+
+.admonitionblock table td.content p {
+    margin: 0 0 var(--space-xs) 0;
+    text-align: left;
+}
+
+.admonitionblock table td.content p:last-child {
+    margin-bottom: 0;
+}
+
+/* Note — navy */
+.admonitionblock.note {
+    border-left: 4px solid var(--navy-bright);
+}
+.admonitionblock.note td.icon {
+    background-color: var(--navy-bright);
+}
+.admonitionblock.note td.content > .title {
+    color: var(--navy-bright);
+}
+
+/* Tip — medium navy */
+.admonitionblock.tip {
+    border-left: 4px solid var(--navy-medium);
+}
+.admonitionblock.tip td.icon {
+    background-color: var(--navy-medium);
+}
+.admonitionblock.tip td.content > .title {
+    color: var(--navy-medium);
+}
+
+/* Important — strong red */
+.admonitionblock.important {
+    border-left: 4px solid var(--red-strong);
+}
+.admonitionblock.important td.icon {
+    background-color: var(--red-strong);
+}
+.admonitionblock.important td.content > .title {
+    color: var(--red-strong);
+}
+
+/* Warning — bright red */
+.admonitionblock.warning {
+    border-left: 4px solid var(--red-bright);
+}
+.admonitionblock.warning td.icon {
+    background-color: var(--red-bright);
+}
+.admonitionblock.warning td.content > .title {
+    color: var(--red-bright);
+}
+
+/* Caution — vivid red */
+.admonitionblock.caution {
+    border-left: 4px solid var(--red-vivid);
+}
+.admonitionblock.caution td.icon {
+    background-color: var(--red-vivid);
+}
+.admonitionblock.caution td.content > .title {
+    color: var(--red-vivid);
+}
+
+/* ------------------------------------------------------------
+   BLOCKQUOTE
+   ------------------------------------------------------------ */
+.quoteblock {
+    margin: 0 0 var(--space-lg) 0;
+    padding: var(--space-lg) var(--space-xl);
+    background-color: var(--navy-tint);
+    border-left: 4px solid var(--navy-bright);
+    border-radius: 0 8px 8px 0;
+    font-style: italic;
+    color: var(--navy-deepest);
+}
+
+.quoteblock blockquote {
+    margin: 0;
+    padding: 0;
+    border: none;
+}
+
+.quoteblock blockquote p {
+    text-align: left;
+    margin-bottom: var(--space-sm);
+}
+
+.quoteblock blockquote p:last-child {
+    margin-bottom: 0;
+}
+
+.quoteblock .attribution {
+    font-family: var(--font-sans);
+    font-size: 0.8125rem;
+    font-style: normal;
+    font-weight: 700;
+    color: var(--red-strong);
+    text-align: right;
+    margin-top: var(--space-sm);
+}
+
+.quoteblock .attribution cite {
+    font-style: normal;
+}
+
+/* ------------------------------------------------------------
+   SIDEBAR / EXAMPLE
+   ------------------------------------------------------------ */
+.sidebarblock {
+    margin: 0 0 var(--space-lg) 0;
+    padding: var(--space-lg);
+    background-color: var(--gray-tint);
+    border: 1px solid var(--lighter-gray);
+    border-radius: 8px;
+}
+
+.sidebarblock > .content > .title {
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--navy-deepest);
+    margin-bottom: var(--space-sm);
+    padding-bottom: var(--space-sm);
+    border-bottom: 1px solid var(--lighter-gray);
+}
+
+.exampleblock {
+    margin: 0 0 var(--space-lg) 0;
+    padding: var(--space-lg);
+    background-color: var(--white);
+    border: 1px solid var(--lighter-gray);
+    border-left: 4px solid var(--navy-bright);
+    border-radius: 0 8px 8px 0;
+}
+
+.exampleblock > .content > .title {
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--navy-deepest);
+    margin-bottom: var(--space-sm);
+}
+
+/* ------------------------------------------------------------
+   VERSE
+   ------------------------------------------------------------ */
+.verseblock {
+    margin: 0 0 var(--space-lg) 0;
+    padding: var(--space-lg) var(--space-xl);
+    background-color: var(--navy-tint);
+    border-left: 4px solid var(--navy-bright);
+    font-style: italic;
+    color: var(--navy-deepest);
+    border-radius: 0 8px 8px 0;
+}
+
+.verseblock pre {
+    background: none;
+    color: inherit;
+    padding: 0;
+    border: none;
+    font-family: var(--font-serif);
+    font-size: inherit;
+    line-height: 1.8;
+}
+
+.verseblock .attribution {
+    font-family: var(--font-sans);
+    font-size: 0.8125rem;
+    font-style: normal;
+    font-weight: 700;
+    color: var(--red-strong);
+    text-align: right;
+    margin-top: var(--space-sm);
+}
+
+/* ------------------------------------------------------------
+   IMAGE / MEDIA
+   ------------------------------------------------------------ */
+.imageblock {
+    margin: 0 0 var(--space-lg) 0;
+    text-align: center;
+}
+
+.imageblock img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.imageblock .title {
+    font-family: var(--font-sans);
+    font-size: 0.8125rem;
+    font-style: italic;
+    color: var(--light-gray);
+    margin-top: var(--space-sm);
+}
+
+/* ------------------------------------------------------------
+   TOC
+   ------------------------------------------------------------ */
+#toc {
+    background-color: var(--white);
+    border: 1px solid var(--lighter-gray);
+    border-radius: 8px;
+    padding: var(--space-lg);
+    margin-bottom: var(--space-2xl);
+}
+
+#toc .title {
+    font-family: var(--font-sans);
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--navy-deepest);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: var(--space-md);
+    padding-bottom: var(--space-sm);
+    border-bottom: 2px solid var(--navy-tint);
+}
+
+#toc ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#toc ul li {
+    margin: 0;
+    padding: 0;
+}
+
+#toc ul li::before {
+    content: none;
+}
+
+#toc ul li a {
+    display: block;
+    padding: var(--space-xs) 0;
+    color: var(--navy-dark);
+    text-decoration: none;
+    font-family: var(--font-sans);
+    font-size: 0.9375rem;
+    border-bottom: 1px solid var(--gray-tint);
+    transition: color 0.15s ease, padding-left 0.15s ease;
+}
+
+#toc ul li a:hover {
+    color: var(--red-bright);
+    padding-left: var(--space-sm);
+}
+
+#toc ul ul li a {
+    padding-left: var(--space-lg);
+    font-size: 0.875rem;
+    color: var(--navy-medium);
+}
+
+#toc ul ul ul li a {
+    padding-left: var(--space-xl);
+    font-size: 0.8125rem;
+    color: var(--mid-gray);
+}
+
+/* ------------------------------------------------------------
+   HEADER (document title block)
+   ------------------------------------------------------------ */
+#header h1 {
+    font-size: 2.75rem;
+    margin-bottom: var(--space-sm);
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+#header .details {
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+    color: var(--light-gray);
+    margin-top: var(--space-md);
+}
+
+#header .details span {
+    display: inline-block;
+    margin-right: var(--space-lg);
+}
+
+#header .details span::before {
+    color: var(--navy-bright);
+    font-weight: 700;
+    margin-right: var(--space-xs);
+}
+
+#header .details .author::before { content: "Author:"; }
+#header .details .email::before { content: "Email:"; }
+#header .details .revnumber::before { content: "Version:"; }
+#header .details .revdate::before { content: "Date:"; }
+
+/* ------------------------------------------------------------
+   FOOTNOTES
+   ------------------------------------------------------------ */
+#footnotes {
+    border-top: 1px solid var(--lighter-gray);
+    padding-top: var(--space-lg);
+    margin-top: var(--space-2xl);
+}
+
+#footnotes hr {
+    display: none;
+}
+
+#footnotes .footnote {
+    font-size: 0.8125rem;
+    color: var(--mid-gray);
+    margin-bottom: var(--space-xs);
+}
+
+#footnotes .footnote a {
+    color: var(--navy-bright);
+    text-decoration: none;
+    font-weight: 700;
+}
+
+/* ------------------------------------------------------------
+   PRINT STYLES
+   ------------------------------------------------------------ */
+@media print {
+    body {
+        background-color: var(--white);
+        font-size: 11pt;
+        line-height: 1.5;
+    }
+
+    #header,
+    #content,
+    #footer,
+    #footnotes {
+        max-width: none;
+        padding: 0;
+    }
+
+    #header {
+        border-bottom-color: var(--navy-deepest);
+        padding-top: var(--space-xl);
+    }
+
+    h1 {
+        font-size: 24pt;
+    }
+
+    h2 {
+        font-size: 18pt;
+        page-break-after: avoid;
+    }
+
+    h3 {
+        font-size: 14pt;
+        page-break-after: avoid;
+    }
+
+    pre {
+        background-color: var(--navy-deepest) !important;
+        color: var(--white) !important;
+        page-break-inside: avoid;
+        border: 1px solid var(--navy-dark);
+    }
+
+    table {
+        page-break-inside: avoid;
+    }
+
+    .admonitionblock {
+        page-break-inside: avoid;
+    }
+
+    a {
+        color: var(--navy-dark);
+        text-decoration: none;
+    }
+
+    a[href]::after {
+        content: " (" attr(href) ")";
+        font-size: 0.8em;
+        color: var(--light-gray);
+    }
+
+    #toc {
+        page-break-after: always;
+    }
+}
+
+/* ------------------------------------------------------------
+   RESPONSIVE
+   ------------------------------------------------------------ */
+@media (max-width: 768px) {
+    #header,
+    #content,
+    #footer,
+    #footnotes {
+        padding: 0 var(--space-md);
+    }
+
+    #header {
+        padding-top: var(--space-xl);
+    }
+
+    h1 {
+        font-size: 1.75rem;
+    }
+
+    h2 {
+        font-size: 1.5rem;
+    }
+
+    h3 {
+        font-size: 1.25rem;
+    }
+
+    pre {
+        padding: var(--space-md);
+        font-size: 0.8125rem;
+    }
+
+    table {
+        font-size: 0.875rem;
+    }
+
+    .quoteblock,
+    .verseblock {
+        padding: var(--space-md);
+    }
+}

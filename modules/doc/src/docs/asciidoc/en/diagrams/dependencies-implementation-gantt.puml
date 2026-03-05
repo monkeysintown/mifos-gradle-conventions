@@ -1,0 +1,73 @@
+@startgantt fineract-implementation-gantt
+title Apache Fineract — Modularization Implementation Sequence (Gantt)
+
+Project starts the 2026-05-27
+saturday are closed
+sunday are closed
+
+' === PHASE 1: Foundation ===
+-- Phase 1: Foundation --
+[1a. Create fineract-core module] lasts 5 days
+[1a. Create fineract-core module] is colored in #90EE90
+
+[1b. Create fineract-command module] lasts 5 days
+[1b. Create fineract-command module] starts at [1a. Create fineract-core module]'s start
+[1b. Create fineract-command module] is colored in #90EE90
+
+[1c. Verify already compliant packages (F9,F10,F11,F13,F19,F20)] lasts 2 days
+[1c. Verify already compliant packages (F9,F10,F11,F13,F19,F20)] starts at [1a. Create fineract-core module]'s end
+[1c. Verify already compliant packages (F9,F10,F11,F13,F19,F20)] is colored in #90EE90
+
+' === PHASE 2: Low-Hanging Fruit ===
+-- Phase 2: Low-Hanging Fruit --
+[2a. Extract read-only DTOs into fineract-core] lasts 5 days
+[2a. Extract read-only DTOs into fineract-core] starts at [1c. Verify already compliant packages (F9,F10,F11,F13,F19,F20)]'s end
+[2a. Extract read-only DTOs into fineract-core] is colored in #98FB98
+
+[2b. Decouple F1 accounting, F2 client, F16 useradmin] lasts 5 days
+[2b. Decouple F1 accounting, F2 client, F16 useradmin] starts at [2a. Extract read-only DTOs into fineract-core]'s end
+[2b. Decouple F1 accounting, F2 client, F16 useradmin] is colored in #98FB98
+
+[2c. Decouple F3 group, F12 transfers, F17 mix] lasts 5 days
+[2c. Decouple F3 group, F12 transfers, F17 mix] starts at [2b. Decouple F1 accounting, F2 client, F16 useradmin]'s end
+[2c. Decouple F3 group, F12 transfers, F17 mix] is colored in #98FB98
+
+' === PHASE 3: Critical Packages ===
+-- Phase 3: Critical Packages (The Hard Part) --
+[3a. Decouple F5 savings (via events & DTOs)] lasts 10 days
+[3a. Decouple F5 savings (via events & DTOs)] starts at [2c. Decouple F3 group, F12 transfers, F17 mix]'s end
+[3a. Decouple F5 savings (via events & DTOs)] is colored in #FFFFE0
+
+[3b. Decouple F4 loan (depends on F5 savings)] lasts 12 days
+[3b. Decouple F4 loan (depends on F5 savings)] starts at [3a. Decouple F5 savings (via events & DTOs)]'s end
+[3b. Decouple F4 loan (depends on F5 savings)] is colored in #FFFFE0
+
+[3c. Break deposit->savings inheritance (F6, F7)] lasts 10 days
+[3c. Break deposit->savings inheritance (F6, F7)] starts at [3a. Decouple F5 savings (via events & DTOs)]'s end
+[3c. Break deposit->savings inheritance (F6, F7)] is colored in #FFFFE0
+
+' === PHASE 4: Orchestrators & Reporting ===
+-- Phase 4: Orchestrators & Reporting --
+[4a. Decouple F14 teller (Command Bus)] lasts 7 days
+[4a. Decouple F14 teller (Command Bus)] starts at [3b. Decouple F4 loan (depends on F5 savings)]'s end
+[4a. Decouple F14 teller (Command Bus)] is colored in #FFB6C1
+
+[4b. Decouple F15 report (CQRS read models)] lasts 10 days
+[4b. Decouple F15 report (CQRS read models)] starts at [3b. Decouple F4 loan (depends on F5 savings)]'s end
+[4b. Decouple F15 report (CQRS read models)] is colored in #FFB6C1
+
+[4c. Decouple F8 shareaccounts, F18 batch] lasts 7 days
+[4c. Decouple F8 shareaccounts, F18 batch] starts at [3c. Break deposit->savings inheritance (F6, F7)]'s end
+[4c. Decouple F8 shareaccounts, F18 batch] is colored in #FFB6C1
+
+' === PHASE 5: Enforcement ===
+-- Phase 5: Enforcement & CI --
+[5a. Implement ArchUnit boundary rules] lasts 3 days
+[5a. Implement ArchUnit boundary rules] starts at [4b. Decouple F15 report (CQRS read models)]'s end
+[5a. Implement ArchUnit boundary rules] is colored in #D3D3D3
+
+[5b. Setup CI/CD pipeline enforcement] lasts 2 days
+[5b. Setup CI/CD pipeline enforcement] starts at [5a. Implement ArchUnit boundary rules]'s end
+[5b. Setup CI/CD pipeline enforcement] is colored in #D3D3D3
+
+@endgantt

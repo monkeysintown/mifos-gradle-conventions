@@ -1,0 +1,442 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn">
+  <bpmn:collaboration id="credit-scoring-collaboration">
+    <bpmn:participant id="participant-frontend" name="CREDIT_SCORING_FRONTEND_(BANK)" processRef="frontend-process" />
+    <bpmn:participant id="participant-credit-scoring" name="CREDIT_SCORING_(BANK)" processRef="credit-scoring-process" />
+    <bpmn:participant id="participant-scoring-service" name="SCORING_SERVICE" processRef="scoring-service-process" />
+    <bpmn:messageFlow id="msg-frontend-to-scoring" sourceRef="participant-frontend" targetRef="start-scoring-request-received" />
+    <bpmn:messageFlow id="msg-report-delay-to-frontend" sourceRef="task-report-delay" targetRef="participant-frontend" />
+    <bpmn:messageFlow id="msg-send-score-to-frontend" sourceRef="task-send-credit-score" targetRef="participant-frontend" />
+    <bpmn:messageFlow id="msg-request-to-service" sourceRef="task-request-credit-score" targetRef="start-service-request-received" />
+    <bpmn:messageFlow id="msg-service-score-direct" sourceRef="task-send-score-direct" targetRef="event-score-received-direct" />
+    <bpmn:messageFlow id="msg-service-score-after-delay" sourceRef="task-send-score-after-delay" targetRef="event-score-received-after-delay" />
+    <bpmn:messageFlow id="msg-service-delay-info" sourceRef="task-report-service-delay" targetRef="event-delay-info-received" />
+  </bpmn:collaboration>
+
+  <bpmn:message id="msg-scoring-request" name="SCORING_REQUEST" />
+  <bpmn:message id="msg-service-request" name="SERVICE_SCORING_REQUEST" />
+  <bpmn:message id="msg-score-direct" name="CREDIT_SCORE_DIRECT" />
+  <bpmn:message id="msg-score-delayed" name="CREDIT_SCORE_AFTER_DELAY" />
+  <bpmn:message id="msg-delay-info" name="DELAY_INFORMATION" />
+
+  <bpmn:process id="frontend-process" isExecutable="false" />
+
+  <bpmn:process id="credit-scoring-process">
+    <bpmn:task id="task-request-credit-score" name="REQUEST_CREDIT_SCORE">
+      <bpmn:incoming>flow-start-to-request</bpmn:incoming>
+      <bpmn:outgoing>flow-request-to-gateway</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="gateway-merge-responses" name="MERGE_RESPONSE_PATHS">
+      <bpmn:incoming>flow-score-delayed-to-merge</bpmn:incoming>
+      <bpmn:incoming>flow-score-direct-to-merge</bpmn:incoming>
+      <bpmn:outgoing>flow-merge-to-send</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="task-send-credit-score" name="SEND_CREDIT_SCORE_TO_FRONTEND">
+      <bpmn:incoming>flow-merge-to-send</bpmn:incoming>
+      <bpmn:outgoing>flow-send-to-end</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="end-scoring-handled" name="SCORING_REQUEST_HANDLED">
+      <bpmn:incoming>flow-send-to-end</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:task id="task-report-delay" name="REPORT_DELAY_TO_FRONTEND">
+      <bpmn:incoming>flow-delay-to-report</bpmn:incoming>
+      <bpmn:outgoing>flow-report-to-score-after-delay</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:sequenceFlow id="flow-start-to-request" sourceRef="start-scoring-request-received" targetRef="task-request-credit-score" />
+    <bpmn:sequenceFlow id="flow-score-delayed-to-merge" sourceRef="event-score-received-after-delay" targetRef="gateway-merge-responses" />
+    <bpmn:sequenceFlow id="flow-score-direct-to-merge" sourceRef="event-score-received-direct" targetRef="gateway-merge-responses" />
+    <bpmn:sequenceFlow id="flow-merge-to-send" sourceRef="gateway-merge-responses" targetRef="task-send-credit-score" />
+    <bpmn:sequenceFlow id="flow-send-to-end" sourceRef="task-send-credit-score" targetRef="end-scoring-handled" />
+    <bpmn:sequenceFlow id="flow-delay-to-report" sourceRef="event-delay-info-received" targetRef="task-report-delay" />
+    <bpmn:sequenceFlow id="flow-report-to-score-after-delay" sourceRef="task-report-delay" targetRef="event-score-received-after-delay" />
+    <bpmn:intermediateCatchEvent id="event-score-received-direct" name="CREDIT_SCORE_RECEIVED">
+      <bpmn:incoming>flow-gateway-to-score-direct</bpmn:incoming>
+      <bpmn:outgoing>flow-score-direct-to-merge</bpmn:outgoing>
+      <bpmn:messageEventDefinition messageRef="msg-score-direct" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:intermediateCatchEvent id="event-score-received-after-delay" name="CREDIT_SCORE_RECEIVED">
+      <bpmn:incoming>flow-report-to-score-after-delay</bpmn:incoming>
+      <bpmn:outgoing>flow-score-delayed-to-merge</bpmn:outgoing>
+      <bpmn:messageEventDefinition messageRef="msg-score-delayed" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:startEvent id="start-scoring-request-received" name="SCORING_REQUEST_RECEIVED">
+      <bpmn:outgoing>flow-start-to-request</bpmn:outgoing>
+      <bpmn:messageEventDefinition messageRef="msg-scoring-request" />
+    </bpmn:startEvent>
+    <bpmn:intermediateCatchEvent id="event-delay-info-received" name="DELAY_INFORMATION_RECEIVED">
+      <bpmn:incoming>flow-gateway-to-delay</bpmn:incoming>
+      <bpmn:outgoing>flow-delay-to-report</bpmn:outgoing>
+      <bpmn:messageEventDefinition messageRef="msg-delay-info" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:sequenceFlow id="flow-request-to-gateway" sourceRef="task-request-credit-score" targetRef="gateway-await-response" />
+    <bpmn:eventBasedGateway id="gateway-await-response" name="AWAIT_SCORING_RESPONSE">
+      <bpmn:incoming>flow-request-to-gateway</bpmn:incoming>
+      <bpmn:outgoing>flow-gateway-to-delay</bpmn:outgoing>
+      <bpmn:outgoing>flow-gateway-to-score-direct</bpmn:outgoing>
+    </bpmn:eventBasedGateway>
+    <bpmn:sequenceFlow id="flow-gateway-to-delay" sourceRef="gateway-await-response" targetRef="event-delay-info-received" />
+    <bpmn:sequenceFlow id="flow-gateway-to-score-direct" sourceRef="gateway-await-response" targetRef="event-score-received-direct" />
+  </bpmn:process>
+
+  <bpmn:process id="scoring-service-process">
+    <bpmn:sequenceFlow id="flow-no-to-report-delay" name="NO" sourceRef="gateway-score-available" targetRef="task-report-service-delay" />
+    <bpmn:sequenceFlow id="flow-yes-to-send-direct" name="YES" sourceRef="gateway-score-available" targetRef="task-send-score-direct" />
+    <bpmn:sequenceFlow id="flow-merge-to-end" sourceRef="gateway-service-end" targetRef="end-service-handled" />
+    <bpmn:sequenceFlow id="flow-send-delayed-to-end" sourceRef="task-send-score-after-delay" targetRef="gateway-service-end" />
+    <bpmn:sequenceFlow id="flow-send-direct-to-end" sourceRef="task-send-score-direct" targetRef="gateway-service-end" />
+    <bpmn:sequenceFlow id="flow-l2-to-send" sourceRef="task-compute-score-level-2" targetRef="task-send-score-after-delay" />
+    <bpmn:sequenceFlow id="flow-delay-to-compute-l2" sourceRef="task-report-service-delay" targetRef="task-compute-score-level-2" />
+    <bpmn:sequenceFlow id="flow-l1-to-check" sourceRef="task-compute-score-level-1" targetRef="gateway-score-available" />
+    <bpmn:sequenceFlow id="flow-start-to-compute-l1" sourceRef="start-service-request-received" targetRef="task-compute-score-level-1" />
+    <bpmn:task id="task-send-score-direct" name="SEND_CREDIT_SCORE_TO_FRONTEND">
+      <bpmn:incoming>flow-yes-to-send-direct</bpmn:incoming>
+      <bpmn:outgoing>flow-send-direct-to-end</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="task-report-service-delay" name="REPORT_DELAY_TO_FRONTEND">
+      <bpmn:incoming>flow-no-to-report-delay</bpmn:incoming>
+      <bpmn:outgoing>flow-delay-to-compute-l2</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="gateway-score-available" name="SCORE_AVAILABLE?">
+      <bpmn:incoming>flow-l1-to-check</bpmn:incoming>
+      <bpmn:outgoing>flow-no-to-report-delay</bpmn:outgoing>
+      <bpmn:outgoing>flow-yes-to-send-direct</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="task-send-score-after-delay" name="SEND_CREDIT_SCORE_TO_FRONTEND">
+      <bpmn:incoming>flow-l2-to-send</bpmn:incoming>
+      <bpmn:outgoing>flow-send-delayed-to-end</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="end-service-handled" name="SCORING_REQUEST_HANDLED">
+      <bpmn:incoming>flow-merge-to-end</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:exclusiveGateway id="gateway-service-end" name="MERGE_END_PATHS">
+      <bpmn:incoming>flow-send-direct-to-end</bpmn:incoming>
+      <bpmn:incoming>flow-send-delayed-to-end</bpmn:incoming>
+      <bpmn:outgoing>flow-merge-to-end</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="task-compute-score-level-2" name="COMPUTE_CREDIT_SCORE_(LEVEL_2)">
+      <bpmn:incoming>flow-delay-to-compute-l2</bpmn:incoming>
+      <bpmn:outgoing>flow-l2-to-send</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="task-compute-score-level-1" name="COMPUTE_CREDIT_SCORE_(LEVEL_1)">
+      <bpmn:incoming>flow-start-to-compute-l1</bpmn:incoming>
+      <bpmn:outgoing>flow-l1-to-check</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:startEvent id="start-service-request-received" name="SCORING_REQUEST_RECEIVED">
+      <bpmn:outgoing>flow-start-to-compute-l1</bpmn:outgoing>
+      <bpmn:messageEventDefinition messageRef="msg-service-request" />
+    </bpmn:startEvent>
+    <bpmn:association id="assoc-delay-note" sourceRef="task-report-service-delay" targetRef="annotation-delay-queue" />
+    <bpmn:textAnnotation id="annotation-delay-queue">
+      <bpmn:text><![CDATA[INCL._ID_FOR_MESSAGE_QUEUEING]]></bpmn:text>
+    </bpmn:textAnnotation>
+  </bpmn:process>
+
+  <bpmndi:BPMNDiagram id="bpmn-diagram-1">
+    <bpmndi:BPMNPlane id="bpmn-plane-1" bpmnElement="credit-scoring-collaboration">
+      <bpmndi:BPMNShape id="participant-frontend-di" bpmnElement="participant-frontend">
+        <dc:Bounds x="123" y="67" width="1343" height="89" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="participant-credit-scoring-di" bpmnElement="participant-credit-scoring">
+        <dc:Bounds x="121" y="185" width="1343" height="379" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="participant-scoring-service-di" bpmnElement="participant-scoring-service">
+        <dc:Bounds x="123" y="603" width="1230" height="448" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="start-scoring-request-received-di" bpmnElement="start-scoring-request-received">
+        <dc:Bounds x="204" y="346" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="177" y="382" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="msg-frontend-to-scoring-di" bpmnElement="msg-frontend-to-scoring">
+        <di:waypoint xsi:type="dc:Point" x="222" y="156" />
+        <di:waypoint xsi:type="dc:Point" x="222" y="346" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="505.5" y="243" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="task-request-credit-score-di" bpmnElement="task-request-credit-score">
+        <dc:Bounds x="306" y="324" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="flow-start-to-request-di" bpmnElement="flow-start-to-request">
+        <di:waypoint xsi:type="dc:Point" x="240" y="364" />
+        <di:waypoint xsi:type="dc:Point" x="306" y="364" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="233" y="354" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="task-report-delay-di" bpmnElement="task-report-delay">
+        <dc:Bounds x="782" y="226" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="msg-report-delay-to-frontend-di" bpmnElement="msg-report-delay-to-frontend">
+        <di:waypoint xsi:type="dc:Point" x="832" y="226" />
+        <di:waypoint xsi:type="dc:Point" x="832" y="156" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="563" y="183" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow-report-to-score-after-delay-di" bpmnElement="flow-report-to-score-after-delay">
+        <di:waypoint xsi:type="dc:Point" x="882" y="266" />
+        <di:waypoint xsi:type="dc:Point" x="988" y="266" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="710" y="256" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="event-score-received-after-delay-di" bpmnElement="event-score-received-after-delay">
+        <dc:Bounds x="988" y="248" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="961" y="213" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gateway-merge-responses-di" bpmnElement="gateway-merge-responses" isMarkerVisible="true">
+        <dc:Bounds x="1068" y="339" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1048" y="389" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="flow-score-delayed-to-merge-di" bpmnElement="flow-score-delayed-to-merge">
+        <di:waypoint xsi:type="dc:Point" x="1024" y="266" />
+        <di:waypoint xsi:type="dc:Point" x="1093" y="266" />
+        <di:waypoint xsi:type="dc:Point" x="1093" y="339" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="941" y="256" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="task-send-credit-score-di" bpmnElement="task-send-credit-score">
+        <dc:Bounds x="1163" y="324" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="flow-merge-to-send-di" bpmnElement="flow-merge-to-send">
+        <di:waypoint xsi:type="dc:Point" x="1118" y="364" />
+        <di:waypoint xsi:type="dc:Point" x="1163" y="364" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1096" y="354" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="msg-send-score-to-frontend-di" bpmnElement="msg-send-score-to-frontend">
+        <di:waypoint xsi:type="dc:Point" x="1213" y="324" />
+        <di:waypoint xsi:type="dc:Point" x="1213" y="156" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1170" y="232" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="end-scoring-handled-di" bpmnElement="end-scoring-handled">
+        <dc:Bounds x="1350" y="346" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1323" y="382" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="flow-send-to-end-di" bpmnElement="flow-send-to-end">
+        <di:waypoint xsi:type="dc:Point" x="1263" y="364" />
+        <di:waypoint xsi:type="dc:Point" x="1350" y="364" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1262" y="354" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="start-service-request-received-di" bpmnElement="start-service-request-received">
+        <dc:Bounds x="221" y="785" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="194" y="821" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="task-compute-score-level-1-di" bpmnElement="task-compute-score-level-1">
+        <dc:Bounds x="319" y="763" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="flow-start-to-compute-l1-di" bpmnElement="flow-start-to-compute-l1">
+        <di:waypoint xsi:type="dc:Point" x="257" y="803" />
+        <di:waypoint xsi:type="dc:Point" x="319" y="803" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="243" y="793" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="msg-request-to-service-di" bpmnElement="msg-request-to-service">
+        <di:waypoint xsi:type="dc:Point" x="330" y="404" />
+        <di:waypoint xsi:type="dc:Point" x="330" y="642" />
+        <di:waypoint xsi:type="dc:Point" x="239" y="642" />
+        <di:waypoint xsi:type="dc:Point" x="239" y="785" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="245.5" y="585" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="gateway-score-available-di" bpmnElement="gateway-score-available" isMarkerVisible="true">
+        <dc:Bounds x="545" y="778" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="595" y="793" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="task-send-score-direct-di" bpmnElement="task-send-score-direct">
+        <dc:Bounds x="816" y="659" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gateway-service-end-di" bpmnElement="gateway-service-end" isMarkerVisible="true">
+        <dc:Bounds x="1111" y="778" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1091" y="828" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="flow-send-direct-to-end-di" bpmnElement="flow-send-direct-to-end">
+        <di:waypoint xsi:type="dc:Point" x="916" y="699" />
+        <di:waypoint xsi:type="dc:Point" x="1136" y="699" />
+        <di:waypoint xsi:type="dc:Point" x="1136" y="778" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="999" y="687" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="end-service-handled-di" bpmnElement="end-service-handled">
+        <dc:Bounds x="1197" y="785" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1170" y="821" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="flow-merge-to-end-di" bpmnElement="flow-merge-to-end">
+        <di:waypoint xsi:type="dc:Point" x="1161" y="803" />
+        <di:waypoint xsi:type="dc:Point" x="1197" y="803" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1134" y="793" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow-no-to-report-delay-di" bpmnElement="flow-no-to-report-delay">
+        <di:waypoint xsi:type="dc:Point" x="570" y="828" />
+        <di:waypoint xsi:type="dc:Point" x="570" y="887" />
+        <di:waypoint xsi:type="dc:Point" x="648" y="887" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="513" y="849" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow-yes-to-send-direct-di" bpmnElement="flow-yes-to-send-direct">
+        <di:waypoint xsi:type="dc:Point" x="570" y="778" />
+        <di:waypoint xsi:type="dc:Point" x="570" y="699" />
+        <di:waypoint xsi:type="dc:Point" x="816" y="699" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="512" y="726" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="task-report-service-delay-di" bpmnElement="task-report-service-delay">
+        <dc:Bounds x="648" y="847" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="task-compute-score-level-2-di" bpmnElement="task-compute-score-level-2">
+        <dc:Bounds x="825" y="847" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="flow-delay-to-compute-l2-di" bpmnElement="flow-delay-to-compute-l2">
+        <di:waypoint xsi:type="dc:Point" x="748" y="887" />
+        <di:waypoint xsi:type="dc:Point" x="825" y="887" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="764" y="877" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="task-send-score-after-delay-di" bpmnElement="task-send-score-after-delay">
+        <dc:Bounds x="956" y="847" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="flow-l2-to-send-di" bpmnElement="flow-l2-to-send">
+        <di:waypoint xsi:type="dc:Point" x="925" y="887" />
+        <di:waypoint xsi:type="dc:Point" x="956" y="887" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="896" y="877" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow-send-delayed-to-end-di" bpmnElement="flow-send-delayed-to-end">
+        <di:waypoint xsi:type="dc:Point" x="1056" y="887" />
+        <di:waypoint xsi:type="dc:Point" x="1136" y="887" />
+        <di:waypoint xsi:type="dc:Point" x="1136" y="828" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1051" y="877" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow-score-direct-to-merge-di" bpmnElement="flow-score-direct-to-merge">
+        <di:waypoint xsi:type="dc:Point" x="884" y="444" />
+        <di:waypoint xsi:type="dc:Point" x="1093" y="444" />
+        <di:waypoint xsi:type="dc:Point" x="1093" y="389" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="888" y="436" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="event-score-received-direct-di" bpmnElement="event-score-received-direct">
+        <dc:Bounds x="848" y="426" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="829" y="398" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="msg-service-score-direct-di" bpmnElement="msg-service-score-direct">
+        <di:waypoint xsi:type="dc:Point" x="866" y="659" />
+        <di:waypoint xsi:type="dc:Point" x="866" y="561" />
+        <di:waypoint xsi:type="dc:Point" x="866" y="561" />
+        <di:waypoint xsi:type="dc:Point" x="866" y="462" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="814.5" y="550.5" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="msg-service-score-after-delay-di" bpmnElement="msg-service-score-after-delay">
+        <di:waypoint xsi:type="dc:Point" x="1006" y="847" />
+        <di:waypoint xsi:type="dc:Point" x="1006" y="566" />
+        <di:waypoint xsi:type="dc:Point" x="1006" y="566" />
+        <di:waypoint xsi:type="dc:Point" x="1006" y="284" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="940" y="556" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="annotation-delay-queue-di" bpmnElement="annotation-delay-queue">
+        <dc:Bounds x="808" y="953" width="156" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="assoc-delay-note-di" bpmnElement="assoc-delay-note">
+        <di:waypoint xsi:type="dc:Point" x="748" y="911" />
+        <di:waypoint xsi:type="dc:Point" x="835" y="953" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow-delay-to-report-di" bpmnElement="flow-delay-to-report">
+        <di:waypoint xsi:type="dc:Point" x="716" y="266" />
+        <di:waypoint xsi:type="dc:Point" x="782" y="266" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="657" y="256" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="event-delay-info-received-di" bpmnElement="event-delay-info-received">
+        <dc:Bounds x="680" y="248" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="661" y="215" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="msg-service-delay-info-di" bpmnElement="msg-service-delay-info">
+        <di:waypoint xsi:type="dc:Point" x="698" y="847" />
+        <di:waypoint xsi:type="dc:Point" x="698" y="566" />
+        <di:waypoint xsi:type="dc:Point" x="698" y="566" />
+        <di:waypoint xsi:type="dc:Point" x="698" y="284" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="662.5" y="556" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow-l1-to-check-di" bpmnElement="flow-l1-to-check">
+        <di:waypoint xsi:type="dc:Point" x="419" y="803" />
+        <di:waypoint xsi:type="dc:Point" x="545" y="803" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="437" y="793" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow-request-to-gateway-di" bpmnElement="flow-request-to-gateway">
+        <di:waypoint xsi:type="dc:Point" x="406" y="364" />
+        <di:waypoint xsi:type="dc:Point" x="517" y="364" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="416.5" y="354" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="gateway-await-response-di" bpmnElement="gateway-await-response">
+        <dc:Bounds x="516.9876670092498" y="339" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="496.9876670092498" y="389" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="flow-gateway-to-delay-di" bpmnElement="flow-gateway-to-delay">
+        <di:waypoint xsi:type="dc:Point" x="542" y="339" />
+        <di:waypoint xsi:type="dc:Point" x="542" y="266" />
+        <di:waypoint xsi:type="dc:Point" x="680" y="266" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="497" y="292.5" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow-gateway-to-score-direct-di" bpmnElement="flow-gateway-to-score-direct">
+        <di:waypoint xsi:type="dc:Point" x="542" y="389" />
+        <di:waypoint xsi:type="dc:Point" x="542" y="444" />
+        <di:waypoint xsi:type="dc:Point" x="848" y="444" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="497" y="406.5" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

@@ -1,0 +1,125 @@
+
+= Fuzzy Testing
+
+Fuzz testing (or fuzzing) is an automated technique that feeds randomly generated, malformed, or unexpected inputs to a program in order to discover crashes, assertion failures, and security vulnerabilities. Unlike traditional unit tests that check specific known cases, fuzz testing explores the vast space of possible inputs to find edge cases the developer never imagined.
+
+In financial software, fuzz testing is particularly valuable because:
+
+* **Input boundaries are complex** — Currency amounts, dates, and account identifiers each have subtle edge cases (e.g., `BigDecimal` with 9999 decimal places, dates in the year 9999, negative zero).
+* **Security surface area is large** — REST APIs accept JSON payloads that may contain unexpected types, missing fields, or deeply nested structures.
+* **Regulatory requirements demand thoroughness** — Regulators expect evidence that the system handles malformed input gracefully.
+
+The key difference between unit testing and fuzz testing is intent. Unit tests verify that specific inputs produce expected outputs. Fuzz tests search for *any* input that causes the program to misbehave. For a deeper comparison, see https://www.code-intelligence.com/blog/unit-testing-vs-fuzz-testing[Unit Testing vs. Fuzz Testing].
+
+JQF (Java Quickcheck-style Fuzzing) is the recommended fuzzing framework for JVM projects. It integrates with JUnit and uses coverage-guided feedback to generate inputs that reach deeper into the code. Learn more at https://github.com/rohanpadhye/jqf[JQF on GitHub].
+
+== JQF Example
+
+[source,java]
+----
+import edu.berkeley.cs.jqf.fuzz.Fuzz;
+import edu.berkeley.cs.jqf.fuzz.JQF;
+import org.junit.runner.RunWith;
+
+import java.math.BigDecimal;
+
+@RunWith(JQF.class)
+public class PaymentAmountFuzzTest {
+
+    @Fuzz
+    public void should_notThrowUnexpectedException_forAnyAmount(String rawAmount) {
+        PaymentValidator validator = new PaymentValidator();
+        try {
+            BigDecimal amount = new BigDecimal(rawAmount);
+            validator.validateAmount(amount);
+        } catch (NumberFormatException e) {
+            // Expected: not every string is a valid BigDecimal
+        } catch (IllegalArgumentException e) {
+            // Expected: validator rejects negative or excessively large amounts
+        }
+        // If any other exception (NullPointerException, StackOverflowError, etc.) is thrown,
+        // the fuzz test will report a failure, indicating a potential bug.
+    }
+
+    @Fuzz
+    public void should_handleArbitraryLoanTerms(LoanFuzzInput input) {
+        InterestCalculator calculator = new InterestCalculator();
+        try {
+            BigDecimal interest = calculator.simpleInterest(
+                input.principal, input.rate, input.termInMonths);
+            // Interest should never be negative for positive inputs
+            if (input.principal.signum() >= 0 && input.rate.signum() >= 0) {
+                assert interest.signum() >= 0 : "Interest must be non-negative";
+            }
+        } catch (IllegalArgumentException e) {
+            // Acceptable — validator caught invalid input
+        }
+    }
+}
+----
+
+Custom generator for structured fuzz input:
+
+[source,java]
+----
+import edu.berkeley.cs.jqf.fuzz.junit.GuidedFuzzing;
+import edu.berkeley.cs.jqf.fuzz.junit.quickcheck.JQF;
+import com.pholser.junit.quickcheck.generator.GenerationStatus;
+import com.pholser.junit.quickcheck.generator.Generator;
+import com.pholser.junit.quickcheck.random.SourceOfRandomness;
+import java.math.BigDecimal;
+
+public class LoanFuzzInputGenerator extends Generator<LoanFuzzInput> {
+
+    public LoanFuzzInputGenerator() {
+        super(LoanFuzzInput.class);
+    }
+
+    @Override
+    public LoanFuzzInput generate(SourceOfRandomness random, GenerationStatus status) {
+        LoanFuzzInput input = new LoanFuzzInput();
+        input.principal = BigDecimal.valueOf(random.nextDouble(-1e9, 1e9));
+        input.rate = BigDecimal.valueOf(random.nextDouble(-1.0, 2.0));
+        input.termInMonths = random.nextInt(-12, 600);
+        return input;
+    }
+}
+
+class LoanFuzzInput {
+    BigDecimal principal;
+    BigDecimal rate;
+    int termInMonths;
+}
+----
+
+== Gradle Configuration
+
+[source,kotlin]
+----
+// build.gradle.kts
+repositories {
+    maven { url = uri("https://jitpack.io") }   // JQF is published via JitPack
+}
+
+dependencies {
+    testImplementation("edu.berkeley.cs.jqf:jqf-fuzz:2.0")
+    testImplementation("com.pholser:junit-quickcheck-core:1.0")
+    testImplementation("com.pholser:junit-quickcheck-generators:1.0")
+}
+----
+
+[source,bash]
+----
+# Run JQF fuzz tests with coverage-guided fuzzing
+$ ./gradlew :payments:test --tests "PaymentAmountFuzzTest" -Djqf.fuzz.time=60s
+
+# Run with a specific seed to reproduce a failure
+$ ./gradlew :payments:test --tests "PaymentAmountFuzzTest" -Djqf.fuzz.seed=42
+----
+
+WARNING: Fuzz tests can run for a long time. Always set a time limit (`-Djqf.fuzz.time`) in CI to prevent builds from hanging. A typical CI fuzz session runs for 60-120 seconds per test class.
+
+see:
+
+- https://github.com/rohanpadhye/jqf
+- https://www.code-intelligence.com/blog/unit-testing-vs-fuzz-testing

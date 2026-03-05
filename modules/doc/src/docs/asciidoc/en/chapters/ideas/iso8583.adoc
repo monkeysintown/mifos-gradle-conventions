@@ -1,0 +1,8 @@
+= ISO 8583
+
+TBD
+
+See:
+
+- https://github.com/kpavlov/jreactive-8583
+- https://www.lytsing.org/downloads/iso8583.pdf

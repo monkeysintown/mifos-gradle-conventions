@@ -1,0 +1,13 @@
+= Introduction
+
+This chapter serves as the definitive reference for every developer contributing to the Mifos Initiative's suite of open-source financial inclusion products. Whether you are a first-time contributor or a seasoned maintainer, the conventions, toolchains, and workflows documented here represent the agreed-upon standards that keep our codebase consistent, secure, and maintainable.
+
+Mifos projects are built primarily with Java and Gradle, targeting the latest long-term-support JDK where practical and Java 25 as the current baseline. Our build logic is expressed through convention plugins stored in dedicated build logic modules, ensuring that every submodule inherits a coherent set of quality gates, dependency versions, and formatting rules without duplicating configuration. We embrace the principle of *convention over configuration*: sensible defaults are encoded once, and individual modules override them only when they have a documented reason to do so.
+
+The development experience is designed to be reproducible. We rely on the Gradle Wrapper so that no one needs a system-wide Gradle installation. We use SDKMan to manage JDK versions and pin them per project through `.sdkmanrc` files. Secrets never live in source trees—they belong in Vault, OpenBao, or a team password manager. Every commit is expected to pass a full CI pipeline before it lands on the main branch, and every pull request is subject to both automated checks and human review.
+
+What follows is a thorough treatment of every facet of the development lifecycle—from setting up your workstation and writing your first commit, through building, testing, securing, and ultimately shipping code that advances financial inclusion for the two billion people who need it most.
+
+See:
+
+- https://martinfowler.com/articles/what-is-code.html

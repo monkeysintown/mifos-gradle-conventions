@@ -1,0 +1,98 @@
+plugins {
+    id "org.mifos.convention.project.base.java"
+    id "test-report-aggregation"
+    id "jvm-test-suite"
+    id "jacoco"
+    // id "jacoco-aggregation"
+    id "se.thinkcode.cucumber-runner"
+    id "com.arc-e-tect.gherkin-to-asciidoc"
+}
+
+/*
+configurations {
+    cucumberRuntime {
+        extendsFrom testImplementation
+        // description = "Cucumber Test Specifications"
+    }
+}
+*/
+
+test {
+    useJUnitPlatform()
+
+    jvmArgs "-Dmifos.environment=local"
+
+    maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
+
+    ignoreFailures = false
+
+    reports {
+        junitXml.required = true
+        html.required = true
+    }
+
+    finalizedBy "jacocoTestReport"
+}
+
+jacoco {
+    toolVersion = "0.8.14"
+    // reportsDirectory = layout.buildDirectory.dir("reports/coverage")
+}
+
+jacocoTestReport {
+    reports {
+        xml.required = true
+        html.required = true
+        csv.required = false
+    }
+    dependsOn test
+}
+
+/*
+reporting {
+    reports {
+        testAggregateTestReport(AggregateTestReport) {
+            testType = TestSuiteType.UNIT_TEST
+        }
+    }
+}
+*/
+
+cucumber {
+//    extraGlues = ["another.classpath", "to.include"]
+//    tags = ""
+//    name = ""
+//    dryRun = "true"
+//    monochrome = "please"
+//    strict = "please"
+//    snippets = ""
+//    version = ""
+//    help = ""
+//    i18n = ""
+//    wip = ""
+
+    threads = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
+    // TODO: use configuration from gradle.properties
+    glue = "classpath:org.mifos"
+    plugin = ["pretty", "se.thinkcode.progress.ProgressPrinter, se.thinkcode.report.MultiSeamHtmlReport:./build/reports"]
+    // shorten = "manifest"
+    featurePath = "src/test/resources"
+    main = "cucumber.api.cli.Main"
+}
+
+dependencies {
+    testImplementation "org.junit.platform:junit-platform-suite"
+
+    testImplementation "io.cucumber:cucumber-java"
+    testImplementation "io.cucumber:cucumber-junit-platform-engine"
+
+    testImplementation "io.karatelabs:karate-junit5"
+
+    testImplementation "org.openjdk.jmh:jmh-core"
+
+    testImplementation "org.assertj:assertj-core"
+
+    testImplementation "org.mockito:mockito-junit-jupiter"
+
+    // cucumberRuntime "io.cucumber:cucumber-java"
+}

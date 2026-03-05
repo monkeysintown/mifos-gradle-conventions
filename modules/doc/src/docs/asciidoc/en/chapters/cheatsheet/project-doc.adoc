@@ -1,0 +1,8 @@
+= Build Project Documentation
+
+NOTE: The current version of the Gradle Asciidoctor plugin is incompatible with Gradle's configuration caching. The command line parameter `--no-configuration-cache` disables that cache.
+
+[source,bash]
+----
+./gradlew asciidoctorZip --no-configuration-cache
+----

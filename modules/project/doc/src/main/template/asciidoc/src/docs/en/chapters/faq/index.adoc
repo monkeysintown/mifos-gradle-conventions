@@ -1,0 +1,7 @@
+= FAQ
+
+include::lorem.adoc[leveloffset=+1]
+
+include::ipsum.adoc[leveloffset=+1]
+
+// include::{commondir}/faq.adoc[leveloffset=+1]

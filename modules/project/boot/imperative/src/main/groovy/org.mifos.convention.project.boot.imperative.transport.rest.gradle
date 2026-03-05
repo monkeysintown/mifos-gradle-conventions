@@ -1,0 +1,13 @@
+plugins {
+    id "org.mifos.convention.project.boot.base.transport.rest"
+}
+
+dependencies {
+    // TODO: fix this; this build module should reside in a separate Git repo
+    implementation "org.mifos:mifos-commons-java-boot-transport-rest-imperative:0.1.0-SNAPSHOT"
+
+    implementation "org.springframework.boot:spring-boot-starter-webmvc"
+
+    implementation "org.springdoc:springdoc-openapi-starter-webmvc-api"
+    implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui"
+}

@@ -1,0 +1,29 @@
+plugins {
+    id "org.mifos.convention.project.boot.base"
+}
+
+dependencies {
+    /*
+    if(file("../../core/build.gradle").exists()) {
+        implementation project(":${parts[0]}-core")
+    }
+    if(file("../../mapping/build.gradle").exists()) {
+        implementation project(":${parts[0]}-mapping")
+    }
+    */
+
+    api "org.springframework.ai:spring-ai-mcp"
+    api "org.springframework.ai:spring-ai-template-st"
+    api "org.springframework.ai:spring-ai-starter-model-transformers"
+    api "org.springframework.ai:spring-ai-starter-model-ollama"
+    // api "org.springframework.ai:spring-ai-starter-model-deepseek"
+    // api "org.springframework.ai:spring-ai-starter-model-postgresml-embedding"
+    api "org.springframework.ai:spring-ai-starter-model-chat-memory"
+    // api "org.springframework.ai:spring-ai-starter-model-chat-memory-repository-jdbc"
+    // api "org.springframework.ai:spring-ai-starter-vector-store-milvus"
+    // api "org.springframework.ai:spring-ai-starter-vector-store-qdrant"
+    // api "org.springframework.ai:spring-ai-starter-vector-store-pgvector"
+
+    testImplementation "org.springframework.ai:spring-ai-test"
+    testImplementation "org.springframework.ai:spring-ai-spring-boot-testcontainers"
+}

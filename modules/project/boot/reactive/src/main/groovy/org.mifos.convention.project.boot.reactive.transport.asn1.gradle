@@ -1,0 +1,42 @@
+plugins {
+    id "org.mifos.convention.project.boot.base.transport"
+}
+
+dependencies {
+    asn1 "com.beanit:asn1bean:1.16.0"
+    asn1 "com.beanit:asn1bean-compiler:1.16.0"
+
+    implementation "com.beanit:asn1bean:1.16.0"
+    implementation "io.netty:netty-all"
+}
+
+def generatedSourcesDir = file("${projectDir}/build/generated-sources/asn1")
+
+tasks.register("generateAsn1Sources", JavaExec) {
+    group = "build"
+    description = "Generates Java source files from ASN.1 definitions"
+
+    classpath = configurations.asn1
+
+    mainClass.set("com.beanit.jasn1.compiler.Compiler")
+
+    inputs.dir("${projectDir}/src/main/resources/asn1")
+    outputs.dir(generatedSourcesDir)
+
+    args = [
+        "-oer",
+        "-p", "org.mifos.transport.asn1",
+        "-f", generatedSourcesDir.absolutePath,
+        // list of ASN.1 files (TODO: list of files in the folder instead of hardcoding)
+        "${projectDir}/src/main/resources/asn1/protocol.asn",
+        "${projectDir}/src/main/resources/asn1/types.asn"
+    ]
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir generatedSourcesDir
+        }
+    }
+}

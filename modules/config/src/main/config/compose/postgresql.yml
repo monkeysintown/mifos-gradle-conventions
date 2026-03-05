@@ -1,0 +1,15 @@
+services:
+  postgresql:
+    container_name: postgresql
+    image: postgis/postgis:16-3.4-alpine
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-d", "postgres", "-h", "localhost", "-U", "root" ]
+      timeout: 10s
+      retries: 20
+      interval: 5s
+    env_file:
+      - ../env/postgres.env
+    volumes:
+      - ../postgresql/docker-entrypoint-initdb.d/1-init.sql:/docker-entrypoint-initdb.d/1-init.sql
+    ports:
+      - "5432:5432"

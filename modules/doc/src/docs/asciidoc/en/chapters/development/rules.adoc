@@ -1,0 +1,76 @@
+= General Rules
+
+The Mifos Initiative adheres to the Contributor Covenant, version 3.0, available at https://www.contributor-covenant.org[contributor-covenant.org]. The Contributor Covenant is one of the most widely adopted codes of conduct in the open-source ecosystem, and for good reason: it establishes a clear, enforceable baseline for respectful collaboration that goes beyond mere technical contribution.
+
+In an open-source community whose mission is financial inclusion, we serve a global audience that spans cultures, languages, and experiences. A code of conduct is not bureaucratic overhead—it is the social contract that makes it possible for volunteers from every time zone to collaborate without fear of harassment, discrimination, or exclusion. It signals to new contributors that their participation is valued and that unacceptable behavior will be addressed promptly and transparently.
+
+Key principles we draw from the Contributor Covenant include:
+
+* **Be respectful** in all interactions—issues, pull requests, code reviews, and chat.
+* **Be inclusive** in language and behavior. Use gender-neutral language in documentation and code comments.
+* **Be constructive** when offering feedback. Critique the code, not the person.
+* **Report violations** to the project maintainers or the Mifos community manager. Every report is taken seriously.
+
+Violations of the code of conduct are handled by the project's leadership team and may result in temporary or permanent bans from the community. The full text of our adopted covenant is included in the `CODE_OF_CONDUCT.adoc` file at the repository root.
+
+// include::{commondir}/conduct.adoc[leveloffset=+1]
+
+== Contributing
+
+Contributing to Mifos follows a structured workflow designed to keep the main branch stable, ensure code quality, and maintain a clear history. The canonical workflow is documented in the `CONTRIBUTING.md` file at the repository root; what follows is a practical walkthrough of the most common path.
+
+First, **fork** the repository on GitHub. This creates a personal copy under your GitHub account where you have push access. Then **clone** your fork locally and add the upstream remote so you can stay in sync:
+
+[source,bash]
+----
+# Clone your fork
+git clone git@github.com:YOUR_USERNAME/fineract.git
+cd fineract
+
+# Add the upstream remote
+git remote add upstream https://github.com/apache/fineract.git
+
+# Verify remotes
+git remote -v
+# origin    git@github.com:YOUR_USERNAME/fineract.git (fetch)
+# origin    git@github.com:YOUR_USERNAME/fineract.git (push)
+# upstream  https://github.com/apache/fineract.git (fetch)
+# upstream  https://github.com/apache/fineract.git (push)
+----
+
+Before starting work, always **create a feature branch** from an up-to-date main:
+
+[source,bash]
+----
+# Fetch the latest from upstream
+git fetch upstream
+
+# Create a feature branch from upstream/main
+git checkout -b feature/add-loan-repayment-schedule upstream/main
+----
+
+Make your changes, commit them with conventional commit messages (see <<Conventional Changelog>>), and push to your fork:
+
+[source,bash]
+----
+git push -u origin feature/add-loan-repayment-schedule
+----
+
+Then open a **pull request** against the upstream repository. Every PR must:
+
+. Pass all CI checks (build, test, static analysis, security scan).
+. Include a clear description of the problem being solved and the approach taken.
+. Reference any related issue (e.g., `Fixes #1234`).
+. Be reviewed by at least one maintainer before merging.
+
+TIP: Keep your PRs small and focused. A PR that touches fewer than 400 lines is far more likely to receive a thorough review than a monolithic change.
+
+After your PR is approved and merged, you can clean up your local branch:
+
+[source,bash]
+----
+git checkout main
+git pull upstream main
+git branch -d feature/add-loan-repayment-schedule
+git push origin --delete feature/add-loan-repayment-schedule
+----

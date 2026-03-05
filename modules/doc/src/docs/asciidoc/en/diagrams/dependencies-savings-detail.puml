@@ -1,0 +1,42 @@
+@startuml savings-detail
+title F5 savings — Dependency Detail (Ce=7, CFV=7, DD=3, IS=0.63)
+
+package "fineract-savings" #LightPink {
+    component [SavingsReadService] as SRS
+    component [SavingsWriteService] as SWS
+    component [SavingsAssembler] as SA
+    component [SavingsAccountingAdapter] as SAA
+    component [InterestCalculation] as IC
+}
+
+package "fineract-core" #LightGreen {
+    component [CommandProcessing] as CMD
+    component [DataValidator] as DV
+}
+
+package "Other Features" #LightYellow {
+    component [accounting\nJournalEntryService] as ACCT
+    component [client\nClientReadService] as CL
+    component [group\nGroupReadService] as GR
+    component [charge\nChargeReadService] as CHG
+    component [calendar\nCalendarService] as CAL
+    component [account-transfers\nTransferService] as AT
+    component [organisation\nOfficeReadService] as ORG
+}
+
+SAA --> ACCT : #Red "post entries"
+SA --> CL    : #Red "client lookup"
+SA --> GR    : #Red "group lookup"
+SWS --> CHG  : #Red "savings charges"
+IC --> CAL   : #Red "scheduling"
+SWS --> AT   : #Red "transfers"
+SA --> ORG   : #Red "office lookup"
+
+SWS ..> CMD : #Green
+SRS ..> DV  : #Green
+
+legend right
+  7 cross-feature violations
+endlegend
+
+@enduml

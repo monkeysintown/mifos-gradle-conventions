@@ -1,0 +1,42 @@
+= AI Legislation
+
+WARNING: All this needs to be verified!
+
+See:
+
+- https://www.youtube.com/watch?v=7RoPi8m1lpE
+- https://govern365.ai
+
+== CRA
+
+The https://digital-strategy.ec.europa.eu/en/policies/cyber-resilience-act[Cyber Resilience Act] (CRA) is an EU regulation that establishes cybersecurity requirements for products with digital elements placed on the EU market. Adopted in 2024 with a phased implementation timeline, the CRA has significant implications for open-source projects like Mifos that are used in financial services.
+
+Key provisions relevant to Mifos development:
+
+* **Security by design**: Products must be developed with secure defaults, vulnerability handling processes, and attack surface minimization.
+* **Vulnerability reporting**: Developers must have a coordinated vulnerability disclosure policy and respond to reported vulnerabilities within defined timeframes.
+* **Software Bill of Materials (SBOM)**: Products must provide an SBOM that enables vulnerability tracking across the dependency tree. Mifos generates SBOMs using Syft as part of the CI pipeline.
+* **Security updates**: Products must receive security updates for the expected lifetime of the product, or for at least five years.
+
+For open-source projects, the CRA draws a distinction between "manufacturers" (who package and sell products) and "developers" (who contribute to open-source projects). Pure open-source development outside a commercial product is not directly regulated, but the downstream users—financial institutions deploying Mifos—are. As a result, Mifos must produce the artifacts (SBOMs, vulnerability reports, security advisories) that our users need to comply with the CRA.
+
+== EU AI act
+
+The https://artificialintelligenceact.eu[EU AI Act] is the world's first comprehensive AI regulation, establishing a risk-based classification system for AI systems. It entered into force in August 2024 with a phased implementation through 2027.
+
+The Act classifies AI systems into four risk tiers:
+
+* **Unacceptable risk** (banned): Social scoring, real-time biometric surveillance.
+* **High risk** (strict requirements): AI used in credit scoring, loan approval, and financial services decision-making.
+* **Limited risk** (transparency obligations): Chatbots, AI-generated content.
+* **Minimal risk** (no regulation): AI-assisted code completion, spam filters.
+
+For Mifos, the critical concern is the **high-risk** classification. If AI is used to make or materially influence loan approval decisions, credit scoring, or risk assessments, the system must comply with strict requirements including:
+
+* Human oversight of AI decisions
+* Transparency and explainability of AI outputs
+* Robustness and accuracy testing
+* Data governance and quality standards
+* Conformity assessment before deployment
+
+The practical implication for Mifos developers: AI-assisted code generation for infrastructure tooling (limited risk) is acceptable, but any AI model that participates in financial decision-making must be designed from the outset with EU AI Act compliance in mind. When in doubt, classify upward and implement the stricter controls.

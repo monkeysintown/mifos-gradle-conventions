@@ -1,0 +1,38 @@
+= Diataxis
+
+The Diataxis framework (https://diataxis.fr/[diataxis.fr]) provides a systematic approach to documentation by identifying four distinct modes, each serving a different user need. Understanding these modes helps Mifos contributors create documentation that is purposeful rather than accidental.
+
+The framework arranges documentation along two axes: *action vs. understanding* (what the reader is trying to do) and *acquisition vs. application* (whether the reader is studying or working). This produces four quadrants:
+
+// TODO: fix table formatting!
+
+.Diataxis Framework - Four Documentation Types
+[cols="1,1"]
+|===
+| *Acquisition* (studying)
+| *Application* (working)
+| *Action* (doing)
+
+|*Tutorial*
+Learning-oriented; guides a newcomer through a controlled exercise
+|*How-to Guide*
+Problem-oriented; helps an experienced user solve a real-world task
+|*Understanding* (thinking)
+|*Explanation*
+Understanding-oriented; illuminates concepts and design decisions
+|*Reference* Information-oriented; provides authoritative descriptions for lookup
+|===
+
+*Tutorials* are learning-oriented. They take the reader by the hand through a controlled, predictable exercise. In Mifos, a tutorial walks a new contributor through setting up a local development environment, creating a simple loan product, or deploying the platform to a test server. Tutorials must be repeatable, opinionated, and focused on success—every step should work exactly as written.
+
+*How-to Guides* are problem-oriented. They assume the reader already understands the basics and needs to accomplish a specific, real-world task. Examples include "How to configure T24 integration," "How to add a custom repayment schedule," or "How to set up multi-tenancy with PostgreSQL." How-to guides are flexible and adapt to the reader's context.
+
+*Reference* documentation is information-oriented. It provides authoritative, complete descriptions of APIs, configuration properties, data models, and command-line interfaces. Mifos API documentation, Gradle task reference, and Spring Boot configuration property listings all fall into this category. Reference documentation must be exhaustive and accurate—omissions are bugs.
+
+*Explanation* is understanding-oriented. It illuminates the "why" behind design decisions, architectural patterns, and trade-offs. The chapter you are reading now is explanatory. ADRs (Architecture Decision Records) are explanatory artifacts. Explanation helps developers build accurate mental models that enable them to make good decisions independently.
+
+In practice, most Mifos documentation serves multiple modes, but clarity improves when contributors consciously identify the primary mode and structure content accordingly.
+
+See:
+
+- https://diataxis.fr/

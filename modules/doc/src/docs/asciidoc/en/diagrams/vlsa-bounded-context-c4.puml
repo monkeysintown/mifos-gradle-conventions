@@ -1,0 +1,54 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+
+title Component Diagram — Bounded Contexts inside VSLA Application
+
+Container_Boundary(vslaApp, "VSLA Application (Spring Boot 3.x)") {
+    Component(groupLifecycle, "Group Lifecycle", "Java, Spring", "Group creation, cycle dates, meeting schedules, member enrollment, operational parameters (shares, penalties, loan products)")
+    Component(capitalShares, "Capital & Shares", "Java, Spring", "Mandatory share purchases, corpus tracking, member savings, share-out estimation")
+    Component(internalLending, "Internal Lending", "Java, Spring", "Member loans from pooled funds, eligibility rules, voting approval, repayment scheduling, interest/fine calculation")
+    Component(externalFunding, "External Funding", "Java, Spring", "Group borrowing from banks/MFIs, government grants, revolving funds")
+    Component(groupAccounting, "Group Accounting", "Java, Spring", "Group-level COA, trial balance, P&L, balance sheet, earnings allocation, bonus deposits, investments")
+    Component(membership, "Membership & Governance", "Java, Spring", "Attendance, lateness, voting power, grading/loyalty, user-to-group mapping")
+    Component(mobilePayments, "Mobile & Payments", "Java, Spring", "Offline sync, YAPE/PLIN webhooks, mobile dashboards, conflict resolution")
+
+    Component(commandBus, "Command Bus", "Java, Spring", "Typed command dispatch, middleware pipeline, handler resolution")
+    Component(eventPublisher, "Event Publisher", "Java, Spring", "Spring ApplicationEventPublisher wrapper; publishes VslaDomainEvents")
+    Component(outboxProcessor, "Outbox Processor", "Java, Spring", "Polls outbox_events table; executes Fineract REST calls asynchronously")
+    Component(cqrsProjector, "CQRS Projector", "Java, Spring", "Async read model builders from domain events")
+}
+
+ContainerDb(vslaDb, "VSLA Database", "PostgreSQL 15", "Aggregates, events, outbox, read models, group GL")
+Container(fineractApp, "Fineract Core Application", "Spring Boot", "Client registry, savings, external loans, institution GL")
+ContainerDb(fineractDb, "Fineract Database", "PostgreSQL / MySQL", "Institution-level financial data")
+Container(mobileApp, "Mobile Application", "Android / iOS", "Offline-first client")
+
+Rel(groupLifecycle, capitalShares, "Publishes domain events to", "SelfFundedGroupCreated, MemberEnrolled, MeetingHeld")
+Rel(capitalShares, internalLending, "Publishes domain events to", "SharesPurchased")
+Rel(internalLending, groupAccounting, "Publishes domain events to", "InternalLoanRepaid")
+Rel(externalFunding, groupAccounting, "Publishes domain events to", "ExternalFundingReceived")
+Rel(membership, groupLifecycle, "Reads group data from", "UserGroupMapping")
+
+Rel(mobileApp, mobilePayments, "Sends commands to", "REST / WebSocket")
+Rel(mobilePayments, commandBus, "Dispatches typed commands to", "PurchaseSharesCommand, ReceiveMobilePaymentCommand")
+Rel(commandBus, groupLifecycle, "Invokes handlers on", "CreateSelfFundedGroupCommand")
+Rel(commandBus, capitalShares, "Invokes handlers on", "PurchaseSharesCommand")
+Rel(commandBus, internalLending, "Invokes handlers on", "ApplyInternalLoanCommand")
+Rel(commandBus, externalFunding, "Invokes handlers on", "ReceiveExternalFundingCommand")
+
+Rel(groupLifecycle, eventPublisher, "Publishes events via", "Spring Events")
+Rel(capitalShares, eventPublisher, "Publishes events via", "Spring Events")
+Rel(internalLending, eventPublisher, "Publishes events via", "Spring Events")
+Rel(externalFunding, eventPublisher, "Publishes events via", "Spring Events")
+Rel(groupAccounting, eventPublisher, "Publishes events via", "Spring Events")
+
+Rel(eventPublisher, outboxProcessor, "Triggers", "FineractSyncRequired")
+Rel(eventPublisher, cqrsProjector, "Triggers", "VslaDomainEvent")
+Rel(outboxProcessor, vslaDb, "Polls pending rows from", "JDBC")
+Rel(outboxProcessor, fineractApp, "Executes REST calls to", "fineract-client (Retrofit2)")
+Rel(cqrsProjector, vslaDb, "Writes projections to", "JDBC")
+
+Rel_U(membership, mobilePayments, "Authorizes access via", "Group membership rules")
+@enduml

@@ -1,0 +1,17 @@
+= Supply Chain Security Tool
+
+WARNING: Still needs more thought!
+
+Develop a Gradle plugin to ensure automated:
+
+- SLSA
+- in-toto
+- https://github.com/carabiner-dev/ampel
+- scorecard
+- https://bestpractices.dev ranking
+- STRIDE threat model (library, annotations, archimate)
+- https://openssf.org/blog/2026/05/29/aligning-on-machine-readable-signals-as-the-foundation-for-due-diligence/
+- dashboard for all Mifos projects: https://insights.linuxfoundation.org/
+- https://openssf.org/projects/scorecard/
+- https://chaoss.community/kb/metric-issues-new/
+-

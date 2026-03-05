@@ -1,0 +1,8 @@
+plugins {
+    id "org.mifos.convention.project.boot.base.ai.mcp"
+}
+
+dependencies {
+    api "org.springframework.ai:spring-ai-starter-mcp-server-webmvc"
+    api "org.springframework.ai:spring-ai-starter-mcp-client-webmvc"
+}

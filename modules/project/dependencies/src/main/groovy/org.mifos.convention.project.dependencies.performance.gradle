@@ -1,0 +1,7 @@
+dependencies {
+    implementation platform("net.openhft:chronicle-bom:2026.8")
+
+    constraints {
+        implementation "com.lmax:disruptor:4.0.0"
+    }
+}

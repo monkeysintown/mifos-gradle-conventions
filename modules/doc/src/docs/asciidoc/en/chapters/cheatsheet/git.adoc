@@ -1,0 +1,17 @@
+= Initialize Git
+
+[source,bash]
+----
+git init
+# put your own email <1>
+git config user.email "aleks@mifos.org"
+# put your own name <2>
+git config user.username "Aleksandar Vidakovic"
+git add .
+git commit -m "Initial commit"
+----
+
+<1> Put your own email you use on Github and that you used to sign the CLA
+<2> Put your own real name (firstname and lastname, no nicknames or any other abbreviations)
+
+WARNING: Really make sure that you configure git properly! Do not just blindly  use this example. There will be more information in the developer documentation, because you should actually also use a GPG key to sign the commits. Just to say that what you see here is the bare minimum to make the project build!

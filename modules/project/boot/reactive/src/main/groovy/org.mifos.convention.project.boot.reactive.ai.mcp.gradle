@@ -1,0 +1,10 @@
+plugins {
+    id "org.mifos.project.java.base.ai.mcp"
+}
+
+dependencies {
+    api "org.springframework.ai:spring-ai-starter-mcp-server-webflux"
+    api "org.springframework.ai:spring-ai-starter-mcp-client-webflux"
+
+    // implementation "io.projectreactor.tools:blockhound"
+}

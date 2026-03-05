@@ -1,0 +1,24 @@
+plugins {
+    id "org.mifos.convention.internal.project.template"
+}
+
+description = "Mifos Initiative - Gradle Conventions - Project - Base"
+
+gradlePlugin {
+    plugins {
+        MifosProjectBaseLayoutPlugin {
+            id = "org.mifos.convention.project.base.layout"
+            implementationClass = "org.mifos.convention.project.base.MifosProjectBaseLayoutPlugin"
+        }
+        MifosProjectRootPlugin {
+            id = "org.mifos.convention.internal.project.base.root"
+            implementationClass = "org.mifos.convention.project.base.MifosProjectRootPlugin"
+        }
+    }
+}
+
+dependencies {
+    implementation libs.commons.io
+    compileOnly libs.lombok
+    annotationProcessor libs.lombok
+}

@@ -1,0 +1,197 @@
+= Mock Testing
+
+Mocking is the practice of replacing real dependencies with controlled substitutes during testing. Used well, mocks isolate the unit under test, make tests fast and deterministic, and allow verification of interactions. Used poorly, mocks couple tests to implementation details, hide real bugs, and produce tests that pass even when the system is broken.
+
+== When to Mock vs. Use Real Implementations
+
+|===
+| Use a Mock When | Use a Real Implementation When
+
+| The dependency is slow (external HTTP service, database)
+| The dependency is a simple value object or utility
+| The dependency is non-deterministic (current time, random number generator)
+| You are writing integration tests
+| The dependency is not yet implemented
+| The real implementation is fast and has no side effects
+| You need to verify specific interaction patterns (e.g., "save was called exactly once")
+| You want to test that two components actually work together
+|===
+
+== Mockito Conventions
+
+In the Mifos project, follow these Mockito conventions:
+
+* Use `@Mock` and `@InjectMocks` with `@ExtendWith(MockitoExtension.class)` rather than manual `Mockito.mock()` calls.
+* Prefer `when(...).thenReturn(...)` over `doReturn(...).when(...)` for type safety.
+* Use `ArgumentCaptor` to verify complex arguments rather than custom matchers.
+* Verify interactions only when the interaction itself is the specification (e.g., "an audit log entry must be created"). Do not verify interactions that are merely implementation details.
+
+== Good vs. Bad Mocking
+
+.Bad mock test — over-mocked, brittle, tests the mock not the logic
+[source,java]
+----
+// BAD: This test is tightly coupled to the implementation.
+// If we refactor LoanService to call repository.save() once instead of twice,
+// this test breaks even though the behavior is correct.
+@Test
+void should_saveLoanTwice_when_disbursing() {
+    when(loanRepository.findById(1L)).thenReturn(Optional.of(loan));
+    repaymentService.disburse(1L, BigDecimal.TEN);
+    verify(loanRepository, times(2)).save(any(Loan.class)); // fragile!
+    verify(auditService, times(1)).log(any());              // testing interaction, not outcome
+}
+----
+
+.Good mock test — tests behavior, not implementation
+[source,java]
+----
+// GOOD: This test verifies the observable outcome, not how it is achieved.
+@Test
+void should_updateOutstandingBalance_when_disbursementOccurs() {
+    // given
+    when(loanRepository.findById(1L)).thenReturn(Optional.of(loan));
+
+    // when
+    Loan updatedLoan = repaymentService.disburse(1L, new BigDecimal("10000.00"));
+
+    // then
+    assertThat(updatedLoan.getOutstandingBalance())
+        .isEqualByComparingTo(new BigDecimal("40000.00"));
+    assertThat(updatedLoan.getStatus()).isEqualTo(LoanStatus.ACTIVE);
+}
+----
+
+== Over-Mocking as a Code Smell
+
+If you find yourself mocking more than three dependencies in a single test, consider:
+
+1. **The class under test has too many responsibilities.** Refactor it into smaller, focused classes.
+2. **You should be writing an integration test instead.** If the test needs the database and the HTTP client, use Testcontainers and WireMock rather than mocking everything.
+3. **Your abstractions are leaking.** Introduce an interface that hides the complexity behind a simpler contract.
+
+NOTE: A test suite with 90% mock coverage but 10% real execution is a red flag. It means the tests pass but the system may still fail in production. Always complement unit tests with integration tests.
+
+== Wiremock
+
+WireMock is an HTTP mock server for testing code that interacts with external REST services. In the Mifos ecosystem, microservices communicate over HTTP, and third-party integrations (payment gateways, SMS providers, credit bureaus) are external dependencies that cannot be available in a test environment. WireMock stubs these services, allowing integration tests to run reliably without network access.
+
+WireMock supports:
+
+* **Stubbing** — Define the response returned for a given request pattern (URL, method, headers, body).
+* **Request matching** — Match on URL path, query parameters, headers, and request body patterns.
+* **Response templating** — Generate dynamic responses using Handlebars templates (e.g., echo back a request ID).
+* **Fault injection** — Simulate timeouts, malformed responses, and connection resets to test resilience.
+* **Record/playback** — Record real HTTP interactions and replay them as stubs.
+
+For more details, see the https://wiremock.org/2.x/docs/overview/[WireMock documentation] and the https://github.com/wiremock/api-template-library/blob/main/[API Template Library].
+
+=== WireMock Stub Example
+
+[source,java]
+----
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+
+import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+
+@SpringBootTest
+class CreditBureauClientTest {
+
+    @RegisterExtension
+    static WireMockExtension wireMock = WireMockExtension.newInstance()
+        .options(wireMockConfig().dynamicPort())
+        .build();
+
+    @Autowired
+    private CreditBureauClient creditBureauClient;
+
+    @Test
+    void should_returnCreditScore_when_bureauRespondsSuccessfully() {
+        // given
+        stubFor(post(urlEqualTo("/api/v1/credit-score"))
+            .withRequestBody(equalToJson("""
+                {
+                  "nationalId": "1234567890",
+                  "country": "KE"
+                }
+                """))
+            .willReturn(aResponse()
+                .withStatus(HttpStatus.OK.value())
+                .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                .withBody("""
+                    {
+                      "score": 720,
+                      "riskCategory": "LOW",
+                      "reportId": "RPT-2025-001"
+                    }
+                    """)));
+
+        // when
+        CreditScoreResult result = creditBureauClient.fetchScore("1234567890", "KE");
+
+        // then
+        assertThat(result.getScore()).isEqualTo(720);
+        assertThat(result.getRiskCategory()).isEqualTo("LOW");
+    }
+
+    @Test
+    void should_retry_when_bureauReturns503() {
+        // given — first call fails, second succeeds
+        stubFor(post(urlEqualTo("/api/v1/credit-score"))
+            .inScenario("Retry")
+            .willReturn(aResponse().withStatus(503))
+            .willSetStateTo("Retry-1"));
+
+        stubFor(post(urlEqualTo("/api/v1/credit-score"))
+            .inScenario("Retry")
+            .whenScenarioStateIs("Retry-1")
+            .willReturn(aResponse()
+                .withStatus(200)
+                .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                .withBody("{\"score\":650,\"riskCategory\":\"MEDIUM\",\"reportId\":\"RPT-2025-002\"}")));
+
+        // when
+        CreditScoreResult result = creditBureauClient.fetchScore("9876543210", "KE");
+
+        // then
+        assertThat(result.getScore()).isEqualTo(650);
+    }
+}
+----
+
+=== Gradle Configuration for WireMock
+
+[source,kotlin]
+----
+dependencies {
+    testImplementation("com.github.tomakehurst:wiremock-jre8-standalone:3.0.1")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+}
+----
+
+[source,bash]
+----
+# Run WireMock-based tests
+$ ./gradlew :credit-bureau:test --tests "CreditBureauClientTest"
+
+# Start WireMock standalone for manual exploration
+$ java -jar wiremock-standalone-3.0.1.jar --port 8089 --record-mappings
+----
+
+TIP: Use WireMock's `--record-mappings` mode during development to capture real API responses, then commit the recorded stubs as test fixtures. This ensures your tests remain stable even when the external API changes.
+
+See:
+
+- https://wiremock.org/2.x/docs/overview
+- https://github.com/wiremock/api-template-library/blob/main
+- https://microcks.io

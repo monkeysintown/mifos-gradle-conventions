@@ -1,0 +1,696 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "app-icon-specifications",
+  "title": "Cross-Platform App Icon & Packaging Image Specifications",
+  "description": "Comprehensive specification of icon/image sizes, shapes, formats, and locations for all major platforms, packaging formats, and distribution channels. Derived from Apple HIG, Android/Material Design guidelines, Microsoft docs, freedesktop.org spec, Bjango Templates, JReleaser docs, and platform developer portals.",
+  "version": "1.0.0",
+  "generated": "2026-05-10",
+  "sources": [
+    "https://developer.apple.com/design/human-interface-guidelines/app-icons",
+    "https://developer.android.com/guide/practices/ui_guidelines/icon_design_adaptive",
+    "https://learn.microsoft.com/en-us/windows/apps/design/iconography/app-icon-construction",
+    "https://specifications.freedesktop.org/icon-theme-spec/icon-theme-spec-latest.html",
+    "https://github.com/bjango/Bjango-Templates/blob/main/Help/Icon%20Sizes.md",
+    "https://jreleaser.org/guide/latest/reference",
+    "https://docs.flatpak.org/en/latest/conventions.html",
+    "https://snapcraft.io/docs/snapcraft-top-level-metadata",
+    "https://appimage.org",
+    "https://w3.org/WebAppManifest"
+  ],
+
+  "masterSourceRecommendation": {
+    "description": "Start from a single 1024x1024 square SVG or PNG master image. Do NOT pre-apply rounded corners or masks — platforms apply their own masking. No transparency for App Store / Play Store icons.",
+    "width": 1024,
+    "height": 1024,
+    "shape": "square",
+    "cornerRadius": 0,
+    "transparency": false,
+    "colorSpace": "sRGB",
+    "format": "SVG (preferred) or PNG"
+  },
+
+  "platforms": {
+
+    "apple-ios-ipados": {
+      "label": "Apple iOS & iPadOS",
+      "description": "iOS and iPadOS app icons. Apple applies a superellipse (squircle) mask automatically — provide flat square images with no transparency. iOS 26+ uses Icon Composer with up to 5 layers at 1024x1024.",
+      "maskedByPlatform": true,
+      "maskShape": "superellipse_squircle",
+      "transparency": "not_allowed",
+      "layers": 1,
+      "colorSpace": "sRGB or Display P3",
+      "formats": ["PNG"],
+      "icons": [
+        { "width": 20,   "height": 20,   "density": "1x",  "use": "iPad notifications",           "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "Icon-20.png",           "location": "AppIcon.appiconset/" },
+        { "width": 40,   "height": 40,   "density": "2x",  "use": "iPhone notifications",          "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "Icon-40.png",           "location": "AppIcon.appiconset/" },
+        { "width": 60,   "height": 60,   "density": "3x",  "use": "iPhone notifications",          "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "Icon-60.png",           "location": "AppIcon.appiconset/" },
+        { "width": 29,   "height": 29,   "density": "1x",  "use": "Spotlight, Settings",           "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "Icon-29.png",           "location": "AppIcon.appiconset/" },
+        { "width": 58,   "height": 58,   "density": "2x",  "use": "Spotlight, Settings",           "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "Icon-58.png",           "location": "AppIcon.appiconset/" },
+        { "width": 87,   "height": 87,   "density": "3x",  "use": "Spotlight, Settings",           "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "Icon-87.png",           "location": "AppIcon.appiconset/" },
+        { "width": 76,   "height": 76,   "density": "1x",  "use": "iPad home screen",              "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "Icon-76.png",           "location": "AppIcon.appiconset/" },
+        { "width": 152,  "height": 152,  "density": "2x",  "use": "iPad home screen",              "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "Icon-152.png",          "location": "AppIcon.appiconset/" },
+        { "width": 167,  "height": 167,  "density": "2x",  "use": "iPad Pro 12.9 inch home",       "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "Icon-167.png",          "location": "AppIcon.appiconset/" },
+        { "width": 120,  "height": 120,  "density": "2x",  "use": "iPhone home screen / Spotlight", "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "Icon-120.png",          "location": "AppIcon.appiconset/" },
+        { "width": 180,  "height": 180,  "density": "3x",  "use": "iPhone home screen",            "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "Icon-180.png",          "location": "AppIcon.appiconset/" },
+        { "width": 1024, "height": 1024, "density": "any", "use": "App Store / iTunes Connect",    "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "Icon-1024.png",         "location": "AppIcon.appiconset/", "notes": "No alpha channel, no transparency" }
+      ]
+    },
+
+    "apple-ios-26-plus": {
+      "label": "Apple iOS & iPadOS 26+",
+      "description": "Starting with iOS 26, Apple uses Icon Composer format with up to 5 layers (tinting, dark mode, etc.). Only a single 1024x1024 source is needed per layer.",
+      "maskedByPlatform": true,
+      "maskShape": "superellipse_squircle",
+      "transparency": "not_allowed",
+      "layers": "up to 5",
+      "colorSpace": "sRGB or Display P3",
+      "formats": ["Icon Composer"],
+      "icons": [
+        { "width": 1024, "height": 1024, "density": "all", "use": "All contexts (Icon Composer format)", "shape": "square", "cornerRadius": 0, "format": "Icon Composer", "file": "AppIcon.icon", "location": "Assets.xcassets/", "notes": "Multi-layer: auto-generates all sizes. Tinting and dark mode variants supported." }
+      ]
+    },
+
+    "apple-imessage": {
+      "label": "Apple iMessage",
+      "description": "iMessage app icons are non-square with rounded corner masks applied by the system.",
+      "maskedByPlatform": true,
+      "maskShape": "rounded_rectangle",
+      "transparency": "not_allowed",
+      "layers": 1,
+      "colorSpace": "sRGB or Display P3",
+      "formats": ["PNG"],
+      "icons": [
+        { "width": 27,  "height": 20,  "density": "1x", "use": "Messages", "shape": "rectangle", "cornerRadius": 0, "format": "PNG", "file": "iMessage-27x20.png",   "location": "MessagesExtension.appiconset/" },
+        { "width": 54,  "height": 40,  "density": "2x", "use": "Messages", "shape": "rectangle", "cornerRadius": 0, "format": "PNG", "file": "iMessage-54x40.png",   "location": "MessagesExtension.appiconset/" },
+        { "width": 81,  "height": 60,  "density": "3x", "use": "Messages", "shape": "rectangle", "cornerRadius": 0, "format": "PNG", "file": "iMessage-81x60.png",   "location": "MessagesExtension.appiconset/" },
+        { "width": 32,  "height": 24,  "density": "1x", "use": "Messages", "shape": "rectangle", "cornerRadius": 0, "format": "PNG", "file": "iMessage-32x24.png",   "location": "MessagesExtension.appiconset/" },
+        { "width": 64,  "height": 48,  "density": "2x", "use": "Messages", "shape": "rectangle", "cornerRadius": 0, "format": "PNG", "file": "iMessage-64x48.png",   "location": "MessagesExtension.appiconset/" },
+        { "width": 96,  "height": 72,  "density": "3x", "use": "Messages", "shape": "rectangle", "cornerRadius": 0, "format": "PNG", "file": "iMessage-96x72.png",   "location": "MessagesExtension.appiconset/" },
+        { "width": 60,  "height": 45,  "density": "1x", "use": "Messages", "shape": "rectangle", "cornerRadius": 0, "format": "PNG", "file": "iMessage-60x45.png",   "location": "MessagesExtension.appiconset/" },
+        { "width": 120, "height": 90,  "density": "2x", "use": "Messages", "shape": "rectangle", "cornerRadius": 0, "format": "PNG", "file": "iMessage-120x90.png",  "location": "MessagesExtension.appiconset/" },
+        { "width": 180, "height": 135, "density": "3x", "use": "Messages", "shape": "rectangle", "cornerRadius": 0, "format": "PNG", "file": "iMessage-180x135.png", "location": "MessagesExtension.appiconset/" }
+      ]
+    },
+
+    "apple-macos": {
+      "label": "Apple macOS",
+      "description": "macOS app icons use a rounded rectangle shape (not masked by the OS — you design the rounded corners). macOS 26+ uses Icon Composer with automatic masking. Pre-macOS 26: transparency is allowed, you design the full icon including rounded corners and shadow.",
+      "maskedByPlatform": false,
+      "maskShape": "none_designer_adds_rounded_corners",
+      "transparency": "allowed (pre-macOS 26)",
+      "layers": 1,
+      "colorSpace": "sRGB",
+      "formats": ["ICNS", "PNG"],
+      "icons": [
+        { "width": 16,   "height": 16,   "density": "1x",  "use": "Finder, Dock",      "shape": "rounded_rectangle", "cornerRadius": "proportional_to_size", "format": "ICNS", "file": "AppIcon.icns", "location": "App.app/Contents/Resources/", "notes": "Embedded in ICNS bundle" },
+        { "width": 32,   "height": 32,   "density": "2x",  "use": "Finder, Dock",      "shape": "rounded_rectangle", "cornerRadius": "proportional_to_size", "format": "ICNS", "file": "AppIcon.icns", "location": "App.app/Contents/Resources/", "notes": "16@2x" },
+        { "width": 32,   "height": 32,   "density": "1x",  "use": "Finder, Dock",      "shape": "rounded_rectangle", "cornerRadius": "proportional_to_size", "format": "ICNS", "file": "AppIcon.icns", "location": "App.app/Contents/Resources/" },
+        { "width": 64,   "height": 64,   "density": "2x",  "use": "Finder, Dock",      "shape": "rounded_rectangle", "cornerRadius": "proportional_to_size", "format": "ICNS", "file": "AppIcon.icns", "location": "App.app/Contents/Resources/" },
+        { "width": 128,  "height": 128,  "density": "1x",  "use": "Finder, Dock",      "shape": "rounded_rectangle", "cornerRadius": "proportional_to_size", "format": "ICNS", "file": "AppIcon.icns", "location": "App.app/Contents/Resources/" },
+        { "width": 256,  "height": 256,  "density": "2x",  "use": "Finder, Dock",      "shape": "rounded_rectangle", "cornerRadius": "proportional_to_size", "format": "ICNS", "file": "AppIcon.icns", "location": "App.app/Contents/Resources/" },
+        { "width": 256,  "height": 256,  "density": "1x",  "use": "Finder, Dock",      "shape": "rounded_rectangle", "cornerRadius": "proportional_to_size", "format": "ICNS", "file": "AppIcon.icns", "location": "App.app/Contents/Resources/" },
+        { "width": 512,  "height": 512,  "density": "2x",  "use": "Finder, Dock",      "shape": "rounded_rectangle", "cornerRadius": "proportional_to_size", "format": "ICNS", "file": "AppIcon.icns", "location": "App.app/Contents/Resources/" },
+        { "width": 512,  "height": 512,  "density": "1x",  "use": "Finder, Dock",      "shape": "rounded_rectangle", "cornerRadius": "proportional_to_size", "format": "ICNS", "file": "AppIcon.icns", "location": "App.app/Contents/Resources/" },
+        { "width": 1024, "height": 1024, "density": "2x",  "use": "Finder, Dock",      "shape": "rounded_rectangle", "cornerRadius": "proportional_to_size", "format": "ICNS", "file": "AppIcon.icns", "location": "App.app/Contents/Resources/" },
+        { "width": 1024, "height": 1024, "density": "any", "use": "App Store",         "shape": "rounded_rectangle", "cornerRadius": "proportional_to_size", "format": "PNG",  "file": "AppIcon-1024.png", "location": "AppIcon.appiconset/" }
+      ],
+      "icnsBundle": {
+        "description": "A single .icns file contains all sizes above as a bundle",
+        "containedSizes": [16, 32, 64, 128, 256, 512, 1024],
+        "format": "ICNS",
+        "file": "AppIcon.icns",
+        "location": "App.app/Contents/Resources/"
+      }
+    },
+
+    "apple-macos-26-plus": {
+      "label": "Apple macOS 26+",
+      "description": "macOS 26+ uses Icon Composer with automatic masking. Rounded corners applied by the system. Up to 5 layers (dark, tinted variants). Transparency not allowed.",
+      "maskedByPlatform": true,
+      "maskShape": "rounded_rectangle",
+      "transparency": "not_allowed",
+      "layers": "up to 5",
+      "colorSpace": "sRGB or Display P3",
+      "formats": ["Icon Composer"],
+      "icons": [
+        { "width": 1024, "height": 1024, "density": "all", "use": "All contexts (Icon Composer format)", "shape": "square", "cornerRadius": 0, "format": "Icon Composer", "file": "AppIcon.icon", "location": "Assets.xcassets/", "notes": "Multi-layer: auto-generates all sizes" }
+      ]
+    },
+
+    "apple-watchos": {
+      "label": "Apple watchOS",
+      "description": "watchOS app icons are circular — Apple applies a circular mask automatically. Provide square images.",
+      "maskedByPlatform": true,
+      "maskShape": "circle",
+      "transparency": "not_allowed",
+      "layers": 1,
+      "colorSpace": "sRGB",
+      "formats": ["PNG"],
+      "icons": [
+        { "width": 48,   "height": 48,   "density": "2x", "use": "Notification Center",           "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "Watch-48.png",   "location": "AppIcon.appiconset/" },
+        { "width": 55,   "height": 55,   "density": "2x", "use": "Notification Center",           "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "Watch-55.png",   "location": "AppIcon.appiconset/" },
+        { "width": 58,   "height": 58,   "density": "2x", "use": "iPhone companion",              "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "Watch-58.png",   "location": "AppIcon.appiconset/" },
+        { "width": 66,   "height": 66,   "density": "2x", "use": "Notification Center",           "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "Watch-66.png",   "location": "AppIcon.appiconset/" },
+        { "width": 80,   "height": 80,   "density": "2x", "use": "Long-Look, Home screen",        "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "Watch-80.png",   "location": "AppIcon.appiconset/" },
+        { "width": 87,   "height": 87,   "density": "3x", "use": "iPhone companion",              "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "Watch-87.png",   "location": "AppIcon.appiconset/" },
+        { "width": 88,   "height": 88,   "density": "2x", "use": "Long-Look notification",        "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "Watch-88.png",   "location": "AppIcon.appiconset/" },
+        { "width": 100,  "height": 100,  "density": "2x", "use": "Home screen",                   "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "Watch-100.png",  "location": "AppIcon.appiconset/" },
+        { "width": 102,  "height": 102,  "density": "2x", "use": "Home screen",                   "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "Watch-102.png",  "location": "AppIcon.appiconset/" },
+        { "width": 172,  "height": 172,  "density": "2x", "use": "Short-Look notification",        "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "Watch-172.png",  "location": "AppIcon.appiconset/" },
+        { "width": 196,  "height": 196,  "density": "2x", "use": "Short-Look notification",        "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "Watch-196.png",  "location": "AppIcon.appiconset/" },
+        { "width": 216,  "height": 216,  "density": "2x", "use": "Short-Look notification",        "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "Watch-216.png",  "location": "AppIcon.appiconset/" },
+        { "width": 234,  "height": 234,  "density": "2x", "use": "Short-Look notification",        "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "Watch-234.png",  "location": "AppIcon.appiconset/" },
+        { "width": 1024, "height": 1024, "density": "any", "use": "App Store",                    "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "Watch-1024.png", "location": "AppIcon.appiconset/", "notes": "No alpha" }
+      ]
+    },
+
+    "apple-tvos": {
+      "label": "Apple tvOS",
+      "description": "tvOS icons have subtle rounded corners applied by the system. 5-layer parallax icons with depth.",
+      "maskedByPlatform": true,
+      "maskShape": "rounded_rectangle_subtle",
+      "transparency": "not_allowed_on_background_allowed_on_top_layers",
+      "layers": 5,
+      "colorSpace": "sRGB or Display P3",
+      "formats": ["PNG"],
+      "icons": [
+        { "width": 400,  "height": 240,  "density": "1x", "use": "Home, top shelf",     "shape": "rectangle", "cornerRadius": 0, "format": "PNG", "file": "tvOS-400x240.png",  "location": "AppIcon.appiconset/" },
+        { "width": 800,  "height": 480,  "density": "2x", "use": "Home, top shelf",     "shape": "rectangle", "cornerRadius": 0, "format": "PNG", "file": "tvOS-800x480.png",  "location": "AppIcon.appiconset/" },
+        { "width": 1280, "height": 768,  "density": "1x, 2x", "use": "App Store",       "shape": "rectangle", "cornerRadius": 0, "format": "PNG", "file": "tvOS-1280x768.png", "location": "AppIcon.appiconset/" }
+      ]
+    },
+
+    "apple-visionos": {
+      "label": "Apple visionOS",
+      "description": "visionOS icons are circular, masked by the system. Uses Icon Composer with up to 5 layers.",
+      "maskedByPlatform": true,
+      "maskShape": "circle",
+      "transparency": "not_allowed",
+      "layers": "up to 5",
+      "colorSpace": "sRGB or Display P3",
+      "formats": ["Icon Composer"],
+      "icons": [
+        { "width": 1024, "height": 1024, "density": "all", "use": "All contexts (Icon Composer format)", "shape": "square", "cornerRadius": 0, "format": "Icon Composer", "file": "AppIcon.icon", "location": "Assets.xcassets/", "notes": "Circular mask applied by visionOS" }
+      ]
+    },
+
+    "android-legacy": {
+      "label": "Android Legacy Launcher Icons",
+      "description": "Pre-Android 8.0 (API 25 and below) launcher icons. Single-layer square icons. Masking varies by launcher.",
+      "maskedByPlatform": false,
+      "maskShape": "varies_by_launcher",
+      "transparency": "allowed",
+      "layers": 1,
+      "colorSpace": "sRGB or Display P3",
+      "formats": ["PNG"],
+      "icons": [
+        { "width": 48,  "height": 48,  "density": "mdpi (1x)",   "use": "Launcher", "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "ic_launcher.png",   "location": "mipmap-mdpi/" },
+        { "width": 72,  "height": 72,  "density": "hdpi (1.5x)", "use": "Launcher", "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "ic_launcher.png",   "location": "mipmap-hdpi/" },
+        { "width": 96,  "height": 96,  "density": "xhdpi (2x)",  "use": "Launcher", "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "ic_launcher.png",   "location": "mipmap-xhdpi/" },
+        { "width": 144, "height": 144, "density": "xxhdpi (3x)", "use": "Launcher", "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "ic_launcher.png",   "location": "mipmap-xxhdpi/" },
+        { "width": 192, "height": 192, "density": "xxxhdpi (4x)","use": "Launcher", "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "ic_launcher.png",   "location": "mipmap-xxxhdpi/" },
+        { "width": 512, "height": 512, "density": "any",         "use": "Google Play Store listing", "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "ic_launcher-play.png", "location": "", "notes": "No alpha, max 1024 KB, 32-bit PNG" }
+      ]
+    },
+
+    "android-adaptive": {
+      "label": "Android Adaptive Icons (API 26+)",
+      "description": "Adaptive icons use two layers (foreground + background) on a 108dp canvas. The visible area is a 72dp circle centered within the 108dp canvas. OEM launchers apply different masks (circle, squircle, rounded square, teardrop). Safe zone: keep important content within 66dp center circle. Android 13+ adds an optional monochrome layer for themed icons.",
+      "maskedByPlatform": true,
+      "maskShape": "varies_by_oem_circle_squircle_rounded_square_teardrop",
+      "transparency": "allowed_foreground_not_allowed_background",
+      "layers": "2 or 3 (foreground, background, optional monochrome)",
+      "colorSpace": "sRGB or Display P3",
+      "formats": ["PNG"],
+      "safeZone": {
+        "description": "Content within the 66dp diameter circle centered on the 108dp canvas is guaranteed visible across all launcher masks",
+        "canvasDp": 108,
+        "safeZoneDiameterDp": 66,
+        "safeZonePercentOfCanvas": 61.1
+      },
+      "icons": [
+        { "width": 108, "height": 108, "density": "mdpi (1x)",   "use": "Adaptive icon layer", "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "ic_launcher_foreground.png", "location": "mipmap-anydpi-v26/", "layer": "foreground", "safeZoneDiameterPx": 66 },
+        { "width": 162, "height": 162, "density": "hdpi (1.5x)", "use": "Adaptive icon layer", "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "ic_launcher_foreground.png", "location": "mipmap-hdpi/", "layer": "foreground", "safeZoneDiameterPx": 99 },
+        { "width": 216, "height": 216, "density": "xhdpi (2x)",  "use": "Adaptive icon layer", "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "ic_launcher_foreground.png", "location": "mipmap-xhdpi/", "layer": "foreground", "safeZoneDiameterPx": 132 },
+        { "width": 324, "height": 324, "density": "xxhdpi (3x)", "use": "Adaptive icon layer", "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "ic_launcher_foreground.png", "location": "mipmap-xxhdpi/", "layer": "foreground", "safeZoneDiameterPx": 198 },
+        { "width": 432, "height": 432, "density": "xxxhdpi (4x)","use": "Adaptive icon layer", "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "ic_launcher_foreground.png", "location": "mipmap-xxxhdpi/", "layer": "foreground", "safeZoneDiameterPx": 264 }
+      ],
+      "monochromeLayer": {
+        "description": "Android 13+ (API 33) themed icon layer. Single-color silhouette that the system tints.",
+        "sizes": "Same as adaptive icon layers above",
+        "format": "PNG",
+        "notes": "Provide as single-color (typically black on transparent) — system applies user-chosen tint color"
+      }
+    },
+
+    "android-notification": {
+      "label": "Android Notification Icons",
+      "description": "Notification icons must be white silhouettes on transparent background. The system applies coloring based on user theme.",
+      "maskedByPlatform": false,
+      "maskShape": "none",
+      "transparency": "required_white_on_transparent",
+      "layers": 1,
+      "colorSpace": "sRGB",
+      "formats": ["PNG"],
+      "icons": [
+        { "width": 24, "height": 24, "density": "mdpi (1x)",   "use": "Notification", "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "ic_notification.png", "location": "drawable-mdpi/" },
+        { "width": 36, "height": 36, "density": "hdpi (1.5x)", "use": "Notification", "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "ic_notification.png", "location": "drawable-hdpi/" },
+        { "width": 48, "height": 48, "density": "xhdpi (2x)",  "use": "Notification", "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "ic_notification.png", "location": "drawable-xhdpi/" },
+        { "width": 72, "height": 72, "density": "xxhdpi (3x)", "use": "Notification", "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "ic_notification.png", "location": "drawable-xxhdpi/" },
+        { "width": 96, "height": 96, "density": "xxxhdpi (4x)","use": "Notification", "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "ic_notification.png", "location": "drawable-xxxhdpi/" }
+      ]
+    },
+
+    "windows-classic": {
+      "label": "Microsoft Windows (Classic Win32)",
+      "description": "Windows application icons provided as multi-resolution ICO files. The ICO format embeds multiple PNG images at different sizes. Design as square with transparent background — Windows applies its own visual treatment.",
+      "maskedByPlatform": false,
+      "maskShape": "none",
+      "transparency": "allowed",
+      "layers": 1,
+      "colorSpace": "sRGB",
+      "formats": ["ICO"],
+      "icoBundle": {
+        "description": "A single .ico file containing multiple embedded PNG images",
+        "containedSizes": [16, 24, 32, 48, 64, 128, 256],
+        "format": "ICO",
+        "file": "app.ico",
+        "location": "application root or resources/"
+      },
+      "icons": [
+        { "width": 16,   "height": 16,   "density": "1x",  "use": "Context menu, title bar, system tray", "shape": "square", "cornerRadius": 0, "format": "ICO", "file": "app.ico", "location": "embedded in ICO", "notes": "Embedded in ICO bundle" },
+        { "width": 24,   "height": 24,   "density": "1.5x","use": "Small icon view",                    "shape": "square", "cornerRadius": 0, "format": "ICO", "file": "app.ico", "location": "embedded in ICO", "notes": "Embedded in ICO bundle" },
+        { "width": 32,   "height": 32,   "density": "2x",  "use": "Desktop, list view, taskbar",        "shape": "square", "cornerRadius": 0, "format": "ICO", "file": "app.ico", "location": "embedded in ICO", "notes": "Embedded in ICO bundle" },
+        { "width": 48,   "height": 48,   "density": "3x",  "use": "Medium icon view, taskbar @2x",      "shape": "square", "cornerRadius": 0, "format": "ICO", "file": "app.ico", "location": "embedded in ICO", "notes": "Embedded in ICO bundle" },
+        { "width": 64,   "height": 64,   "density": "4x",  "use": "Large icon view",                    "shape": "square", "cornerRadius": 0, "format": "ICO", "file": "app.ico", "location": "embedded in ICO", "notes": "Embedded in ICO bundle" },
+        { "width": 128,  "height": 128,  "density": "8x",  "use": "Extra large icon view",              "shape": "square", "cornerRadius": 0, "format": "ICO", "file": "app.ico", "location": "embedded in ICO", "notes": "Embedded in ICO bundle" },
+        { "width": 256,  "height": 256,  "density": "16x", "use": "Maximum icon view (PNG-compressed)",  "shape": "square", "cornerRadius": 0, "format": "ICO", "file": "app.ico", "location": "embedded in ICO", "notes": "PNG-compressed inside ICO" }
+      ]
+    },
+
+    "windows-uwp-tiles": {
+      "label": "Microsoft Windows UWP Tiles",
+      "description": "UWP/WinUI tile icons for Start Menu. Multiple scale factors required. Visual Studio can auto-generate from a single 1024x1024 source.",
+      "maskedByPlatform": false,
+      "maskShape": "none",
+      "transparency": "allowed",
+      "layers": 1,
+      "colorSpace": "sRGB",
+      "formats": ["PNG"],
+      "icons": [
+        { "width": 44,   "height": 44,   "density": "1x",   "use": "App list icon",          "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "Square44x44.targetsize-44.png",   "location": "Assets/" },
+        { "width": 55,   "height": 55,   "density": "1.25x","use": "App list icon",          "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "Square44x44.targetsize-55.png",   "location": "Assets/" },
+        { "width": 66,   "height": 66,   "density": "1.5x", "use": "App list icon",          "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "Square44x44.targetsize-66.png",   "location": "Assets/" },
+        { "width": 88,   "height": 88,   "density": "2x",   "use": "App list icon",          "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "Square44x44.targetsize-88.png",   "location": "Assets/" },
+        { "width": 176,  "height": 176,  "density": "4x",   "use": "App list icon",          "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "Square44x44.targetsize-176.png",  "location": "Assets/" },
+        { "width": 71,   "height": 71,   "density": "1x",   "use": "Small tile",             "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "SmallTile.png",                 "location": "Assets/" },
+        { "width": 142,  "height": 142,  "density": "2x",   "use": "Small tile",             "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "SmallTile.scale-200.png",       "location": "Assets/" },
+        { "width": 284,  "height": 284,  "density": "4x",   "use": "Small tile",             "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "SmallTile.scale-400.png",       "location": "Assets/" },
+        { "width": 150,  "height": 150,  "density": "1x",   "use": "Medium tile",            "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "MediumTile.png",               "location": "Assets/" },
+        { "width": 300,  "height": 300,  "density": "2x",   "use": "Medium tile",            "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "MediumTile.scale-200.png",     "location": "Assets/" },
+        { "width": 600,  "height": 600,  "density": "4x",   "use": "Medium tile",            "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "MediumTile.scale-400.png",     "location": "Assets/" },
+        { "width": 310,  "height": 150,  "density": "1x",   "use": "Wide tile",              "shape": "rectangle", "cornerRadius": 0, "format": "PNG", "file": "WideTile.png",               "location": "Assets/" },
+        { "width": 620,  "height": 300,  "density": "2x",   "use": "Wide tile",              "shape": "rectangle", "cornerRadius": 0, "format": "PNG", "file": "WideTile.scale-200.png",     "location": "Assets/" },
+        { "width": 1240, "height": 600,  "density": "4x",   "use": "Wide tile",              "shape": "rectangle", "cornerRadius": 0, "format": "PNG", "file": "WideTile.scale-400.png",     "location": "Assets/" },
+        { "width": 310,  "height": 310,  "density": "1x",   "use": "Large tile (desktop)",   "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "LargeTile.png",               "location": "Assets/" },
+        { "width": 620,  "height": 620,  "density": "2x",   "use": "Large tile (desktop)",   "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "LargeTile.scale-200.png",     "location": "Assets/" },
+        { "width": 1240, "height": 1240, "density": "4x",   "use": "Large tile (desktop)",   "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "LargeTile.scale-400.png",     "location": "Assets/" },
+        { "width": 50,   "height": 50,   "density": "1x",   "use": "Store logo / Package logo", "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "StoreLogo.png",             "location": "Assets/" },
+        { "width": 100,  "height": 100,  "density": "2x",   "use": "Store logo / Package logo", "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "StoreLogo.scale-200.png",   "location": "Assets/" },
+        { "width": 200,  "height": 200,  "density": "4x",   "use": "Store logo / Package logo", "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "StoreLogo.scale-400.png",   "location": "Assets/" }
+      ]
+    },
+
+    "linux-freedesktop": {
+      "label": "Linux (Freedesktop hicolor icon theme)",
+      "description": "Freedesktop.org Icon Theme Specification. Icons placed in hicolor theme directory structure. Desktop environments handle any masking. SVG is preferred as it renders at any size.",
+      "maskedByPlatform": false,
+      "maskShape": "none_DE_applies_masking",
+      "transparency": "allowed",
+      "layers": 1,
+      "colorSpace": "sRGB",
+      "formats": ["PNG", "SVG"],
+      "icons": [
+        { "width": 16,   "height": 16,   "density": "1x",  "use": "Fallback / tiny icons",     "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "<appid>.png", "location": "hicolor/16x16/apps/" },
+        { "width": 22,   "height": 22,   "density": "1x",  "use": "Toolbar / menu icons",      "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "<appid>.png", "location": "hicolor/22x22/apps/" },
+        { "width": 24,   "height": 24,   "density": "1x",  "use": "Toolbar / menu icons",      "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "<appid>.png", "location": "hicolor/24x24/apps/" },
+        { "width": 32,   "height": 32,   "density": "1x",  "use": "Small icons",               "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "<appid>.png", "location": "hicolor/32x32/apps/" },
+        { "width": 48,   "height": 48,   "density": "1x",  "use": "Traditional default size",   "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "<appid>.png", "location": "hicolor/48x48/apps/" },
+        { "width": 64,   "height": 64,   "density": "1x",  "use": "Standard desktop",          "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "<appid>.png", "location": "hicolor/64x64/apps/" },
+        { "width": 96,   "height": 96,   "density": "1x",  "use": "High-density desktop",      "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "<appid>.png", "location": "hicolor/96x96/apps/" },
+        { "width": 128,  "height": 128,  "density": "1x",  "use": "Application menu & dock",   "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "<appid>.png", "location": "hicolor/128x128/apps/" },
+        { "width": 192,  "height": 192,  "density": "1x",  "use": "HiDPI desktop",             "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "<appid>.png", "location": "hicolor/192x192/apps/" },
+        { "width": 256,  "height": 256,  "density": "1x",  "use": "High-DPI / app stores",     "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "<appid>.png", "location": "hicolor/256x256/apps/" },
+        { "width": 512,  "height": 512,  "density": "1x",  "use": "Large preview / app stores","shape": "square", "cornerRadius": 0, "format": "PNG", "file": "<appid>.png", "location": "hicolor/512x512/apps/" },
+        { "width": null,  "height": null, "density": "any", "use": "Scalable (all sizes)",      "shape": "square", "cornerRadius": 0, "format": "SVG", "file": "<appid>.svg", "location": "hicolor/scalable/apps/", "notes": "Preferred format — renders at any size" }
+      ]
+    },
+
+    "macos-dmg": {
+      "label": "macOS DMG (Disk Image)",
+      "description": "DMG disk images require a volume icon (ICNS) and optionally a background image for the Finder window when mounted.",
+      "maskedByPlatform": false,
+      "maskShape": "none",
+      "transparency": "allowed",
+      "layers": 1,
+      "colorSpace": "sRGB",
+      "formats": ["ICNS", "PNG"],
+      "icons": [
+        { "width": 512,  "height": 512,  "density": "1x",   "use": "DMG volume icon",           "shape": "rounded_rectangle", "cornerRadius": "proportional", "format": "ICNS", "file": ".VolumeIcon.icns", "location": "DMG root/", "notes": "Same ICNS as app icon" },
+        { "width": 1024, "height": 1024, "density": "2x",   "use": "DMG volume icon (retina)",   "shape": "rounded_rectangle", "cornerRadius": "proportional", "format": "ICNS", "file": ".VolumeIcon.icns", "location": "DMG root/", "notes": "Embedded in ICNS" },
+        { "width": 660,  "height": 440,  "density": "1x",   "use": "DMG window background",      "shape": "rectangle", "cornerRadius": 0, "format": "PNG", "file": "background.png",    "location": ".background/", "notes": "Hidden file, set with SetFile -a V" },
+        { "width": 1320, "height": 880,  "density": "2x",   "use": "DMG window background (retina)", "shape": "rectangle", "cornerRadius": 0, "format": "PNG", "file": "background.png",  "location": ".background/", "notes": "Retina @2x background" }
+      ]
+    },
+
+    "windows-msi": {
+      "label": "Windows MSI (WiX Toolset)",
+      "description": "MSI installers require an ICO file for Add/Remove Programs and optional BMP images for custom installer dialogs.",
+      "maskedByPlatform": false,
+      "maskShape": "none",
+      "transparency": "allowed_in_ICO",
+      "layers": 1,
+      "colorSpace": "sRGB",
+      "formats": ["ICO", "BMP"],
+      "icons": [
+        { "width": 16,   "height": 16,   "density": "1x",  "use": "Add/Remove Programs icon", "shape": "square", "cornerRadius": 0, "format": "ICO", "file": "app.ico",       "location": "embedded in ICO", "notes": "Multi-res ICO" },
+        { "width": 32,   "height": 32,   "density": "2x",  "use": "Add/Remove Programs icon", "shape": "square", "cornerRadius": 0, "format": "ICO", "file": "app.ico",       "location": "embedded in ICO" },
+        { "width": 48,   "height": 48,   "density": "3x",  "use": "Add/Remove Programs icon", "shape": "square", "cornerRadius": 0, "format": "ICO", "file": "app.ico",       "location": "embedded in ICO" },
+        { "width": 256,  "height": 256,  "density": "16x", "use": "Add/Remove Programs icon", "shape": "square", "cornerRadius": 0, "format": "ICO", "file": "app.ico",       "location": "embedded in ICO" },
+        { "width": 493,  "height": 58,   "density": "1x",  "use": "WiX dialog banner (top)",   "shape": "rectangle", "cornerRadius": 0, "format": "BMP", "file": "WixUIBannerBmp.bmp", "location": "installer resources/" },
+        { "width": 493,  "height": 312,  "density": "1x",  "use": "WiX dialog background",     "shape": "rectangle", "cornerRadius": 0, "format": "BMP", "file": "WixUIDialogBmp.bmp", "location": "installer resources/" }
+      ]
+    },
+
+    "flatpak": {
+      "label": "Flatpak",
+      "description": "Flatpak follows the freedesktop hicolor icon spec. Icons placed in the export directory. Flathub prefers 256x256 PNG minimum or SVG. JReleaser requires at least one icon, 256x256 preferred.",
+      "maskedByPlatform": false,
+      "maskShape": "none_DE_applies_masking",
+      "transparency": "allowed",
+      "layers": 1,
+      "colorSpace": "sRGB",
+      "formats": ["PNG", "SVG"],
+      "icons": [
+        { "width": 64,   "height": 64,   "density": "1x",  "use": "Standard desktop fallback",  "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "<app-id>.png", "location": "export/share/icons/hicolor/64x64/apps/" },
+        { "width": 128,  "height": 128,  "density": "1x",  "use": "Standard desktop",           "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "<app-id>.png", "location": "export/share/icons/hicolor/128x128/apps/" },
+        { "width": 256,  "height": 256,  "density": "1x",  "use": "Flathub preferred size",     "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "<app-id>.png", "location": "export/share/icons/hicolor/256x256/apps/" },
+        { "width": 512,  "height": 512,  "density": "1x",  "use": "High-DPI displays",          "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "<app-id>.png", "location": "export/share/icons/hicolor/512x512/apps/" },
+        { "width": null,  "height": null, "density": "any", "use": "Scalable (all sizes)",       "shape": "square", "cornerRadius": 0, "format": "SVG", "file": "<app-id>.svg", "location": "export/share/icons/hicolor/scalable/apps/" }
+      ]
+    },
+
+    "snap": {
+      "label": "Snap / Snapcraft",
+      "description": "Snap packages need a single icon file referenced in snapcraft.yaml. The Snap Store applies a circular mask in listings. SVG or 512x512 PNG recommended.",
+      "maskedByPlatform": true,
+      "maskShape": "circle_in_store_listings",
+      "transparency": "allowed",
+      "layers": 1,
+      "colorSpace": "sRGB",
+      "formats": ["PNG", "SVG"],
+      "icons": [
+        { "width": 512,  "height": 512,  "density": "1x",  "use": "Snap Store listing & desktop", "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "icon.png", "location": "snap/gui/" },
+        { "width": null,  "height": null, "density": "any", "use": "Snap Store listing & desktop (scalable)", "shape": "square", "cornerRadius": 0, "format": "SVG", "file": "icon.svg", "location": "snap/gui/", "notes": "Preferred for scalability" }
+      ]
+    },
+
+    "appimage": {
+      "label": "AppImage",
+      "description": "AppImage requires a .DirIcon PNG file at the root of the AppImage filesystem for desktop integration. Minimum 128x128, 256x256+ preferred.",
+      "maskedByPlatform": false,
+      "maskShape": "none_DE_applies_masking",
+      "transparency": "allowed",
+      "layers": 1,
+      "colorSpace": "sRGB",
+      "formats": ["PNG"],
+      "icons": [
+        { "width": 128,  "height": 128,  "density": "1x",  "use": ".DirIcon (minimum)",         "shape": "square", "cornerRadius": 0, "format": "PNG", "file": ".DirIcon", "location": "AppImage root/" },
+        { "width": 256,  "height": 256,  "density": "1x",  "use": ".DirIcon (preferred)",        "shape": "square", "cornerRadius": 0, "format": "PNG", "file": ".DirIcon", "location": "AppImage root/", "notes": "Preferred for better quality" }
+      ]
+    },
+
+    "jpackage-linux": {
+      "label": "JPackage (Linux deb/rpm)",
+      "description": "JPackage for Linux packages uses a single PNG icon. jpackage embeds it into the .desktop file and hicolor theme directories automatically.",
+      "maskedByPlatform": false,
+      "maskShape": "none_DE_applies_masking",
+      "transparency": "allowed",
+      "layers": 1,
+      "colorSpace": "sRGB",
+      "formats": ["PNG"],
+      "jreleaserConfig": {
+        "field": "assemble.jpackage.<name>.linux.icon",
+        "format": "PNG"
+      },
+      "icons": [
+        { "width": 256,  "height": 256,  "density": "1x",  "use": "JPackage Linux icon (recommended)", "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "app.png", "location": "src/jreleaser/icons/" },
+        { "width": 512,  "height": 512,  "density": "1x",  "use": "JPackage Linux icon (high-DPI)",   "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "app.png", "location": "src/jreleaser/icons/" }
+      ]
+    },
+
+    "jpackage-macos": {
+      "label": "JPackage (macOS dmg/pkg)",
+      "description": "JPackage for macOS requires an ICNS file containing all required resolutions.",
+      "maskedByPlatform": false,
+      "maskShape": "rounded_rectangle_designer_adds",
+      "transparency": "allowed",
+      "layers": 1,
+      "colorSpace": "sRGB",
+      "formats": ["ICNS"],
+      "jreleaserConfig": {
+        "field": "assemble.jpackage.<name>.osx.icon",
+        "format": "ICNS"
+      },
+      "icons": [
+        { "width": "multi", "height": "multi", "density": "all", "use": "JPackage macOS icon", "shape": "rounded_rectangle", "cornerRadius": "proportional", "format": "ICNS", "file": "app.icns", "location": "src/jreleaser/icons/", "containedSizes": [16, 32, 64, 128, 256, 512, 1024] }
+      ]
+    },
+
+    "jpackage-windows": {
+      "label": "JPackage (Windows msi/exe)",
+      "description": "JPackage for Windows requires an ICO file containing all required resolutions.",
+      "maskedByPlatform": false,
+      "maskShape": "none",
+      "transparency": "allowed",
+      "layers": 1,
+      "colorSpace": "sRGB",
+      "formats": ["ICO"],
+      "jreleaserConfig": {
+        "field": "assemble.jpackage.<name>.windows.icon",
+        "format": "ICO"
+      },
+      "icons": [
+        { "width": "multi", "height": "multi", "density": "all", "use": "JPackage Windows icon", "shape": "square", "cornerRadius": 0, "format": "ICO", "file": "app.ico", "location": "src/jreleaser/icons/", "containedSizes": [16, 24, 32, 48, 64, 128, 256] }
+      ]
+    },
+
+    "chocolatey": {
+      "label": "Chocolatey",
+      "description": "Chocolatey packages reference an icon via a publicly accessible HTTPS URL. No icon is embedded in the package. PNG format, typically 256x256.",
+      "maskedByPlatform": false,
+      "maskShape": "none",
+      "transparency": "allowed",
+      "layers": 1,
+      "colorSpace": "sRGB",
+      "formats": ["PNG"],
+      "jreleaserConfig": {
+        "field": "packagers.chocolatey.iconUrl",
+        "notes": "Must be publicly accessible HTTPS URL"
+      },
+      "icons": [
+        { "width": 256, "height": 256, "density": "1x", "use": "Chocolatey iconUrl (hosted)", "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "icon.png", "location": "hosted (public URL)", "notes": "Referenced by HTTPS URL in .nuspec" }
+      ]
+    },
+
+    "homebrew": {
+      "label": "Homebrew (Cask)",
+      "description": "Homebrew Cask uses the macOS app bundle's existing ICNS icon. No separate icon file is required in the formula. An optional icon URL can be provided.",
+      "maskedByPlatform": false,
+      "maskShape": "none",
+      "transparency": "allowed",
+      "layers": 1,
+      "colorSpace": "sRGB",
+      "formats": ["PNG"],
+      "icons": [
+        { "width": 512, "height": 512, "density": "1x", "use": "Optional: hosted icon for Cask", "shape": "rounded_rectangle", "cornerRadius": "proportional", "format": "PNG", "file": "icon.png", "location": "hosted (public URL)", "notes": "Optional — uses app bundle icon by default" }
+      ]
+    },
+
+    "favicon": {
+      "label": "Web Favicon",
+      "description": "Favicon images for web browsers. Modern browsers support SVG favicons. Legacy ICO format embeds multiple sizes. Apple and Microsoft have additional tile/bookmark sizes.",
+      "maskedByPlatform": false,
+      "maskShape": "none_sometimes_rounded_by_browser",
+      "transparency": "allowed",
+      "layers": 1,
+      "colorSpace": "sRGB",
+      "formats": ["ICO", "PNG", "SVG"],
+      "icons": [
+        { "width": 16,   "height": 16,   "density": "1x",  "use": "Browser tab (classic)",          "shape": "square", "cornerRadius": 0, "format": "ICO", "file": "favicon.ico",     "location": "website root/", "notes": "Multi-res ICO containing 16, 32, 48" },
+        { "width": 32,   "height": 32,   "density": "2x",  "use": "Browser tab (retina)",           "shape": "square", "cornerRadius": 0, "format": "ICO", "file": "favicon.ico",     "location": "embedded in ICO" },
+        { "width": 48,   "height": 48,   "density": "3x",  "use": "Windows taskbar pin",            "shape": "square", "cornerRadius": 0, "format": "ICO", "file": "favicon.ico",     "location": "embedded in ICO" },
+        { "width": 180,  "height": 180,  "density": "1x",  "use": "iOS home screen bookmark",       "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "apple-touch-icon.png", "location": "website root/" },
+        { "width": 150,  "height": 150,  "density": "1x",  "use": "Microsoft tile (browserconfig)",  "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "mstile-150x150.png",  "location": "website root/" },
+        { "width": 310,  "height": 310,  "density": "1x",  "use": "Microsoft large tile",           "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "mstile-310x310.png",  "location": "website root/" },
+        { "width": 310,  "height": 150,  "density": "1x",  "use": "Microsoft wide tile",            "shape": "rectangle", "cornerRadius": 0, "format": "PNG", "file": "mstile-310x150.png", "location": "website root/" },
+        { "width": null,  "height": null, "density": "any", "use": "Scalable favicon (modern browsers)", "shape": "square", "cornerRadius": 0, "format": "SVG", "file": "favicon.svg", "location": "website root/", "notes": "Chrome, Firefox, Edge (not Safari)" }
+      ]
+    },
+
+    "pwa": {
+      "label": "Progressive Web App (PWA)",
+      "description": "PWA manifest icons. Maskable icons require safe zone padding: content must fit within the inner 80% circle. Non-maskable icons fill the full square.",
+      "maskedByPlatform": true,
+      "maskShape": "varies_circle_squircle_rounded_square",
+      "transparency": "not_allowed_for_maskable",
+      "layers": 1,
+      "colorSpace": "sRGB",
+      "formats": ["PNG"],
+      "safeZone": {
+        "description": "For maskable icons (purpose: 'maskable'), content must fit within the inner 80% circle of the icon. The outer 10% on each side may be cropped.",
+        "safeZonePercent": 80
+      },
+      "icons": [
+        { "width": 72,   "height": 72,   "density": "1x",  "use": "Small PWA icon",            "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "icon-72x72.png",   "location": "pwa-icons/", "purpose": "any" },
+        { "width": 96,   "height": 96,   "density": "1x",  "use": "Medium PWA icon",           "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "icon-96x96.png",   "location": "pwa-icons/", "purpose": "any" },
+        { "width": 128,  "height": 128,  "density": "1x",  "use": "Standard PWA icon",          "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "icon-128x128.png", "location": "pwa-icons/", "purpose": "any" },
+        { "width": 144,  "height": 144,  "density": "1x",  "use": "Large PWA icon",            "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "icon-144x144.png", "location": "pwa-icons/", "purpose": "any" },
+        { "width": 192,  "height": 192,  "density": "1x",  "use": "PWA icon (required)",        "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "icon-192x192.png", "location": "pwa-icons/", "purpose": "any maskable", "safeZoneDiameterPx": 154 },
+        { "width": 512,  "height": 512,  "density": "1x",  "use": "PWA splash screen (required)","shape": "square", "cornerRadius": 0, "format": "PNG", "file": "icon-512x512.png", "location": "pwa-icons/", "purpose": "any maskable", "safeZoneDiameterPx": 410 }
+      ]
+    },
+
+    "chrome-extension": {
+      "label": "Chrome / Browser Extension",
+      "description": "Chrome extension icons declared in manifest.json under the 'icons' key. Other Chromium-based browsers follow the same spec.",
+      "maskedByPlatform": false,
+      "maskShape": "none",
+      "transparency": "allowed",
+      "layers": 1,
+      "colorSpace": "sRGB",
+      "formats": ["PNG"],
+      "icons": [
+        { "width": 16,  "height": 16,  "density": "1x", "use": "Favicon, context menu",     "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "icon-16.png",  "location": "extension/" },
+        { "width": 32,  "height": 32,  "density": "2x", "use": "Extension toolbar (1x)",     "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "icon-32.png",  "location": "extension/" },
+        { "width": 48,  "height": 48,  "density": "3x", "use": "Extension management page",  "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "icon-48.png",  "location": "extension/" },
+        { "width": 128, "height": 128, "density": "4x", "use": "Chrome Web Store listing",   "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "icon-128.png", "location": "extension/" }
+      ]
+    },
+
+    "vscode-extension": {
+      "label": "VS Code Extension",
+      "description": "VS Code extension icon for the Marketplace. Declared in package.json under the 'icon' key.",
+      "maskedByPlatform": false,
+      "maskShape": "none",
+      "transparency": "allowed",
+      "layers": 1,
+      "colorSpace": "sRGB",
+      "formats": ["PNG"],
+      "icons": [
+        { "width": 128, "height": 128, "density": "1x", "use": "VS Code Marketplace listing", "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "icon.png", "location": "extension root/" }
+      ]
+    },
+
+    "jetbrains-plugin": {
+      "label": "JetBrains / IntelliJ Plugin",
+      "description": "JetBrains Marketplace plugin icon. SVG is the preferred format. Declared in plugin.xml or marketplace listing.",
+      "maskedByPlatform": false,
+      "maskShape": "none",
+      "transparency": "allowed",
+      "layers": 1,
+      "colorSpace": "sRGB",
+      "formats": ["SVG", "PNG"],
+      "icons": [
+        { "width": 80,   "height": 80,   "density": "1x", "use": "Plugin marketplace icon", "shape": "square", "cornerRadius": 0, "format": "SVG", "file": "pluginIcon.svg", "location": "resources/META-INF/", "notes": "SVG preferred" },
+        { "width": 80,   "height": 80,   "density": "1x", "use": "Plugin marketplace icon (fallback)", "shape": "square", "cornerRadius": 0, "format": "PNG", "file": "pluginIcon.png", "location": "resources/META-INF/" }
+      ]
+    }
+  },
+
+  "safeZoneSummary": {
+    "description": "Platforms that require safe zone / padding to ensure content visibility after masking",
+    "zones": [
+      {
+        "platform": "Android Adaptive Icons",
+        "canvasDp": 108,
+        "safeZoneShape": "circle",
+        "safeZoneDiameterDp": 66,
+        "safeZonePercentOfCanvas": 61.1,
+        "reason": "OEM launchers apply different masks (circle, squircle, rounded square, teardrop) that crop outer edges"
+      },
+      {
+        "platform": "PWA Maskable Icons",
+        "canvasPx": 512,
+        "safeZoneShape": "circle",
+        "safeZoneDiameterPx": 410,
+        "safeZonePercentOfCanvas": 80,
+        "reason": "Different browsers apply different mask shapes; content outside 80% may be cropped"
+      },
+      {
+        "platform": "Apple iOS",
+        "canvasPx": 1024,
+        "safeZoneShape": "none_explicitly_documented",
+        "safeZonePercentOfCanvas": "effectively ~90%",
+        "reason": "Apple applies a superellipse (squircle) mask — corner areas are cropped but less aggressively than Android"
+      },
+      {
+        "platform": "Snap Store",
+        "canvasPx": 512,
+        "safeZoneShape": "circle",
+        "safeZonePercentOfCanvas": "~80%",
+        "reason": "Snap Store applies a circular mask in listings"
+      }
+    ]
+  },
+
+  "dedupedOutputSizes": {
+    "description": "The unique set of PNG sizes needed to cover ALL platforms above. Generate these from your 1024x1024 source, then assemble into ICO/ICNS bundles as needed.",
+    "squarePNGs": [16, 20, 22, 24, 29, 32, 40, 44, 48, 50, 55, 58, 60, 64, 66, 71, 72, 76, 80, 87, 88, 96, 100, 102, 107, 128, 142, 144, 150, 167, 172, 176, 180, 192, 196, 216, 234, 256, 284, 300, 432, 487, 512, 600, 1024],
+    "rectanglePNGs": [
+      { "width": 27,  "height": 20 },
+      { "width": 32,  "height": 24 },
+      { "width": 54,  "height": 40 },
+      { "width": 60,  "height": 45 },
+      { "width": 64,  "height": 48 },
+      { "width": 81,  "height": 60 },
+      { "width": 96,  "height": 72 },
+      { "width": 120, "height": 90 },
+      { "width": 134, "height": 100 },
+      { "width": 148, "height": 110 },
+      { "width": 180, "height": 135 },
+      { "width": 310, "height": 150 },
+      { "width": 388, "height": 188 },
+      { "width": 465, "height": 225 },
+      { "width": 493, "height": 58 },
+      { "width": 493, "height": 312 },
+      { "width": 620, "height": 300 },
+      { "width": 660, "height": 440 },
+      { "width": 800, "height": 480 },
+      { "width": 1240, "height": 600 },
+      { "width": 1280, "height": 768 },
+      { "width": 1320, "height": 880 }
+    ],
+    "bundledFormats": [
+      {
+        "format": "ICO",
+        "description": "Multi-resolution ICO file for Windows",
+        "containedSizes": [16, 24, 32, 48, 64, 128, 256],
+        "file": "app.ico"
+      },
+      {
+        "format": "ICNS",
+        "description": "Multi-resolution ICNS file for macOS",
+        "containedSizes": [16, 32, 64, 128, 256, 512, 1024],
+        "file": "app.icns"
+      }
+    ],
+    "scalableFormats": [
+      {
+        "format": "SVG",
+        "description": "Scalable vector graphic — preferred for Linux, JetBrains, and modern web",
+        "file": "app.svg"
+      }
+    ]
+  }
+}

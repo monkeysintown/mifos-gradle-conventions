@@ -1,0 +1,26 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral().content {
+            excludeModule("javax.media", "jai_core")
+        }
+        gradlePluginPortal()
+        maven {
+            url = uri("https://central.sonatype.com/repository/maven-snapshots")
+        }
+        maven {
+            url = uri("https://mifos.jfrog.io/artifactory/mifosx-gradle-local")
+        }
+    }
+
+    dependencies {
+        classpath "org.mifos:mifos-conventions-gradle-project-java:0.1.0-SNAPSHOT"
+    }
+}
+
+apply plugin: "org.mifos.convention.project.base.layout"
+
+include(":mifos-dummy-foo")
+project(":mifos-dummy-foo").projectDir = file("${rootDir}/modules/foo")
+include(":mifos-dummy-doc")
+project(":mifos-dummy-doc").projectDir = file("${rootDir}/modules/doc")

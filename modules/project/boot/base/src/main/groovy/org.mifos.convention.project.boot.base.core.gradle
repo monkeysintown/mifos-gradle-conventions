@@ -1,0 +1,22 @@
+plugins {
+    id "org.mifos.convention.project.boot.base"
+}
+
+dependencies {
+    // TODO: fix this; this build module should reside in a separate Git repo
+    api "org.mifos:mifos-commons-java-boot-core:0.1.0-SNAPSHOT"
+    // api "io.micrometer:micrometer-core"
+    api "jakarta.validation:jakarta.validation-api"
+    api "javax.measure:unit-api"
+    api "tech.units:indriya"
+    api "javax.money:money-api"
+    api "org.locationtech.jts:jts-core"
+    api "org.springframework.data:spring-data-commons"
+    api "org.aspectj:aspectjweaver"
+    api "org.springframework.modulith:spring-modulith-api"
+    implementation "org.hibernate.validator:hibernate-validator"
+    implementation "org.javamoney.moneta:moneta-core"
+    compileOnly "com.fasterxml.jackson.core:jackson-annotations"
+    compileOnly "io.swagger.core.v3:swagger-annotations-jakarta"
+    compileOnly "org.springframework.boot:spring-boot-starter"
+}

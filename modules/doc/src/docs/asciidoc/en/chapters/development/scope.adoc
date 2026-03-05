@@ -1,0 +1,3 @@
+= Proper Use of Scopes
+
+Not everything needs to be public (controllers, configuration... maybe even entity classes)

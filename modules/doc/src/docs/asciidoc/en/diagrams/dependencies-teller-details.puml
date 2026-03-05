@@ -1,0 +1,36 @@
+@startuml teller-detail
+title F14 teller — Cross-Cutting Orchestrator (Ce=5, CFV=5, IS=0.74)
+
+package "fineract-teller" #LightYellow {
+    component [TellerService] as TS
+    component [CashierService] as CS
+}
+
+package "fineract-core" #LightGreen {
+    component [CommandProcessing] as CMD
+}
+
+package "Other Features" #LightPink {
+    component [accounting] as ACCT
+    component [client] as CL
+    component [loan] as LOAN
+    component [savings] as SAV
+    component [organisation] as ORG
+}
+
+TS --> ACCT : "cashier accounting"
+TS --> CL   : "client identification"
+TS --> LOAN : "loan repayment"
+TS --> SAV  : "savings deposit"
+TS --> ORG  : "office/teller setup"
+
+CS ..> CMD
+
+'note over TS
+'  Teller is an orchestrator that
+'  coordinates across 5 domains.
+'  Should use events/commands instead
+'  of direct imports.
+'end note
+
+@enduml

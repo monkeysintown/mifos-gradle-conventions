@@ -1,0 +1,3 @@
+= Localstack
+
+Emulate AWS Services.

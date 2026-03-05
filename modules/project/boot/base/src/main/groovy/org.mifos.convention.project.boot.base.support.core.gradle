@@ -1,0 +1,7 @@
+plugins {
+    id "org.mifos.convention.project.boot.base"
+}
+
+dependencies {
+    compileOnly "org.springframework.boot:spring-boot"
+}

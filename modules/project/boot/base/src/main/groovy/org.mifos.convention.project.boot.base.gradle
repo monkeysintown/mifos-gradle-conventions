@@ -1,0 +1,51 @@
+plugins {
+    id "org.mifos.convention.project.java"
+    id "org.mifos.convention.project.java.test.spring"
+}
+
+// TODO: improve this, not always just latest by default!
+// var v = (findProperty("mifos.libs.commons")?:rootProject.version) + ""
+var v = (findProperty("mifos.libs.commons")?:"+") + ""
+var classifier = (findProperty("mifos.projects.classifier")?:"imperative") + ""
+
+dependencies {
+    annotationProcessor "org.springframework.boot:spring-boot-autoconfigure-processor"
+
+    constraints {
+        implementation "org.mifos:mifos-commons-java-boot-core:${v}"
+        implementation "org.mifos:mifos-commons-java-boot-mapping:${v}"
+        implementation "org.mifos:mifos-commons-java-boot-migration:${v}"
+        implementation "org.mifos:mifos-commons-java-boot-application:${v}"
+        implementation "org.mifos:mifos-commons-java-boot-testing:${v}"
+
+        if("reactive".equals(classifier)) {
+            implementation "org.mifos:mifos-commons-java-boot-persistence-relational-reactive:${v}"
+
+            implementation "org.mifos:mifos-commons-java-boot-persistence-jpa-reactive:${v}"
+
+            implementation "org.mifos:mifos-commons-java-boot-persistence-mongo-reactive:${v}"
+
+            implementation "org.mifos:mifos-commons-java-boot-persistence-redis-reactive:${v}"
+
+            implementation "org.mifos:mifos-commons-java-boot-transport-rest-reactive:${v}"
+
+            implementation "org.mifos:mifos-commons-java-boot-transport-grpc-reactive:${v}"
+
+            implementation "org.mifos:mifos-commons-java-boot-starter-reactive:${v}"
+        } else {
+            implementation "org.mifos:mifos-commons-java-boot-persistence-relational-imperative:${v}"
+
+            implementation "org.mifos:mifos-commons-java-boot-persistence-jpa-imperative:${v}"
+
+            implementation "org.mifos:mifos-commons-java-boot-persistence-mongo-imperative:${v}"
+
+            implementation "org.mifos:mifos-commons-java-boot-persistence-redis-imperative:${v}"
+
+            implementation "org.mifos:mifos-commons-java-boot-transport-rest-imperative:${v}"
+
+            implementation "org.mifos:mifos-commons-java-boot-transport-grpc-imperative:${v}"
+
+            implementation "org.mifos:mifos-commons-java-boot-starter-imperative:${v}"
+        }
+    }
+}

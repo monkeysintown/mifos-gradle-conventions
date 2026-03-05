@@ -1,0 +1,17 @@
+= Data Intensive Applications
+
+TBD
+
+See:
+
+- https://www.amazon.com/Data-oriented-design-engineering-resources-schedules/dp/1916478700
+- https://www.amazon.com/Designing-Data-Intensive-Applications-Reliable-Maintainable/dp/1449373321/ref=pd_sbs_d_sccl_1_4/135-5877793-8747446?pd_rd_w=UDXN1&content-id=amzn1.sym.aa738fbd-ad05-4d11-aae2-04b598db6305&pf_rd_p=aa738fbd-ad05-4d11-aae2-04b598db6305&pf_rd_r=VW7WFH92J4TEC2DQKFE0&pd_rd_wg=8Luoy&pd_rd_r=de11175b-8797-4864-b7c9-ce67c1219998&pd_rd_i=1449373321&psc=1
+
+== Data Frame
+
+See:
+
+- https://github.com/jtablesaw/tablesaw
+- https://dflib.org
+- https://dflib.org/charts/hockey_teams.html
+- https://haifengl.github.io

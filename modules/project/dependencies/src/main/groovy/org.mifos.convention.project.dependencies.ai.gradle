@@ -1,0 +1,64 @@
+dependencies {
+    implementation platform("org.springframework.ai:spring-ai-bom:2.0.0")
+
+    // implementation platform("dev.langchain4j:langchain4j-bom:1.4.0")
+    // implementation platform("dev.langchain4j:langchain4j-community-bom:1.4.0-beta10")
+
+    // implementation platform("org.bsc.langgraph4j:langgraph4j-bom:1.6.2")
+
+    implementation platform("ai.timefold.solver:timefold-solver-bom:2.4.0-rc-1")
+
+    implementation platform("org.kie:bom:10.2.0")
+
+    implementation platform("org.drools:drools-bom:10.2.0")
+
+    implementation platform("com.embabel.agent:embabel-agent-dependencies:1.0.0")
+
+    constraints {
+        implementation "net.sourceforge.tess4j:tess4j:5.18.0"
+
+        implementation "edu.stanford.nlp:stanford-corenlp:4.5.10"
+
+        implementation "org.apache.opennlp:opennlp:3.0.0-M3"
+        implementation "org.apache.opennlp:opennlp-cli:3.0.0-M3"
+        implementation "org.apache.opennlp:opennlp-dl:3.0.0-M3"
+        implementation "org.apache.opennlp:opennlp-dl-gpu:3.0.0-M3"
+        implementation "org.apache.opennlp:opennlp-ml-libsvm:3.0.0-M3"
+        implementation "org.apache.opennlp:opennlp-ml-perceptron:3.0.0-M3"
+        implementation "org.apache.opennlp:opennlp-ml-bayes:3.0.0-M3"
+        implementation "org.apache.opennlp:opennlp-ml-maxent:3.0.0-M3"
+        implementation "org.apache.opennlp:opennlp-ml-commons:3.0.0-M3"
+        implementation "org.apache.opennlp:opennlp-ml:3.0.0-M3"
+        implementation "org.apache.opennlp:opennlp-core:3.0.0-M3"
+        implementation "org.apache.opennlp:opennlp-api:3.0.0-M3"
+        implementation "org.apache.opennlp:opennlp-model-resolver:3.0.0-M3"
+        implementation "org.apache.opennlp:opennlp-runtime:3.0.0-M3"
+        implementation "org.apache.opennlp:opennlp-distr:3.0.0-M3"
+        implementation "org.apache.opennlp:opennlp-docs:3.0.0-M3"
+        implementation "org.apache.opennlp:opennlp-morfologik:3.0.0-M3"
+        implementation "org.apache.opennlp:opennlp-uima:3.0.0-M3"
+        implementation "org.apache.opennlp:opennlp-tools:3.0.0-M3"
+        implementation "org.apache.opennlp:opennlp-models:3.0.0-M3"
+        implementation "org.apache.opennlp:opennlp-tools-models:2.5.8"
+        implementation "org.apache.opennlp:opennlp-morfologik-addon:2.5.8"
+
+        implementation "io.jenetics:jpx:4.0.0"
+        implementation "io.jenetics:jenetics:9.0.0"
+        implementation "io.jenetics:jenetics.ext:9.0.0"
+        implementation "io.jenetics:jenetics.prog:9.0.0"
+        implementation "io.jenetics:jenetics.xml:9.0.0"
+        implementation "io.jenetics:facilejdbc:2.1.1"
+        implementation "io.jenetics:lattices:3.0.0.ALPHA4"
+        implementation "io.jenetics:colt:2.0.0"
+        implementation "io.jenetics:prngine:2.0.0"
+
+        // implementation("org.eclipse.lmos:arc-azure-client:$arcVersion")
+        // implementation("org.eclipse.lmos:arc-spring-boot-starter:$arcVersion")
+        // implementation("org.eclipse.lmos:arc-reader-pdf:$arcVersion")
+        // implementation("org.eclipse.lmos:arc-reader-html:$arcVersion")
+        // implementation("org.eclipse.lmos:arc-assistants:$arcVersion")
+        // implementation("org.eclipse.lmos:arc-reader-html:$arcVersion")
+        // implementation("org.eclipse.lmos:arc-api:$arcVersion")
+        // implementation("org.eclipse.lmos:arc-graphql-spring-boot-starter:$arcVersion")
+    }
+}

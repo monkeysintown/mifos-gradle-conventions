@@ -1,0 +1,131 @@
+= Asciidoc
+
+AsciiDoc is the documentation format of choice for the Mifos project. While Markdown has become the default for many projects, AsciiDoc offers significant advantages for professional technical documentation—advantages that justify its selection as the standard format.
+
+*Why AsciiDoc over Markdown:* Markdown is simple, but its simplicity becomes a limitation at scale. AsciiDoc provides semantic richness that Markdown lacks: conditional content (include sections only for certain audiences), native cross-references (link to any section, table, or listing by ID), include directives (compose documents from fragments), and admonitions (callouts for tips, warnings, and important notes). Markdown has no standard way to include one file in another, no standard cross-reference mechanism, and no admonition syntax—the very features that a project of Mifos's size requires.
+
+*AsciiDoc Toolchain:* The rendering engine is Asciidoctor, a fast, Ruby-based processor that converts AsciiDoc to HTML5, PDF, EPUB, and DocBook. In the Mifos project, Asciidoctor is invoked through the Gradle asciidoctor plugin, which integrates documentation builds into the standard Gradle workflow.
+
+.Gradle Asciidoctor Plugin Configuration
+[source,groovy]
+----
+plugins {
+    id("org.asciidoctor.jvm.convert") version "4.0.4"
+}
+
+asciidoctor {
+    sourceDir = file("src/docs/asciidoc")
+    outputDir = file("build/docs/asciidoc")
+
+    attributes(
+        "source-highlighter" to "coderay",
+        "imagesdir" to "images",
+        "toc" to "left",
+        "icons" to "font",
+        "sectanchors" to true,
+        "idprefix" to "",
+        "idseparator" to "-",
+        "project-version" to project.version
+    )
+
+    // Enable PlantUML diagram processing
+    requires("asciidoctor-diagram")
+}
+----
+
+To build the documentation:
+
+[source,bash]
+----
+# Build all AsciiDoc documentation
+./gradlew asciidoctor
+
+# Output is generated in build/docs/asciidoc/
+# Open the HTML output in a browser:
+open build/docs/asciidoc/index.html
+----
+
+.Key AsciiDoc Syntax Examples:
+
+.Headings and Sections
+[source,asciidoc]
+----
+= Document Title
+
+== Chapter
+
+=== Section
+
+==== Subsection
+----
+
+.Lists
+[source,asciidoc]
+----
+* Unordered item one
+* Unordered item two
+** Nested item
+
+. Ordered item one
+. Ordered item two
+.. Nested ordered item
+----
+
+.Tables
+[source,asciidoc]
+----
+[cols="1,2,3"]
+|===
+| Name | Type | Description
+
+| `loanId` | String | Unique loan identifier
+| `principal` | BigDecimal | Loan amount
+| `status` | Enum | Current loan status
+|===
+----
+
+.Code Blocks
+[source,asciidoc]
+----
+[source,java]
+----
+public class LoanService {
+public Loan createLoan(CreateLoanCommand cmd) {
+// implementation
+}
+}
+----
+----
+
+.Cross-References
+[source,asciidoc]
+----
+See <<documentation-concepts,Documentation Concepts>> for details.
+
+[[documentation-concepts]]
+=== Documentation Concepts
+----
+----
+
+.Includes
+[source,asciidoc]
+----
+// TBD
+----
+
+.Admonitions
+[source,asciidoc]
+----
+[TIP]
+Use convention plugins to enforce consistent build configuration
+across all Mifos modules.
+
+[WARNING]
+Never commit generated documentation to the repository.
+Always regenerate from source during the build.
+
+[IMPORTANT]
+All public API methods must include Javadoc with at least
+a description, parameter documentation, and return value
+documentation.
+----

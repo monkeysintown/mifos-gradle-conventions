@@ -1,0 +1,21 @@
+= Infrastructure
+
+include::introduction.adoc[leveloffset=+1]
+
+include::devops.adoc[leveloffset=+1]
+
+include::providers.adoc[leveloffset=+1]
+
+include::iac.adoc[leveloffset=+1]
+
+include::docker.adoc[leveloffset=+1]
+
+include::kubernetes.adoc[leveloffset=+1]
+
+include::ci.adoc[leveloffset=+1]
+
+include::backstage.adoc[leveloffset=+1]
+
+include::runbook.adoc[leveloffset=+1]
+
+include::secrets.adoc[leveloffset=+1]

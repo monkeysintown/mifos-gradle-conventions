@@ -1,0 +1,38 @@
+@startuml
+!include <edgy/edgy2>
+
+title Adapter Pattern: Decoupling Architecture
+
+$architectureFacet("Architecture") {
+  $capability("Capability")
+}
+
+$identityFacet("This is the Identity facet", identity) {
+    $content(" This is the Content element", content)
+    $purpose("This is the Purpose element", purpose)
+    $story("This is the Story element", story)
+}
+
+$link(content, purpose)
+$link(content, story)
+$link(purpose, story)
+
+package "Tight Coupling (Anti-Pattern)" {
+    rectangle "High-Level Module\n(Business Logic)" as Client_Bad
+    rectangle "Low-Level Module\n(Legacy/Vendor)" as Service_Bad
+
+    Client_Bad --> Service_Bad : Direct Hard Dependency
+}
+
+package "Decoupled (Adapter Pattern)" {
+    rectangle "High-Level Module\n(Business Logic)" as Client_Good
+    interface "Target Interface" as Target
+    rectangle "Adapter" as Adapter
+    rectangle "Low-Level Module\n(Legacy/Vendor)" as Service_Good
+
+    Client_Good --> Target : Depends On
+    Adapter ..|> Target : Implements
+    Adapter --> Service_Good : Uses/Wraps
+}
+
+@enduml

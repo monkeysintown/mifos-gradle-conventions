@@ -1,0 +1,7 @@
+dependencies {
+    constraints {
+        implementation "com.microsoft.playwright:playwright:1.59.0"
+        implementation "com.microsoft.playwright:driver-bundle:1.59.0"
+        implementation "com.microsoft.playwright:driver:1.59.0"
+    }
+}

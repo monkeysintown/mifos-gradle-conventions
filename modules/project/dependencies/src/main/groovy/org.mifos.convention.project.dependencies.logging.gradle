@@ -1,0 +1,16 @@
+configurations.all {
+    exclude module: "slf4j-jdk14"
+}
+
+dependencies {
+    implementation platform("org.slf4j:slf4j-bom:2.0.17")
+
+    // implementation platform("org.apache.logging.log4j:log4j-bom:2.25.3")
+
+    constraints {
+        implementation "ch.qos.logback:logback-core:1.6.0"
+        implementation "ch.qos.logback:logback-classic:1.6.0"
+
+        implementation "org.jboss.logging:jboss-logging:3.6.1.Final"
+    }
+}

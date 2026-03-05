@@ -1,0 +1,40 @@
+dependencies {
+    implementation platform("org.eclipse.jetty:jetty-bom:12.1.11")
+
+    implementation platform("com.squareup.okhttp3:okhttp-bom:5.4.0")
+
+    implementation platform("io.github.openfeign:feign-bom:13.13")
+
+    implementation platform("org.jboss.resteasy:resteasy-bom:7.0.2.Final")
+
+    implementation platform("io.swagger.core.v3:swagger-bom:2.2.52")
+
+    constraints {
+        implementation "net.devh:grpc-server-spring-boot-starter:3.1.0.RELEASE"
+
+        implementation "com.github.scribejava:scribejava-apis:8.3.3"
+        implementation "com.github.scribejava:scribejava-httpclient-armeria:8.3.3"
+        implementation "com.github.scribejava:scribejava-httpclient-apache:8.3.3"
+        implementation "com.github.scribejava:scribejava-httpclient-okhttp:8.3.3"
+        implementation "com.github.scribejava:scribejava-httpclient-ning:8.3.3"
+        implementation "com.github.scribejava:scribejava-httpclient-ahc:8.3.3"
+        implementation "com.github.scribejava:scribejava-core:8.3.3"
+
+        implementation "io.github.openfeign.form:feign-form:3.8.0"
+        implementation "io.github.openfeign.form:feign-form-spring:3.8.0"
+        implementation "io.github.openfeign.opentracing:feign-opentracing:0.4.1"
+        implementation "io.github.openfeign.opentracing:feign-hystrix-opentracing:0.4.1"
+
+        implementation "org.asynchttpclient:async-http-client:3.0.10"
+
+        implementation "com.nimbusds:nimbus-jose-jwt:10.9.1"
+
+        implementation "io.jsonwebtoken:jjwt-api:0.13.0"
+        implementation "io.jsonwebtoken:jjwt-impl:0.13.0"
+        implementation "io.jsonwebtoken:jjwt-jackson:0.13.0"
+
+        implementation "org.puremvc:puremvc:2.2"
+        implementation "org.puremvc:puremvc-multicore:2.2"
+        implementation "org.puremvc:puremvc-multicore-util-pipes:2.2"
+    }
+}

@@ -1,0 +1,7 @@
+= Validation
+
+TBD
+
+See:
+
+- https://aws.plainenglish.io/spring-boot-validation-everything-you-need-to-know-in-one-place-c92fbda362f4

@@ -1,0 +1,13 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet id="{{module_name}}-00001" author="vidakovic">
+        <createTable tableName="{{module_name}}">
+            <column name="id" type="uuid" defaultValue="gen_random_uuid()">
+                <constraints primaryKey="true" primaryKeyName="{{module_name}}_id_pk" />
+            </column>
+            <column name="created_at" type="timestamp with time zone" />
+            <column name="name" type="varchar(255)" />
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

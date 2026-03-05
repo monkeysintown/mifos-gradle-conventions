@@ -1,0 +1,118 @@
+= Penetration Testing
+
+Financial applications are high-value targets for attackers. Penetration testing (pen testing) systematically probes the application for vulnerabilities that could be exploited to steal funds, access customer data, or disrupt services. The Mifos Initiative treats pen testing as a mandatory phase in every release cycle, combining automated scanning with manual exploitation by security-trained engineers.
+
+== OWASP Top 10
+
+The Open Worldwide Application Security Project (OWASP) publishes the Top 10 most critical web application security risks. Every Mifos penetration test must verify that the application is not vulnerable to any of these categories:
+
+[cols="1,5"]
+|===
+| ID | Risk
+
+| A01 | **Broken Access Control** — Users accessing data or functions beyond their authorized scope (e.g., a branch manager viewing another branch's clients).
+| A02 | **Cryptographic Failures** — Sensitive data (PII, passwords) transmitted or stored without encryption.
+| A03 | **Injection** — SQL injection, NoSQL injection, or command injection via unsanitized input.
+| A04 | **Insecure Design** — Missing threat modeling, absent rate limiting, or business logic flaws.
+| A05 | **Security Misconfiguration** — Default credentials, open cloud storage, verbose error messages.
+| A06 | **Vulnerable and Outdated Components** — Using libraries with known CVEs.
+| A07 | **Identification and Authentication Failures** — Weak password policies, missing MFA, session fixation.
+| A08 | **Software and Data Integrity Failures** — Insecure CI/CD pipelines, unsigned updates.
+| A09 | **Security Logging and Monitoring Failures** — No audit trail for financial transactions, missing alerting.
+| A10 | **Server-Side Request Forgery (SSRF)** — The server makes requests to attacker-controlled URLs.
+|===
+
+== ZAProxy for Automated Scanning
+
+OWASP Zed Attack Proxy (ZAProxy) is a free, open-source penetration testing tool that automatically crawls a web application and tests for common vulnerabilities. ZAProxy is integrated into the Mifos CI pipeline to catch regressions early.
+
+[source,bash]
+----
+# Install ZAProxy (Debian/Ubuntu)
+$ sudo apt-get install zaproxy
+
+# Or download from https://www.zaproxy.org/download/
+$ wget https://github.com/zaproxy/zaproxy/releases/download/v2.15.0/ZAP_2.15.0_Linux.tar.gz
+$ tar -xzf ZAP_2.15.0_Linux.tar.gz -C /opt/
+
+# Run an automated baseline scan against the staging environment
+$ zap.sh -cmd -quickurl https://staging.mifos.org \
+    -quickout build/reports/zap/zap-report.html \
+    -config api.disablekey=true
+
+# Run a full active scan (takes longer, finds more vulnerabilities)
+$ zap.sh -cmd -quickurl https://staging.mifos.org \
+    -quickout build/reports/zap/zap-full-report.html \
+    -config scanner.level=3
+
+# Run ZAProxy headless in CI using Docker
+$ docker run -t owasp/zap2docker-stable zap-baseline.py \
+    -t https://staging.mifos.org \
+    -r build/reports/zap/baseline-report.html \
+    -J build/reports/zap/baseline-report.json
+----
+
+== Gradle Integration for ZAProxy
+
+[source,kotlin]
+----
+tasks.register("zapScan") {
+    group = "security"
+    description = "Runs OWASP ZAP baseline scan against the application"
+    doLast {
+        exec {
+            executable = "docker"
+            args("run", "--rm", "--network", "host",
+                 "-v", "${layout.buildDirectory.get().absolutePath}/reports/zap:/zap/wrk",
+                 "owasp/zap2docker-stable",
+                 "zap-baseline.py",
+                 "-t", "http://host.docker.internal:8080",
+                 "-r", "baseline-report.html",
+                 "-J", "baseline-report.json")
+        }
+    }
+}
+----
+
+== Manual Penetration Testing Workflow
+
+Automated tools find low-hanging fruit, but manual pen testing is essential for business logic vulnerabilities that scanners cannot detect. The Mifos pen testing workflow follows these steps:
+
+1. **Scope definition** — Identify the target environment, allowed testing windows, and out-of-scope systems. Obtain written authorization.
+2. **Reconnaissance** — Map the attack surface: API endpoints, authentication flows, user roles, and data flows.
+3. **Vulnerability scanning** — Run ZAProxy and dependency-check to identify known vulnerabilities.
+4. **Manual exploitation** — Test for business logic flaws: Can a user disburse a loan without approval? Can interest rates be modified via the API? Can a client's balance be altered by replaying a transaction?
+5. **Post-exploitation** — Determine the impact of each finding. Can an attacker escalate from branch user to admin? Can they exfiltrate PII?
+6. **Reporting** — Document each finding with severity (Critical / High / Medium / Low), steps to reproduce, and remediation guidance.
+7. **Remediation verification** — After fixes are deployed, re-test each finding to confirm the vulnerability is resolved.
+
+== Dependency Vulnerability Scanning
+
+[source,kotlin]
+----
+// build.gradle.kts
+plugins {
+    id("org.owasp.dependencycheck") version "9.1.0"
+}
+
+dependencyCheck {
+    failBuildOnCVSS = 7.0f   // fail on High or Critical vulnerabilities
+    suppressionFile = file("security/dependency-check-suppressions.xml")
+    formats = listOf("HTML", "JSON")
+    outputDirectory = layout.buildDirectory.dir("reports/dependency-check").get().asFile
+}
+----
+
+[source,bash]
+----
+# Run dependency vulnerability check
+$ ./gradlew dependencyCheckAnalyze
+
+# View the report
+$ open build/reports/dependency-check/dependency-check-report.html
+----
+
+TIP: Integrate `dependencyCheckAnalyze` into the CI pipeline so that every pull request is scanned for known vulnerabilities. Set `failBuildOnCVSS = 4.0` (Medium) for stricter enforcement.
+See:
+
+- ZAProxy

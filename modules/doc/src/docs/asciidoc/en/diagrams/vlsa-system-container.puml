@@ -1,0 +1,31 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+LAYOUT_WITH_LEGEND()
+
+ title Container Diagram — VSLA Service & Fineract Integration
+
+Person(groupMember, "Group Member / Treasurer", "Offline-first mobile user")
+
+Container_Boundary(vslaBoundary, "VSLA Service") {
+    Container(vslaApp, "VSLA Application", "Spring Boot 3.x, Java 21", "Typed command bus, domain aggregates, CQRS projections, Outbox processor, event listeners")
+    ContainerDb(vslaDb, "VSLA Database", "PostgreSQL 15", "Aggregates, domain events, outbox table, read models, group-level Chart of Accounts")
+}
+
+Container(mobileApp, "Mobile Application", "Android / iOS / PWA", "Offline-first client with SQLite local queue, YAPE/PLIN SDK, WebSocket client")
+
+Container_Boundary(fineractBoundary, "Apache Fineract Core") {
+    Container(fineractApp, "Fineract Application", "Spring Boot, Java", "Client registry, savings accounts, external loans, institution GL, maker-checker workflow")
+    ContainerDb(fineractDb, "Fineract Database", "PostgreSQL / MySQL", "Institution-level financial data, acc_gl_journal_entry, m_savings_account, m_loan")
+}
+
+System_Ext(paymentGw, "Payment Gateway", "YAPE / PLIN cloud infrastructure")
+
+Rel(groupMember, mobileApp, "Uses", "Mobile UI / Touch")
+Rel(mobileApp, vslaApp, "REST + WebSocket", "JSON over HTTPS")
+Rel(vslaApp, vslaDb, "Reads & writes", "JDBC / R2DBC")
+Rel(vslaApp, fineractApp, "REST API calls", "fineract-client (Retrofit2) over HTTPS")
+Rel(fineractApp, fineractDb, "Reads & writes", "JDBC")
+Rel(paymentGw, vslaApp, "Payment webhooks", "HTTPS JSON")
+Rel(mobileApp, paymentGw, "Initiates payment", "Mobile SDK / Deep link")
+@enduml

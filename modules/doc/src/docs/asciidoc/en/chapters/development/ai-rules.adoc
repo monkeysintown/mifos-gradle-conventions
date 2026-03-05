@@ -1,0 +1,12 @@
+= AI Rules
+
+AI coding assistants—whether cloud-based APIs or local models—are powerful tools that can accelerate development, but they introduce risks specific to a financial platform where correctness is paramount. The following rules govern AI-assisted development in the Mifos ecosystem:
+
+. **Always review AI-generated code** before committing. Treat AI output as a draft from a junior developer—useful as a starting point, but subject to the same scrutiny as any human contribution.
+. **Never commit code you don't understand**. If you cannot explain what a generated function does and why it is correct, do not merge it. This is especially critical for financial calculations, security logic, and data access code.
+. **AI output must pass all existing tests**. Run the full test suite (`./gradlew check`) after incorporating AI-generated changes. If tests fail, fix the generated code—do not modify the tests to accommodate incorrect output.
+. **Document AI-assisted changes in commit messages**. When a commit includes significant AI-generated code, note this in the commit body: `Co-authored-by: AI Assistant <ai@mifos.org>`. This maintains transparency and helps future reviewers understand the context.
+. **Never feed production data to AI services**. Customer PII, financial records, and tenant configuration must never be included in prompts. Use synthetic data for testing and development.
+. **Security-sensitive code requires human expertise**. Authentication, authorization, encryption, and key management must be written and reviewed by humans with domain knowledge. Do not delegate these to AI assistants.
+
+IMPORTANT: These rules are not guidelines—they are mandatory. Violations may result in revocation of commit access.

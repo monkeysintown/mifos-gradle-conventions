@@ -1,0 +1,8 @@
+= Publish to Mifos Artifactory/Maven Repository
+
+WARNING: This requires more configuration. Will be explained in upcoming developer documentation.
+
+[source,bash]
+----
+jreleaser deploy --config-file jreleaser.yml
+----

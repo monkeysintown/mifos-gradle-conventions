@@ -1,0 +1,40 @@
+= Archimate
+
+ArchiMate is an open and independent enterprise architecture modeling language that provides a uniform representation for diagrams describing enterprise architectures. Developed under The Open Group, it offers a standardized vocabulary and notation for describing the structure and relationships of business processes, application components, and technology infrastructure.
+
+The Archimate language is organized into three layers, each addressing a different aspect of the enterprise:
+
+*The Business Layer* models the products, services, and processes that an organization delivers to its stakeholders. In Mifos, this includes financial products (loans, savings accounts, insurance), business processes (client onboarding, loan origination, payment processing), and business actors (loan officers, branch managers, regulators).
+
+*The Application Layer* models the software applications and their interactions that support the business processes. For Mifos, this includes the core banking engine, the mobile banking application, the reporting service, the notification service, and the integration layer with external systems like SMS gateways and payment processors.
+
+*The Technology Layer* models the hardware, software, and network infrastructure that supports the application layer. This includes PostgreSQL databases, Kafka message brokers, Kubernetes clusters, cloud providers (AWS, Azure), and networking components.
+
+.ArchiMate Layers in Mifos (Textual Representation)
+----
+┌─────────────────────────────────────────────────────┐
+│  BUSINESS LAYER                                     │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐           │
+│  │ Client   │  │ Loan     │  │ Savings  │           │
+│  │ Onboard  │─▶│ Originate│  │ Deposit  │           │
+│  └──────────┘  └──────────┘  └──────────┘           │
+│       │              │              │               │
+├───────┼──────────────┼──────────────┼───────────────┤
+│  APPLICATION LAYER                                  │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐           │
+│  │ Customer │  │ Lending  │  │ Deposit  │           │
+│  │ Svc      │─▶│ Svc      │  │ Svc      │           │
+│  └──────────┘  └──────────┘  └──────────┘           │
+│       │              │              │               │
+├───────┼──────────────┼──────────────┼───────────────┤
+│  TECHNOLOGY LAYER                                   │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐           │
+│  │ Postgres │  │ Kafka    │  │ K8s      │           │
+│  │ DB       │  │ Broker   │  │ Cluster  │           │
+│  └──────────┘  └──────────┘  └──────────┘           │
+└─────────────────────────────────────────────────────┘
+----
+
+ArchiMate *viewpoints* allow architects to create targeted views of the architecture for specific stakeholders. A business stakeholder might see only the Business Layer viewpoint, while an infrastructure engineer needs the Technology Layer viewpoint. The CTO might see a layered viewpoint that shows how technology supports applications which support business processes.
+
+The primary tool for creating ArchiMate models is the https://www.archimatetool.com[Archi tool], an open-source, cross-platform application. Archi supports modeling, visualization, and export of ArchiMate diagrams. For Mifos, we recommend storing ArchiMate models in the repository using the Open Exchange Format, enabling version control and diffing of architectural models alongside code changes.

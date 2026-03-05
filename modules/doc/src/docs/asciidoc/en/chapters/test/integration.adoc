@@ -1,0 +1,458 @@
+= Integration Testing
+
+Integration tests verify that multiple components work together correctly. Unlike unit tests, integration tests do not mock the database or message broker—they use real infrastructure to catch configuration errors, schema mismatches, and serialization bugs that unit tests cannot detect.
+
+In the Mifos project, integration tests use the following stack:
+
+* **`@SpringBootTest`** — Boots the full application context.
+* **Testcontainers** — Spins up Docker containers for PostgreSQL, MariaDB, and ActiveMQ so tests run against real databases and message brokers.
+* **Test profiles** — `application-integrationtest.yml` provides configuration that points to Testcontainers-managed services.
+* **Test data management** — `@Sql` annotations and Flyway migrations set up and tear down schema and reference data.
+
+== Complete Integration Test with Testcontainers
+
+[source,java]
+----
+import static org.assertj.core.api.Assertions.assertThat;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+
+@SpringBootTest
+@ActiveProfiles("integrationtest")
+@Testcontainers
+class LoanRepositoryIntegrationTest {
+
+    @Container
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine")
+        .withDatabaseName("mifos_test")
+        .withUsername("mifos")
+        .withPassword("mifos_test_pw");
+
+    @DynamicPropertySource
+    static void configureProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", postgres::getJdbcUrl);
+        registry.add("spring.datasource.username", postgres::getUsername);
+        registry.add("spring.datasource.password", postgres::getPassword);
+        registry.add("spring.flyway.enabled", () -> "true");
+    }
+
+    @Autowired
+    private LoanRepository loanRepository;
+
+    @Autowired
+    private ClientRepository clientRepository;
+
+    @Test
+    void should_persistAndRetrieveLoan_withAllAssociations() {
+        // given
+        Client client = clientRepository.save(
+            Client.builder().name("Jane Doe").nationalId("ID-001").build());
+
+        Loan loan = Loan.builder()
+            .client(client)
+            .principal(new BigDecimal("25000.00"))
+            .interestRate(new BigDecimal("0.10"))
+            .termInMonths(24)
+            .status(LoanStatus.PENDING_APPROVAL)
+            .build();
+
+        // when
+        Loan saved = loanRepository.save(loan);
+        Loan found = loanRepository.findById(saved.getId()).orElseThrow();
+
+        // then
+        assertThat(found.getPrincipal()).isEqualByComparingTo(new BigDecimal("25000.00"));
+        assertThat(found.getClient().getName()).isEqualTo("Jane Doe");
+        assertThat(found.getStatus()).isEqualTo(LoanStatus.PENDING_APPROVAL);
+    }
+
+    @Test
+    void should_findLoansByStatus_usingCustomQuery() {
+        // given — test data is loaded via @Sql or Flyway migration
+        // when
+        List<Loan> activeLoans = loanRepository.findByStatus(LoanStatus.ACTIVE);
+
+        // then
+        assertThat(activeLoans).isNotEmpty();
+        assertThat(activeLoans).allMatch(loan -> loan.getStatus() == LoanStatus.ACTIVE);
+    }
+}
+----
+
+== Gradle Configuration
+
+[source,kotlin]
+----
+dependencies {
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.testcontainers:testcontainers:1.19.7")
+    testImplementation("org.testcontainers:postgresql:1.19.7")
+    testImplementation("org.testcontainers:junit-jupiter:1.19.7")
+}
+
+tasks.test {
+    useJUnitPlatform {
+        includeTags("integration")
+    }
+}
+
+// Integration tests need more heap for Spring context
+tasks.withType<Test>().matching { it.name.contains("integration") }.configureEach {
+    jvmArgs("-Xmx512m")
+}
+----
+
+== Test Profile Configuration
+
+[source,yaml]
+----
+# src/test/resources/application-integrationtest.yml
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate          # let Flyway manage the schema
+    show-sql: true
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.jms.ActiveMQAutoConfiguration
+----
+
+[source,bash]
+----
+# Run integration tests
+$ ./gradlew test --tags "integration"
+
+# Run a specific integration test class
+$ ./gradlew :lending:test --tests "LoanRepositoryIntegrationTest"
+
+# Ensure Docker is running before executing Testcontainers tests
+$ docker info > /dev/null 2>&1 && echo "Docker is running" || echo "Start Docker first"
+----
+
+== Spring Test
+
+The Spring Test framework provides a suite of annotations that let you load exactly the slice of the application context you need for a given test. Loading only what is necessary keeps tests fast and avoids unintended side effects between beans.
+
+=== `@WebMvcTest` — Controller Tests
+
+`@WebMvcTest` loads only the web layer (controllers, `@ControllerAdvice`, filters, and Jackson configuration). The database and service layer are not loaded. Inject mock services with `@MockBean`.
+
+[source,java]
+----
+@WebMvcTest(LoanController.class)
+class LoanControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockBean
+    private LoanService loanService;
+
+    @Test
+    void should_returnLoanDetails_when_loanExists() throws Exception {
+        // given
+        LoanDto loanDto = new LoanDto(1L, new BigDecimal("50000.00"), "ACTIVE");
+        when(loanService.findById(1L)).thenReturn(loanDto);
+
+        // when / then
+        mockMvc.perform(get("/api/v1/loans/1"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.principal").value(50000.00))
+            .andExpect(jsonPath("$.status").value("ACTIVE"));
+    }
+
+    @Test
+    void should_return404_when_loanNotFound() throws Exception {
+        when(loanService.findById(999L)).thenThrow(new LoanNotFoundException(999L));
+
+        mockMvc.perform(get("/api/v1/loans/999"))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.error").value("Loan not found: 999"));
+    }
+}
+----
+
+=== `@DataJpaTest` — Repository Tests
+
+`@DataJpaTest` configures an embedded database, entity scanning, and Spring Data repositories. It is ideal for testing custom query methods and JPA mappings.
+
+[source,java]
+----
+@DataJpaTest
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@Testcontainers
+class ClientRepositoryTest {
+
+    @Container
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine");
+
+    @DynamicPropertySource
+    static void props(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", postgres::getJdbcUrl);
+        registry.add("spring.datasource.username", postgres::getUsername);
+        registry.add("spring.datasource.password", postgres::getPassword);
+    }
+
+    @Autowired
+    private ClientRepository clientRepository;
+
+    @Autowired
+    private TestEntityManager entityManager;
+
+    @Test
+    void should_findClientByNationalId() {
+        entityManager.persistAndFlush(
+            Client.builder().name("Alice").nationalId("NID-100").build());
+
+        Client found = clientRepository.findByNationalId("NID-100").orElseThrow();
+
+        assertThat(found.getName()).isEqualTo("Alice");
+    }
+}
+----
+
+=== `@SpringBootTest` — Full Context Tests
+
+`@SpringBootTest` loads the entire application context. Use it sparingly for end-to-end scenarios where multiple layers must interact.
+
+[source,java]
+----
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("integrationtest")
+class LoanApplicationEndToEndTest {
+
+    @Autowired
+    private TestRestTemplate restTemplate;
+
+    @Test
+    void should_createRetrieveAndDisburseLoan() {
+        // create client
+        ResponseEntity<ClientDto> clientResp = restTemplate.postForEntity(
+            "/api/v1/clients",
+            new CreateClientRequest("Bob", "NID-200", "KE"),
+            ClientDto.class);
+        assertThat(clientResp.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+
+        Long clientId = clientResp.getBody().getId();
+
+        // apply for loan
+        ResponseEntity<LoanDto> loanResp = restTemplate.postForEntity(
+            "/api/v1/loans",
+            new CreateLoanRequest(clientId, new BigDecimal("100000.00"), 36),
+            LoanDto.class);
+        assertThat(loanResp.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+
+        Long loanId = loanResp.getBody().getId();
+
+        // retrieve loan
+        LoanDto loan = restTemplate.getForObject("/api/v1/loans/" + loanId, LoanDto.class);
+        assertThat(loan.getStatus()).isEqualTo("PENDING_APPROVAL");
+    }
+}
+----
+
+=== `@TestConfiguration` — Custom Test Beans
+
+When you need to override or add beans for testing without affecting the main application context, use `@TestConfiguration`:
+
+[source,java]
+----
+@TestConfiguration
+static class TestConfig {
+
+    @Bean
+    @Primary
+    public Clock fixedClock() {
+        // All time-dependent code uses this fixed clock in tests
+        return Clock.fixed(Instant.parse("2025-06-15T10:00:00Z"), ZoneOffset.UTC);
+    }
+
+    @Bean
+    @Primary
+    public InterestRateProvider fixedRateProvider() {
+        return () -> new BigDecimal("0.12");  // always return 12% in tests
+    }
+}
+----
+
+[source,bash]
+----
+# Run only WebMvcTest slice
+$ ./gradlew test --tests "LoanControllerTest"
+
+# Run only DataJpaTest slice
+$ ./gradlew test --tests "ClientRepositoryTest"
+
+# Run full SpringBootTest
+$ ./gradlew test --tests "LoanApplicationEndToEndTest"
+----
+
+NOTE: Each Spring Test slice creates a separate application context. If you have many slices with different configurations, the total number of contexts can slow down the build. Share configuration between test classes where possible to allow context caching.
+
+=== JMeter Performance Test
+
+Apache JMeter is the industry-standard tool for load and performance testing of web applications. It simulates multiple concurrent users hitting your API and measures response times, throughput, error rates, and resource utilization. For the Mifos platform—which may serve thousands of concurrent financial transactions—JMeter tests prove that the system meets its Service Level Objectives (SLOs) under load.
+
+== Test Plan Structure
+
+A JMeter test plan consists of:
+
+* **Thread Group** — Defines the number of virtual users, ramp-up period, and loop count.
+* **Samplers** — HTTP requests that represent the operations being tested (e.g., `POST /api/v1/loans`, `GET /api/v1/clients/{id}`).
+* **Listeners** — Collect and display results (Summary Report, Aggregate Graph, HTML Dashboard).
+* **Assertions** — Validate response status codes, body content, or response time thresholds.
+* **Configuration Elements** — HTTP Defaults, CSV Data Sets for parameterized input, and variables.
+
+== Basic Test Plan Example
+
+The following JMeter test plan simulates 200 concurrent users performing loan disbursements:
+
+[source,xml]
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="5.0">
+  <hashTree>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Mifos Loan Disbursement Load Test">
+      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments">
+        <argumentsProp name="Arguments.arguments">
+          <elementProp name="BASE_URL" elementType="Argument">
+            <stringProp name="Argument.value">localhost</stringProp>
+          </elementProp>
+          <elementProp name="PORT" elementType="Argument">
+            <stringProp name="Argument.value">8080</stringProp>
+          </elementProp>
+        </argumentsProp>
+      </elementProp>
+    </TestPlan>
+    <hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Loan Disbursement Users">
+        <intProp name="ThreadGroup.num_threads">200</intProp>
+        <intProp name="ThreadGroup.ramp_time">60</intProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController">
+          <stringProp name="LoopController.loops">50</stringProp>
+        </elementProp>
+      </ThreadGroup>
+      <hashTree>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Create Loan Application">
+          <stringProp name="HTTPSampler.domain">${BASE_URL}</stringProp>
+          <intProp name="HTTPSampler.port">${PORT}</intProp>
+          <stringProp name="HTTPSampler.path">/api/v1/loans</stringProp>
+          <stringProp name="HTTPSampler.method">POST</stringProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <stringProp name="HTTPSampler.postBodyRaw">true</stringProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <stringProp name="Argument.value">{"clientId": ${CLIENT_ID}, "principal": 50000, "termInMonths": 24}</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert 201 Created">
+            <collectionProp name="Asserion.test_strings">
+              <stringProp name="49">201</stringProp>
+            </collectionProp>
+            <intProp name="Assertion.test_type">8</intProp>
+            <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
+          </ResponseAssertion>
+        </hashTree>
+        <DurationAssertion guiclass="DurationAssertionGui" testclass="DurationAssertion" testname="Response under 2s">
+          <stringProp name="DurationAssertion.duration">2000</stringProp>
+        </DurationAssertion>
+      </hashTree>
+    </hashTree>
+  </hashTree>
+</jmeterTestPlan>
+----
+
+== Running JMeter from CLI
+
+[source,bash]
+----
+# Run JMeter in non-GUI mode (required for CI)
+$ jmeter -n -t load-tests/loan_disbursement.jmx \
+    -l build/reports/jmeter/results.jtl \
+    -e -o build/reports/jmeter/dashboard \
+    -JBASE_URL=staging.mifos.org \
+    -JPORT=443
+
+# View the HTML dashboard
+$ open build/reports/jmeter/dashboard/index.html
+
+# Run a quick smoke test with 10 users
+$ jmeter -n -t load-tests/loan_disbursement.jmx \
+    -Jthreads=10 -Jrampup=10 -Jloops=5 \
+    -l build/reports/jmeter/smoke.jtl
+----
+
+== Gradle Integration
+
+[source,kotlin]
+----
+// build.gradle.kts
+plugins {
+    id("de.undercouch.download") version "5.6.0"
+}
+
+val jmeterVersion = "5.6.3"
+val jmeterDir = layout.buildDirectory.dir("jmeter")
+
+tasks.register("downloadJMeter") {
+    description = "Downloads Apache JMeter"
+    doLast {
+        ant.withGroovyBuilder {
+            "get"("src" to "https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-${jmeterVersion}.tgz",
+                  "dest" to file("${jmeterDir.get()}/jmeter.tgz"))
+        }
+        copy {
+            from(tarTree(resources.gzip(file("${jmeterDir.get()}/jmeter.tgz"))))
+            into(jmeterDir)
+        }
+    }
+}
+
+tasks.register("jmeterTest") {
+    description = "Runs JMeter performance tests in non-GUI mode"
+    dependsOn("downloadJMeter")
+    doLast {
+        exec {
+            executable = file("${jmeterDir.get()}/apache-jmeter-${jmeterVersion}/bin/jmeter")
+            args("-n",
+                 "-t", "load-tests/loan_disbursement.jmx",
+                 "-l", "${layout.buildDirectory.get()}/reports/jmeter/results.jtl",
+                 "-e",
+                 "-o", "${layout.buildDirectory.get()}/reports/jmeter/dashboard",
+                 "-Jthreads=200",
+                 "-Jrampup=60",
+                 "-Jloops=50")
+        }
+    }
+}
+----
+
+[source,bash]
+----
+# Run performance tests via Gradle
+$ ./gradlew jmeterTest
+
+# CI pipeline: run a smoke load test (10 users, 5 iterations)
+$ ./gradlew jmeterTest -Jthreads=10 -Jrampup=10 -Jloops=5
+----
+
+WARNING: Never run full-scale load tests against production. Use a staging environment with production-like data volumes and hardware. Full load tests should be scheduled during maintenance windows.

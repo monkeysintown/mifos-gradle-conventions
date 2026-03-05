@@ -1,0 +1,18 @@
+dependencies {
+    constraints {
+        implementation "com.twilio.sdk:twilio:10.9.2"
+
+        implementation "com.github.dikhan:pagerduty-client:3.1.2"
+
+        implementation "systems.comodal:pagerduty-event-json-iterator-adapter:0.10.1"
+        implementation "systems.comodal:pagerduty-event-client:0.10.1"
+
+        implementation "com.mypurecloud:platform-client-v2:219.0.0"
+
+        implementation "com.hubspot:NioSmtpClient:1.1.0"
+
+        implementation "com.slack.api:slack-api-client:1.45.2"
+
+        implementation "io.vertx:vertx-mail-client:5.0.0.CR5"
+    }
+}
