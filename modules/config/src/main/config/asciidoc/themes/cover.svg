@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="2400" viewBox="0 0 1600 2400">
+  <defs>
+    <!-- Gradients using the full palette -->
+    <linearGradient id="blueGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#023f73;stop-opacity:0.9" />
+      <stop offset="100%" style="stop-color:#00193a;stop-opacity:0.95" />
+    </linearGradient>
+    <linearGradient id="redGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#cd0c2b;stop-opacity:0.85" />
+      <stop offset="100%" style="stop-color:#7a0213;stop-opacity:0.9" />
+    </linearGradient>
+    <linearGradient id="tealGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#034780;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#002b53;stop-opacity:0.85" />
+    </linearGradient>
+    <radialGradient id="centerGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#034780;stop-opacity:0.15" />
+      <stop offset="100%" style="stop-color:#00193a;stop-opacity:0.4" />
+    </radialGradient>
+    <radialGradient id="redGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#bf0a26;stop-opacity:0.2" />
+      <stop offset="100%" style="stop-color:#7a0213;stop-opacity:0.5" />
+    </radialGradient>
+  </defs>
+
+  <!-- Light background with subtle texture -->
+  <rect width="1600" height="2400" fill="#f4f6f9"/>
+  <rect width="1600" height="2400" fill="url(#centerGlow)"/>
+
+  <!-- ============================================ -->
+  <!-- HEXAGONAL HONEYCOMB PATTERN - MAIN ELEMENT   -->
+  <!-- ============================================ -->
+
+  <!-- Large hexagons - background layer -->
+  <g opacity="0.25">
+    <polygon points="200,150 286,200 286,300 200,350 114,300 114,200" fill="#00193a"/>
+    <polygon points="600,150 686,200 686,300 600,350 514,300 514,200" fill="#002b53"/>
+    <polygon points="1000,150 1086,200 1086,300 1000,350 914,300 914,200" fill="#023f73"/>
+    <polygon points="1400,150 1486,200 1486,300 1400,350 1314,300 1314,200" fill="#034780"/>
+
+    <polygon points="400,450 486,500 486,600 400,650 314,600 314,500" fill="#023f73"/>
+    <polygon points="800,450 886,500 886,600 800,650 714,600 714,500" fill="#002b53"/>
+    <polygon points="1200,450 1286,500 1286,600 1200,650 1114,600 1114,500" fill="#00193a"/>
+
+    <polygon points="200,750 286,800 286,900 200,950 114,900 114,800" fill="#034780"/>
+    <polygon points="600,750 686,800 686,900 600,950 514,900 514,800" fill="#023f73"/>
+    <polygon points="1000,750 1086,800 1086,900 1000,950 914,900 914,800" fill="#002b53"/>
+    <polygon points="1400,750 1486,800 1486,900 1400,950 1314,900 1314,800" fill="#00193a"/>
+
+    <polygon points="400,1050 486,1100 486,1200 400,1250 314,1200 314,1100" fill="#00193a"/>
+    <polygon points="800,1050 886,1100 886,1200 800,1250 714,1200 714,1100" fill="#034780"/>
+    <polygon points="1200,1050 1286,1100 1286,1200 1200,1250 1114,1200 1114,1100" fill="#023f73"/>
+
+    <polygon points="200,1350 286,1400 286,1500 200,1550 114,1500 114,1400" fill="#002b53"/>
+    <polygon points="600,1350 686,1400 686,1500 600,1550 514,1500 514,1400" fill="#00193a"/>
+    <polygon points="1000,1350 1086,1400 1086,1500 1000,1550 914,1500 914,1400" fill="#034780"/>
+    <polygon points="1400,1350 1486,1400 1486,1500 1400,1550 1314,1500 1314,1400" fill="#023f73"/>
+
+    <polygon points="400,1650 486,1700 486,1800 400,1850 314,1800 314,1700" fill="#023f73"/>
+    <polygon points="800,1650 886,1700 886,1800 800,1850 714,1800 714,1700" fill="#00193a"/>
+    <polygon points="1200,1650 1286,1700 1286,1800 1200,1850 1114,1800 1114,1700" fill="#034780"/>
+
+    <polygon points="200,1950 286,2000 286,2100 200,2150 114,2100 114,2000" fill="#00193a"/>
+    <polygon points="600,1950 686,2000 686,2100 600,2150 514,2100 514,2000" fill="#002b53"/>
+    <polygon points="1000,1950 1086,2000 1086,2100 1000,2150 914,2100 914,2000" fill="#023f73"/>
+    <polygon points="1400,1950 1486,2000 1486,2100 1400,2150 1314,2100 1314,2000" fill="#00193a"/>
+
+    <polygon points="400,2250 486,2300 486,2400 400,2450 314,2400 314,2300" fill="#034780"/>
+    <polygon points="800,2250 886,2300 886,2400 800,2450 714,2400 714,2300" fill="#002b53"/>
+    <polygon points="1200,2250 1286,2300 1286,2400 1200,2450 1114,2400 1114,2300" fill="#023f73"/>
+  </g>
+
+  <!-- Medium hexagons - mid layer with outlines -->
+  <g fill="none" stroke-width="2.5">
+    <polygon points="400,300 470,340 470,420 400,460 330,420 330,340" stroke="#023f73" stroke-opacity="0.6" fill="#023f73" fill-opacity="0.15"/>
+    <polygon points="800,300 870,340 870,420 800,460 730,420 730,340" stroke="#034780" stroke-opacity="0.6" fill="#034780" fill-opacity="0.15"/>
+    <polygon points="1200,300 1270,340 1270,420 1200,460 1130,420 1130,340" stroke="#002b53" stroke-opacity="0.6" fill="#002b53" fill-opacity="0.15"/>
+
+    <polygon points="200,600 270,640 270,720 200,760 130,720 130,640" stroke="#034780" stroke-opacity="0.5" fill="#034780" fill-opacity="0.12"/>
+    <polygon points="600,600 670,640 670,720 600,760 530,720 530,640" stroke="#00193a" stroke-opacity="0.5" fill="#00193a" fill-opacity="0.12"/>
+    <polygon points="1000,600 1070,640 1070,720 1000,760 930,720 930,640" stroke="#023f73" stroke-opacity="0.5" fill="#023f73" fill-opacity="0.12"/>
+    <polygon points="1400,600 1470,640 1470,720 1400,760 1330,720 1330,640" stroke="#002b53" stroke-opacity="0.5" fill="#002b53" fill-opacity="0.12"/>
+
+    <polygon points="400,900 470,940 470,1020 400,1060 330,1020 330,940" stroke="#002b53" stroke-opacity="0.55" fill="#002b53" fill-opacity="0.14"/>
+    <polygon points="800,900 870,940 870,1020 800,1060 730,1020 730,940" stroke="#00193a" stroke-opacity="0.55" fill="#00193a" fill-opacity="0.14"/>
+    <polygon points="1200,900 1270,940 1270,1020 1200,1060 1130,1020 1130,940" stroke="#034780" stroke-opacity="0.55" fill="#034780" fill-opacity="0.14"/>
+
+    <polygon points="200,1200 270,1240 270,1320 200,1360 130,1320 130,1240" stroke="#023f73" stroke-opacity="0.5" fill="#023f73" fill-opacity="0.12"/>
+    <polygon points="600,1200 670,1240 670,1320 600,1360 530,1320 530,1240" stroke="#034780" stroke-opacity="0.5" fill="#034780" fill-opacity="0.12"/>
+    <polygon points="1000,1200 1070,1240 1070,1320 1000,1360 930,1320 930,1240" stroke="#00193a" stroke-opacity="0.5" fill="#00193a" fill-opacity="0.12"/>
+    <polygon points="1400,1200 1470,1240 1470,1320 1400,1360 1330,1320 1330,1240" stroke="#023f73" stroke-opacity="0.5" fill="#023f73" fill-opacity="0.12"/>
+
+    <polygon points="400,1500 470,1540 470,1620 400,1660 330,1620 330,1540" stroke="#00193a" stroke-opacity="0.6" fill="#00193a" fill-opacity="0.15"/>
+    <polygon points="800,1500 870,1540 870,1620 800,1660 730,1620 730,1540" stroke="#023f73" stroke-opacity="0.6" fill="#023f73" fill-opacity="0.15"/>
+    <polygon points="1200,1500 1270,1540 1270,1620 1200,1660 1130,1620 1130,1540" stroke="#002b53" stroke-opacity="0.6" fill="#002b53" fill-opacity="0.15"/>
+
+    <polygon points="200,1800 270,1840 270,1920 200,1960 130,1920 130,1840" stroke="#034780" stroke-opacity="0.5" fill="#034780" fill-opacity="0.12"/>
+    <polygon points="600,1800 670,1840 670,1920 600,1960 530,1920 530,1840" stroke="#023f73" stroke-opacity="0.5" fill="#023f73" fill-opacity="0.12"/>
+    <polygon points="1000,1800 1070,1840 1070,1920 1000,1960 930,1920 930,1840" stroke="#002b53" stroke-opacity="0.5" fill="#002b53" fill-opacity="0.12"/>
+    <polygon points="1400,1800 1470,1840 1470,1920 1400,1960 1330,1920 1330,1840" stroke="#00193a" stroke-opacity="0.5" fill="#00193a" fill-opacity="0.12"/>
+
+    <polygon points="400,2100 470,2140 470,2220 400,2260 330,2220 330,2140" stroke="#002b53" stroke-opacity="0.55" fill="#002b53" fill-opacity="0.14"/>
+    <polygon points="800,2100 870,2140 870,2220 800,2260 730,2220 730,2140" stroke="#034780" stroke-opacity="0.55" fill="#034780" fill-opacity="0.14"/>
+    <polygon points="1200,2100 1270,2140 1270,2220 1200,2260 1130,2220 1130,2140" stroke="#023f73" stroke-opacity="0.55" fill="#023f73" fill-opacity="0.14"/>
+  </g>
+
+  <!-- Small filled hexagons - accent layer -->
+  <g>
+    <polygon points="300,450 340,473 340,520 300,543 260,520 260,473" fill="#034780" opacity="0.5"/>
+    <polygon points="500,450 540,473 540,520 500,543 460,520 460,473" fill="#023f73" opacity="0.4"/>
+    <polygon points="700,450 740,473 740,520 700,543 660,520 660,473" fill="#002b53" opacity="0.5"/>
+    <polygon points="900,450 940,473 940,520 900,543 860,520 860,473" fill="#00193a" opacity="0.4"/>
+    <polygon points="1100,450 1140,473 1140,520 1100,543 1060,520 1060,473" fill="#034780" opacity="0.5"/>
+    <polygon points="1300,450 1340,473 1340,520 1300,543 1260,520 1260,473" fill="#023f73" opacity="0.4"/>
+
+    <polygon points="100,750 140,773 140,820 100,843 60,820 60,773" fill="#002b53" opacity="0.45"/>
+    <polygon points="300,750 340,773 340,820 300,843 260,820 260,773" fill="#00193a" opacity="0.35"/>
+    <polygon points="500,750 540,773 540,820 500,843 460,820 460,773" fill="#034780" opacity="0.5"/>
+    <polygon points="700,750 740,773 740,820 700,843 660,820 660,773" fill="#023f73" opacity="0.4"/>
+    <polygon points="900,750 940,773 940,820 900,843 860,820 860,773" fill="#002b53" opacity="0.45"/>
+    <polygon points="1100,750 1140,773 1140,820 1100,843 1060,820 1060,773" fill="#00193a" opacity="0.35"/>
+    <polygon points="1300,750 1340,773 1340,820 1300,843 1260,820 1260,773" fill="#034780" opacity="0.5"/>
+    <polygon points="1500,750 1540,773 1540,820 1500,843 1460,820 1460,773" fill="#023f73" opacity="0.4"/>
+
+    <polygon points="300,1050 340,1073 340,1120 300,1143 260,1120 260,1073" fill="#023f73" opacity="0.4"/>
+    <polygon points="500,1050 540,1073 540,1120 500,1143 460,1120 460,1073" fill="#034780" opacity="0.5"/>
+    <polygon points="700,1050 740,1073 740,1120 700,1143 660,1120 660,1073" fill="#00193a" opacity="0.35"/>
+    <polygon points="900,1050 940,1073 940,1120 900,1143 860,1120 860,1073" fill="#002b53" opacity="0.45"/>
+    <polygon points="1100,1050 1140,1073 1140,1120 1100,1143 1060,1120 1060,1073" fill="#023f73" opacity="0.4"/>
+    <polygon points="1300,1050 1340,1073 1340,1120 1300,1143 1260,1120 1260,1073" fill="#034780" opacity="0.5"/>
+
+    <polygon points="100,1350 140,1373 140,1420 100,1443 60,1420 60,1373" fill="#034780" opacity="0.5"/>
+    <polygon points="300,1350 340,1373 340,1420 300,1443 260,1420 260,1373" fill="#023f73" opacity="0.4"/>
+    <polygon points="500,1350 540,1373 540,1420 500,1443 460,1420 460,1373" fill="#002b53" opacity="0.45"/>
+    <polygon points="700,1350 740,1373 740,1420 700,1443 660,1420 660,1373" fill="#00193a" opacity="0.35"/>
+    <polygon points="900,1350 940,1373 940,1420 900,1443 860,1420 860,1373" fill="#034780" opacity="0.5"/>
+    <polygon points="1100,1350 1140,1373 1140,1420 1100,1443 1060,1420 1060,1373" fill="#023f73" opacity="0.4"/>
+    <polygon points="1300,1350 1340,1373 1340,1420 1300,1443 1260,1420 1260,1373" fill="#002b53" opacity="0.45"/>
+    <polygon points="1500,1350 1540,1373 1540,1420 1500,1443 1460,1420 1460,1373" fill="#00193a" opacity="0.35"/>
+
+    <polygon points="300,1650 340,1673 340,1720 300,1743 260,1720 260,1673" fill="#002b53" opacity="0.45"/>
+    <polygon points="500,1650 540,1673 540,1720 500,1743 460,1720 460,1673" fill="#00193a" opacity="0.35"/>
+    <polygon points="700,1650 740,1673 740,1720 700,1743 660,1720 660,1673" fill="#034780" opacity="0.5"/>
+    <polygon points="900,1650 940,1673 940,1720 900,1743 860,1720 860,1673" fill="#023f73" opacity="0.4"/>
+    <polygon points="1100,1650 1140,1673 1140,1720 1100,1743 1060,1720 1060,1673" fill="#002b53" opacity="0.45"/>
+    <polygon points="1300,1650 1340,1673 1340,1720 1300,1743 1260,1720 1260,1673" fill="#00193a" opacity="0.35"/>
+
+    <polygon points="100,1950 140,1973 140,2020 100,2043 60,2020 60,1973" fill="#023f73" opacity="0.4"/>
+    <polygon points="300,1950 340,1973 340,2020 300,2043 260,2020 260,1973" fill="#034780" opacity="0.5"/>
+    <polygon points="500,1950 540,1973 540,2020 500,2043 460,2020 460,1973" fill="#00193a" opacity="0.35"/>
+    <polygon points="700,1950 740,1973 740,2020 700,2043 660,2020 660,1973" fill="#002b53" opacity="0.45"/>
+    <polygon points="900,1950 940,1973 940,2020 900,2043 860,2020 860,1973" fill="#034780" opacity="0.5"/>
+    <polygon points="1100,1950 1140,1973 1140,2020 1100,2043 1060,2020 1060,1973" fill="#023f73" opacity="0.4"/>
+    <polygon points="1300,1950 1340,1973 1340,2020 1300,2043 1260,2020 1260,1973" fill="#00193a" opacity="0.35"/>
+    <polygon points="1500,1950 1540,1973 1540,2020 1500,2043 1460,2020 1460,1973" fill="#002b53" opacity="0.45"/>
+  </g>
+
+  <!-- RED ACCENT HEXAGONS - vivid highlights -->
+  <g>
+    <polygon points="800,600 850,629 850,687 800,716 750,687 750,629" fill="#bf0a26" opacity="0.7"/>
+    <polygon points="400,1200 450,1229 450,1287 400,1316 350,1287 350,1229" fill="#cd0c2b" opacity="0.65"/>
+    <polygon points="1200,1800 1250,1829 1250,1887 1200,1916 1150,1887 1150,1829" fill="#a10220" opacity="0.7"/>
+    <polygon points="200,900 240,923 240,970 200,993 160,970 160,923" fill="#bf0a26" opacity="0.5"/>
+    <polygon points="1400,300 1440,323 1440,370 1400,393 1360,370 1360,323" fill="#cd0c2b" opacity="0.55"/>
+    <polygon points="600,2100 640,2123 640,2170 600,2193 560,2170 560,2123" fill="#a10220" opacity="0.6"/>
+    <polygon points="1000,1500 1040,1523 1040,1570 1000,1593 960,1570 960,1523" fill="#bf0a26" opacity="0.55"/>
+  </g>
+
+  <!-- Connection lines between hexagons (network feel) -->
+  <g stroke="#023f73" stroke-width="1.5" opacity="0.25" fill="none">
+    <line x1="400" y1="460" x2="400" y2="500"/>
+    <line x1="800" y1="460" x2="800" y2="500"/>
+    <line x1="1200" y1="460" x2="1200" y2="500"/>
+    <line x1="200" y1="760" x2="200" y2="800"/>
+    <line x1="600" y1="760" x2="600" y2="800"/>
+    <line x1="1000" y1="760" x2="1000" y2="800"/>
+    <line x1="1400" y1="760" x2="1400" y2="800"/>
+    <line x1="400" y1="1060" x2="400" y2="1100"/>
+    <line x1="800" y1="1060" x2="800" y2="1100"/>
+    <line x1="1200" y1="1060" x2="1200" y2="1100"/>
+    <line x1="200" y1="1360" x2="200" y2="1400"/>
+    <line x1="600" y1="1360" x2="600" y2="1400"/>
+    <line x1="1000" y1="1360" x2="1000" y2="1400"/>
+    <line x1="1400" y1="1360" x2="1400" y2="1400"/>
+    <line x1="400" y1="1660" x2="400" y2="1700"/>
+    <line x1="800" y1="1660" x2="800" y2="1700"/>
+    <line x1="1200" y1="1660" x2="1200" y2="1700"/>
+    <line x1="200" y1="1960" x2="200" y2="2000"/>
+    <line x1="600" y1="1960" x2="600" y2="2000"/>
+    <line x1="1000" y1="1960" x2="1000" y2="2000"/>
+    <line x1="1400" y1="1960" x2="1400" y2="2000"/>
+  </g>
+
+  <!-- Diagonal red accent lines -->
+  <g stroke="#cd0c2b" stroke-width="2" opacity="0.2" fill="none">
+    <line x1="0" y1="1800" x2="400" y2="1400"/>
+    <line x1="400" y1="1400" x2="800" y2="1000"/>
+    <line x1="800" y1="1000" x2="1200" y2="600"/>
+    <line x1="1200" y1="600" x2="1600" y2="200"/>
+    <line x1="0" y1="2200" x2="400" y2="1800"/>
+    <line x1="400" y1="1800" x2="800" y2="1400"/>
+    <line x1="800" y1="1400" x2="1200" y2="1000"/>
+    <line x1="1200" y1="1000" x2="1600" y2="600"/>
+  </g>
+
+  <!-- Corner geometric accents -->
+  <polygon points="0,0 250,0 0,250" fill="#00193a" opacity="0.15"/>
+  <polygon points="1600,2400 1350,2400 1600,2150" fill="#7a0213" opacity="0.15"/>
+
+  <!-- Subtle dot grid inside some hexagons -->
+  <g fill="#131313" opacity="0.15">
+    <circle cx="400" cy="383" r="3"/>
+    <circle cx="800" cy="383" r="3"/>
+    <circle cx="1200" cy="383" r="3"/>
+    <circle cx="200" cy="683" r="3"/>
+    <circle cx="600" cy="683" r="3"/>
+    <circle cx="1000" cy="683" r="3"/>
+    <circle cx="1400" cy="683" r="3"/>
+    <circle cx="400" cy="983" r="3"/>
+    <circle cx="800" cy="983" r="3"/>
+    <circle cx="1200" cy="983" r="3"/>
+    <circle cx="200" cy="1283" r="3"/>
+    <circle cx="600" cy="1283" r="3"/>
+    <circle cx="1000" cy="1283" r="3"/>
+    <circle cx="1400" cy="1283" r="3"/>
+    <circle cx="400" cy="1583" r="3"/>
+    <circle cx="800" cy="1583" r="3"/>
+    <circle cx="1200" cy="1583" r="3"/>
+    <circle cx="200" cy="1883" r="3"/>
+    <circle cx="600" cy="1883" r="3"/>
+    <circle cx="1000" cy="1883" r="3"/>
+    <circle cx="1400" cy="1883" r="3"/>
+  </g>
+
+  <!-- Thin connecting arcs (data flow) -->
+  <g fill="none" stroke="#034780" stroke-width="1.5" opacity="0.12">
+    <path d="M 0,400 Q 400,200 800,400 T 1600,400"/>
+    <path d="M 0,800 Q 400,600 800,800 T 1600,800"/>
+    <path d="M 0,1200 Q 400,1000 800,1200 T 1600,1200"/>
+    <path d="M 0,1600 Q 400,1400 800,1600 T 1600,1600"/>
+    <path d="M 0,2000 Q 400,1800 800,2000 T 1600,2000"/>
+  </g>
+
+</svg>

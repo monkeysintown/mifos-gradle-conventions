@@ -1,0 +1,5 @@
+= Glossary
+
+include::development.adoc[leveloffset=+1]
+
+// include::{commondir}/glossary.adoc[leveloffset=+1]

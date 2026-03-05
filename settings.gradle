@@ -1,0 +1,71 @@
+import org.apache.tools.ant.DirectoryScanner
+
+pluginManagement {
+    repositories {
+        mavenLocal()
+        mavenCentral().content {
+            excludeModule("javax.media", "jai_core")
+        }
+        gradlePluginPortal()
+        maven {
+            url = uri("https://mifos.jfrog.io/artifactory/mifosx-gradle-local")
+        }
+    }
+}
+
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral().content {
+            excludeModule("javax.media", "jai_core")
+        }
+        maven {
+            url = uri("https://mifos.jfrog.io/artifactory/mifosx-gradle-local")
+        }
+        gradlePluginPortal()
+    }
+
+    configurations.configureEach {
+        resolutionStrategy {
+            dependencySubstitution {
+                substitute module( "com.burgstaller:okhttp-digest:1.10" ) using module("io.github.rburgst:okhttp-digest:1.21") because "okhttp-digest only version 1.21 is available on Maven Central. Old version was on jcenter, which asciidoctor-gradle-plugin depends on transitively through simplified-jruby-gradle-plugin via http-builder-ng-okhttp "
+            }
+        }
+    }
+    dependencies {
+        classpath "io.freefair.aggregate-javadoc:io.freefair.aggregate-javadoc.gradle.plugin:9.5.0"
+        classpath "com.palantir.java-format-idea:com.palantir.java-format-idea.gradle.plugin:2.91.0"
+        classpath "com.github.ben-manes.versions:com.github.ben-manes.versions.gradle.plugin:0.54.0"
+        classpath "com.autonomousapps.dependency-analysis:com.autonomousapps.dependency-analysis.gradle.plugin:3.10.0"
+        classpath "pl.allegro.tech.build.axion-release:pl.allegro.tech.build.axion-release.gradle.plugin:1.21.2"
+        classpath "org.asciidoctor.jvm.revealjs:org.asciidoctor.jvm.revealjs.gradle.plugin:4.0.5"
+        classpath "org.asciidoctor.jvm.pdf:org.asciidoctor.jvm.pdf.gradle.plugin:4.0.5"
+        classpath "org.asciidoctor.jvm.gems:org.asciidoctor.jvm.gems.gradle.plugin:4.0.5"
+        classpath "org.asciidoctor.jvm.epub:org.asciidoctor.jvm.epub.gradle.plugin:4.0.5"
+        classpath "org.asciidoctor.editorconfig:org.asciidoctor.editorconfig.gradle.plugin:4.0.5"
+        classpath "org.asciidoctor.jvm.convert:org.asciidoctor.jvm.convert.gradle.plugin:4.0.5"
+    }
+}
+
+rootProject.name = "mifos-conventions-gradle"
+
+include(":mifos-conventions-gradle-config")
+project(":mifos-conventions-gradle-config").projectDir = file("${rootDir}/modules/config")
+include(":mifos-conventions-gradle-doc")
+project(":mifos-conventions-gradle-doc").projectDir = file("${rootDir}/modules/doc")
+include(":mifos-conventions-gradle-project-base")
+project(":mifos-conventions-gradle-project-base").projectDir = file("${rootDir}/modules/project/base")
+include(":mifos-conventions-gradle-project-doc")
+project(":mifos-conventions-gradle-project-doc").projectDir = file("${rootDir}/modules/project/doc")
+include(":mifos-conventions-gradle-project-dependencies")
+project(":mifos-conventions-gradle-project-dependencies").projectDir = file("${rootDir}/modules/project/dependencies")
+include(":mifos-conventions-gradle-project-java")
+project(":mifos-conventions-gradle-project-java").projectDir = file("${rootDir}/modules/project/java")
+include(":mifos-conventions-gradle-project-boot-base")
+project(":mifos-conventions-gradle-project-boot-base").projectDir = file("${rootDir}/modules/project/boot/base")
+include(":mifos-conventions-gradle-project-boot-imperative")
+project(":mifos-conventions-gradle-project-boot-imperative").projectDir = file("${rootDir}/modules/project/boot/imperative")
+include(":mifos-conventions-gradle-project-boot-reactive")
+project(":mifos-conventions-gradle-project-boot-reactive").projectDir = file("${rootDir}/modules/project/boot/reactive")
+include(":mifos-conventions-gradle-project-boot-layout")
+project(":mifos-conventions-gradle-project-boot-layout").projectDir = file("${rootDir}/modules/project/boot/layout")

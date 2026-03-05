@@ -1,0 +1,15 @@
+plugins {
+    id "org.mifos.convention.project.boot.base.ai.starter"
+}
+
+dependencies {
+    /*
+    if(file("../../core/build.gradle").exists()) {
+        api project(":${parts[0]}-core")
+    }
+    if(file("../mcp/build.gradle").exists()) {
+        api project(":${parts[0]}-${parts[1]}-mcp")
+    }
+    */
+    implementation "org.springframework.boot:spring-boot-starter"
+}

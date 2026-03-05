@@ -1,0 +1,37 @@
+= Methodology
+
+TBD
+
+See:
+
+- https://medium.com/javarevisited/how-i-build-prototypes-faster-using-this-proven-system-c033134343b9
+
+== TRIZ
+
+- https://en.wikipedia.org/wiki/TRIZ
+- https://sixsigmastudyguide.com/theory-of-inventive-problem-solving-triz/
+- https://www.toolshero.com/problem-solving/triz-method
+
+== Kaizen
+
+See:
+
+- https://en.wikipedia.org/wiki/Kaizen
+
+== Ikigai
+
+See:
+
+- https://en.wikipedia.org/wiki/Ikigai
+
+== Event Sourcing
+
+See:
+
+- https://en.wikipedia.org/wiki/Event_storming
+
+== Six Sigma
+
+See:
+
+- https://en.wikipedia.org/wiki/Six_Sigma

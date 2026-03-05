@@ -1,0 +1,6 @@
+[bibliography]
+= Build and Release
+
+* [[[gradle]]] Benjamin Muschko. _Gradle in Action_. Manning Publications. 2014. A thorough introduction to the Gradle build system, covering the build lifecycle, plugin development, multi-project builds, and continuous delivery. While some of the specific API examples are dated (Gradle has evolved significantly since publication), the conceptual foundations of build automation, convention over configuration, and incremental builds remain relevant and have directly informed the design of the Mifos convention plugins.
+
+* [[[cicd]]] Farley & Humble. _Continuous Delivery: Reliable Software Releases through Build, Test, and Deployment Automation_. Addison-Wesley Professional. 2010. The definitive guide to continuous delivery pipelines, covering build automation, test strategy, deployment patterns, and release management. The Mifos release workflow described in <<releases>> follows the principles and practices outlined in this book, including the emphasis on reproducible builds, automated testing at every stage, and the deployment pipeline as the single path to production.

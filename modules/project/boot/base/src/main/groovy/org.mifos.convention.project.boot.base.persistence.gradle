@@ -1,0 +1,10 @@
+plugins {
+    id "org.mifos.convention.project.boot.base"
+    id "org.mifos.convention.project.boot.base.mapping"
+}
+
+dependencies {
+    implementation "org.springframework.boot:spring-boot"
+    implementation "org.springframework.data:spring-data-commons"
+    api "tools.jackson.core:jackson-databind"
+}

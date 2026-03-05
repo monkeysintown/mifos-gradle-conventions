@@ -1,0 +1,24 @@
+= Tools
+
+TBD
+
+== Schema Crawler
+
+TBD
+
+See:
+
+- https://www.schemacrawler.com/diagramming.html
+
+[source,bash]
+----
+schemacrawler \
+--server sqlite \
+--database sc.db \
+--info-level standard \
+--command template \
+--templating-language velocity \
+--template plantuml.vm \
+--output-file sc.puml
+----
+

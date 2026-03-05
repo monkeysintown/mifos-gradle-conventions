@@ -1,0 +1,8 @@
+= Chaos Engineering
+
+TBD
+
+- Chaos: https://github.com/dastergon/awesome-chaos-engineering
+- Fuzzer: https://github.com/rohanpadhye/jqf
+- https://www.code-intelligence.com/blog/unit-testing-vs-fuzz-testing
+- https://github.com/parrot55/fuzzunit

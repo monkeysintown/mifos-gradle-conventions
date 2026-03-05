@@ -1,0 +1,111 @@
+plugins {
+    id "org.mifos.convention.project.boot.base.application"
+    id "org.graalvm.buildtools.native"
+}
+
+bootBuildImage {
+    buildpacks = [
+        "paketobuildpacks/ca-certificates",
+        // "paketobuildpacks/bellsoft-liberica",
+        // "paketobuildpacks/azul-zulu",
+        // see: https://paketo.io/docs/howto/sbom/
+        // "paketobuildpacks/graalvm",
+        "paketobuildpacks/java-native-image",
+        "paketobuildpacks/syft",
+        "paketobuildpacks/executable-jar",
+        "paketobuildpacks/dist-zip",
+        "paketobuildpacks/spring-boot",
+        "paketobuildpacks/environment-variables",
+    ]
+
+    environment["BP_JVM_VERSION"] = "25.0.3"
+    environment["BP_JVM_TYPE"] = "JRE"
+    environment["BPE_DELIM_JAVA_TOOL_OPTIONS"] = " "
+    environment["BPE_APPEND_JAVA_TOOL_OPTIONS"] = "-XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8 -Duser.timezone=UTC -Djava.security.egd=file:/dev/./urandom"
+    // environment["JAVA_TOOL_OPTIONS"] = ""
+    environment["BP_JVM_JLINK_ENABLED"] = "false"
+    environment["BP_NATIVE_IMAGE"] = "true"
+    environment["BP_SPRING_CLOUD_BINDINGS_DISABLED"] = "true"
+//    environment["BP_EMBED_CERTS"] = "true"
+//    environment["BP_ENABLE_RUNTIME_CERT_BINDING"] = "false"
+//    environment["BP_RUNTIME_CERT_BINDING_DISABLED"] = "true"
+
+    imageName = "mifos/${ext["mifos.convention.rootslug"]}-${project.name}"
+    tags = [
+        "mifos/${ext["mifos.convention.rootslug"]}-${project.name}:${project.version}"
+    ]
+
+    buildCache {
+        volume {
+            name = "cache-${ext["mifos.convention.rootslug"]}-${project.name}.build"
+        }
+    }
+    launchCache {
+        volume {
+            name = "cache-${ext["mifos.convention.rootslug"]}-${project.name}.launch"
+        }
+    }
+}
+
+application {
+    mainClass = "${ext["mifos.convention.baseclass"]}.${ext["mifos.convention.rootslug"]}.Main"
+}
+
+graalvmNative {
+    agent {
+        enabled = false
+        /*
+        metadataCopy {
+            inputTaskNames.add("run")
+            outputDirectories.add("src/main/resources/META-INF/native-image/${ext["mifos.convention.baseclass"]}.${ext["mifos.convention.rootslug"]}")
+            mergeWithExisting = true
+        }
+        modes {
+            conditional {
+                // Specify the path to your filter file
+                userCodeFilterPath = file("src/main/resources/user-code-filter.txt")
+            }
+        }
+        */
+    }
+    binaries.all {
+        // common options
+        verbose = true
+        debug = true
+        buildArgs.addAll(
+            "--static-nolibc",
+            "--exact-reachability-metadata"
+    )
+        runtimeArgs.add('-XX:MissingRegistrationReportingMode=Warn')
+    }
+
+    binaries.main {
+        // options to configure the main binary
+        imageName = "${ext["mifos.convention.rootslug"]}-${project.name}"
+        mainClass = "${ext["mifos.convention.baseclass"]}.${ext["mifos.convention.rootslug"]}.Main"
+
+        buildArgs.addAll(
+                "-O3",
+                "--initialize-at-build-time=org.xml.sax.helpers.LocatorImpl",
+                "--initialize-at-build-time=org.xml.sax.helpers.AttributesImpl",
+                "--trace-object-instantiation=io.micrometer.common.util.internal.logging.LocationAwareSlf4JLogger",
+                "--trace-object-instantiation=org.slf4j.LoggerFactory",
+                "--trace-object-instantiation=org.slf4j.MDC",
+                "--trace-object-instantiation=org.slf4j.impl.StaticLoggerBinder",
+                "--trace-object-instantiation=org.slf4j.spi.MDCAdapter",
+                "--initialize-at-build-time=org.slf4j",
+                "--initialize-at-build-time=ch.qos.logback",
+                "--initialize-at-build-time=io.micrometer.common.util.internal.logging",
+                "--emit build-report",
+                "--enable-native-access=ALL-UNNAMED",
+                "--gc=G1"
+
+        )
+        // buildArgs.add('-Dgraalvm.ForcePolyglotInvalid=false')
+    }
+
+    binaries.test {
+        // options to configure the test binary
+        quickBuild = true
+    }
+}

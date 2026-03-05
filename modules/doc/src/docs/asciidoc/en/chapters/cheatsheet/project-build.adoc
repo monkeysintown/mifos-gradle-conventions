@@ -1,0 +1,16 @@
+= Build the Project
+
+If you reload the project in your IDE then the following task is executed automatically. Execute the following command once to be sure that everything works and you have the shared configurations for all Mifos projects locally available (you should see a folder `.mifos` in the root of the project):
+
+.Unzip Shared Mifos Build Conventions Configuration
+[source,bash]
+----
+./gradlew mifosConfigUnzip
+----
+
+And from now on you can just execute:
+
+[source,bash]
+----
+./gradlew clean build publish
+----

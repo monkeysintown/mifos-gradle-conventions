@@ -1,0 +1,14 @@
+= Durable Execution
+
+TBD
+
+See:
+
+- https://www.morling.dev/blog/building-durable-execution-engine-with-sqlite
+- https://temporal.io
+- https://www.restate.dev
+- https://www.resonatehq.io
+- https://www.inngest.com
+- https://www.dbos.dev
+- https://dzone.com/articles/durable-agents-with-spring-ai-and-dapr
+- https://docs.dapr.io/developing-applications/building-blocks/workflow/

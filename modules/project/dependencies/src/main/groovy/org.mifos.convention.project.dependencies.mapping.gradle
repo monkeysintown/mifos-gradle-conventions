@@ -1,0 +1,19 @@
+dependencies {
+    constraints {
+        implementation "org.mapstruct:mapstruct:1.6.3"
+        implementation "org.mapstruct:mapstruct-processor:1.6.3"
+        implementation "org.mapstruct.extensions.spring:mapstruct-spring-extensions:2.0.0"
+        implementation "org.mapstruct.extensions.spring:mapstruct-spring-test-extensions:2.0.0"
+        implementation "org.mapstruct.extensions.spring:mapstruct-spring-annotations:2.0.0"
+        annotationProcessor "org.mapstruct:mapstruct:1.6.3"
+        annotationProcessor "org.mapstruct:mapstruct-processor:1.6.3"
+        annotationProcessor "org.mapstruct.extensions.spring:mapstruct-spring-extensions:2.0.0"
+        annotationProcessor "org.mapstruct.extensions.spring:mapstruct-spring-test-extensions:2.0.0"
+        annotationProcessor "org.mapstruct.extensions.spring:mapstruct-spring-annotations:2.0.0"
+        testAnnotationProcessor "org.mapstruct:mapstruct:1.6.3"
+        testAnnotationProcessor "org.mapstruct:mapstruct-processor:1.6.3"
+        testAnnotationProcessor "org.mapstruct.extensions.spring:mapstruct-spring-extensions:2.0.0"
+        testAnnotationProcessor "org.mapstruct.extensions.spring:mapstruct-spring-test-extensions:2.0.0"
+        testAnnotationProcessor "org.mapstruct.extensions.spring:mapstruct-spring-annotations:2.0.0"
+    }
+}

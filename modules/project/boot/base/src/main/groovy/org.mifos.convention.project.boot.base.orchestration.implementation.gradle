@@ -1,0 +1,19 @@
+plugins {
+    id "org.mifos.convention.project.boot.base"
+}
+
+dependencies {
+    /*
+    if(file("../core/build.gradle").exists()) {
+        api project(":${parts[0]}-${parts[1]}-${parts[2]}-core")
+    }
+    file("../../../usecase").listFiles().each {
+        if(!it.name.containsIgnoreCase("build")) {
+            if(file("../../../usecase/${it.name}/starter/build.gradle").exists()) {
+                implementation project(":${parts[0]}-usecase-${it.name}-starter")
+            }
+        }
+    }
+    */
+    implementation "org.springframework.boot:spring-boot-starter"
+}

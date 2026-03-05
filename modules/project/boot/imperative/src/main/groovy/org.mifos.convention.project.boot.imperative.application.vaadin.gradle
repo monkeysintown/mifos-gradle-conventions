@@ -1,0 +1,12 @@
+plugins {
+    id "org.mifos.convention.project.boot.imperative.application"
+    id "com.vaadin"
+    id "com.vaadin.flow"
+    id "com.vaadin.hilla"
+
+}
+
+dependencies {
+    implementation "com.vaadin:vaadin-spring-boot-starter"
+    implementation "org.parttio:line-awesome"
+}

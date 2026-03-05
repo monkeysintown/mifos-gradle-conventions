@@ -1,0 +1,24 @@
+dependencies {
+    constraints {
+        implementation "com.google.code.findbugs:jsr305:3.0.2"
+
+        implementation "org.jspecify:jspecify:1.0.0"
+
+        implementation "com.google.errorprone:error_prone_core:2.47.0"
+        implementation "com.google.errorprone:error_prone_annotations:2.49.0"
+        implementation "com.google.errorprone:error_prone_type_annotations:2.47.0"
+
+        implementation "org.checkerframework:javacutil:4.2.0"
+        implementation "org.checkerframework:framework-test:4.2.0"
+        implementation "org.checkerframework:dataflow-nullaway:4.2.0"
+        implementation "org.checkerframework:dataflow-errorprone:4.2.0"
+        implementation "org.checkerframework:dataflow:4.2.0"
+        implementation "org.checkerframework:dataflow-shaded:4.2.0"
+        implementation "org.checkerframework:checker-util:4.2.0"
+        implementation "org.checkerframework:checker-qual-android:4.2.0"
+        implementation "org.checkerframework:checker-qual:4.2.0"
+        implementation "org.checkerframework:checker:4.2.0"
+        implementation "org.checkerframework:stubparser:3.28.0"
+        implementation "org.checkerframework:checker-compat-qual:2.5.6"
+    }
+}

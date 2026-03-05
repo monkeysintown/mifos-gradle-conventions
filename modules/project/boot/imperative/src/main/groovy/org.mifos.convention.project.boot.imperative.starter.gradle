@@ -1,0 +1,8 @@
+plugins {
+    id "org.mifos.convention.project.boot.base.starter"
+}
+
+dependencies {
+    implementation "org.mifos:mifos-commons-java-boot-starter-imperative"
+    implementation "org.springframework.boot:spring-boot-starter-webmvc"
+}

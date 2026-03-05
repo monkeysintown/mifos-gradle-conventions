@@ -1,0 +1,245 @@
+plugins {
+    id "base"
+    // id "maven-publish"
+    id "org.mifos.convention.project.base"
+    id "org.asciidoctor.jvm.convert"
+    id "org.asciidoctor.jvm.pdf"
+    id "org.asciidoctor.jvm.gems"
+    id "org.asciidoctor.jvm.epub"
+    id "org.asciidoctor.jvm.revealjs"
+    id "org.asciidoctor.editorconfig"
+}
+
+configurations {
+    asciidoctorExt {
+        description = "Asciidoctor Extensions"
+        canBeResolved = true
+    }
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral().content {
+        excludeModule("javax.media", "jai_core")
+    }
+    maven {
+        url = uri("https://central.sonatype.com/repository/maven-snapshots")
+    }
+}
+
+dependencies {
+    asciidoctorGems "rubygems:rouge:5.0.0"
+}
+
+asciidoctorj {
+    requires = ["rouge"]
+
+    version = "3.0.1"
+
+    attributes = [
+            // "plantuml-config": "${rootDir}/.mifos/config/plantuml/themes/mifos-default-theme.puml",
+            "plantuml-config": "${rootDir}/.mifos/config/plantuml/themes/mifos-default-config.cfg",
+            "version": "${project.version}",
+            "generated": "${layout.buildDirectory}/generated/asciidoc",
+            "imagesoutdir"  : "${projectDir}/build/docs/html/en/images",
+            "imagesdir"     : "${projectDir}/src/docs/asciidoc/en/images",
+            "diagramsdir": "${projectDir}/src/docs/asciidoc/en/diagrams",
+            "commondir": "${rootDir}/.mifos/config/asciidoc/pages",
+            // "webfonts": "Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CUbuntu+Mono:400",
+            "stylesdir": "${rootDir}/.mifos/config/asciidoc/stylesheets",
+            // TODO: cleanup admonitions background (lighter) and then enable again
+            // "stylesheet": "mifos-default.css",
+            "years": "2026",
+            "encoding": "utf-8",
+            "xrefstyle": "short",
+            "icons": "font",
+            "lang": "en",
+            "source-highlighter": "rouge",
+            "rootdir": "${rootDir}".toString(),
+            "baseurl": "https://mifos.org",
+            "revdate": java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd").withZone(ZoneId.from(ZoneOffset.UTC)).format(Instant.now()),
+            "revnumber": "${project.version}",
+            "revremark": "Draft", // TODO: make this conditional
+            "branch": "unknown", // TODO: figure out how to retrieve this
+            "doctype": "book",
+            "compat-mode": "",
+            "media": "printer",
+            "compress": "",
+            "pdf-page-size": "A4",
+            "experimental": "",
+            "pdf-version": "1.7",
+            "page-layout": "base",
+            "toc": "left",
+            "toc-title": "Table of Contents",
+            "toclevels": "1",
+            // "sectnums": "",
+            "sectanchors": "",
+            "source-language": "java",
+            "linkattrs": "",
+            "hide-uri-scheme": "",
+            "data-uri": "",
+            "organization": "Mifos Initiative",
+            "phone": "+381-677xxxxxx",
+            "email": "info@mifos.org",
+            "checkedbox": "pass:normal[{startsb}&#10004;{endsb}]",
+            "table-stripes": "even",
+            "vgdir": project.properties["mifos.asciidoc.diagram.vg.dir"],
+            "vg2svg": "${project.properties['mifos.asciidoc.diagram.vg.dir']}/vg2svg",
+            "vg2png": "${project.properties['mifos.asciidoc.diagram.vg.dir']}/vg2png",
+            "vl2vg": "${project.properties['mifos.asciidoc.diagram.vg.dir']}/vl2vg",
+            "vl2svg": "${project.properties['mifos.asciidoc.diagram.vg.dir']}/vl2svg",
+            "vl2png": "${project.properties['mifos.asciidoc.diagram.vg.dir']}/vl2png",
+    ]
+
+    jrubyVersion = "10.0.5.0"
+
+    modules {
+        diagram.use()
+        //diagram.version "3.2.1"
+        pdf.use()
+        pdf.version = "2.3.23"
+        epub.use()
+        epub.version = "2.2.0"
+        // revealjs.use()
+    }
+
+    fatalWarnings ~/include file not found|missing callout|image to embed not found or not readable/
+    fatalWarnings missingIncludes()
+}
+
+asciidoctor {
+    logDocuments = true
+
+    languages = ["en"]
+
+    baseDir = "${projectDir}/src/docs/asciidoc"
+    sourceDir = "${projectDir}/src/docs/asciidoc"
+    sources {
+        include "index.adoc"
+    }
+    outputDir = "build/docs/html"
+
+    logging.captureStandardError LogLevel.INFO
+}
+
+pdfThemes {
+    local "mifos-default", {
+        themeDir = "${rootDir}/.mifos/config/asciidoc/themes"
+    }
+    local "mifos-dummy", {
+        themeDir = "${rootDir}/.mifos/config/asciidoc/themes"
+    }
+}
+
+asciidoctorPdf {
+    logDocuments = true
+
+    languages = ["en"]
+
+    baseDir = "${projectDir}/src/docs/asciidoc"
+    sourceDir = "${projectDir}/src/docs/asciidoc"
+    sources {
+        include "index.adoc"
+    }
+    outputDir = "build/docs/pdf"
+
+    fontsDirs = ["${rootDir}/.mifos/config/asciidoc/fonts"]
+    theme = "mifos-default"
+
+    logging.captureStandardError LogLevel.INFO
+}
+
+asciidoctorEditorConfig {
+    destinationDir = "${projectDir}"
+}
+
+revealjs {
+    // version = "5.2.0"
+
+    templateGitHub {
+        organisation = "hakimel"
+        repository = "reveal.js"
+        tag = "5.2.0"
+    }
+}
+
+// Optional: add extra Reveal.js plugins from GitHub
+revealjsPlugins {
+    github("rajgoel") {
+        setOrganisation("rajgoel")
+        setRepository("reveal.js-plugins")
+        setBranch("master")
+    }
+}
+
+asciidoctorRevealJs {
+    sourceDir = file("src/docs/asciidoc")
+    sources {
+        include "presentation.adoc"
+    }
+
+    revealjsOptions {
+        controls = true
+        slideNumber = "c/t"
+        transition = "slide"
+        theme = "black"
+        verticalCenter = true
+    }
+
+    plugins = ["rajgoel/chalkboard"]
+
+    attributes = [
+            "source-highlighter": "highlight.js"
+    ]
+}
+
+tasks.register("asciidoctorZip", Zip) {
+    def projectName = project.provider { project.name }
+    def projectVersion = project.provider { project.version }
+
+    group = "documentation"
+    description = "Package Mifos Project Documentation Packaging"
+    archiveBaseName = "${projectName.get()}"
+    dependsOn = [asciidoctor, asciidoctorPdf]
+
+    into("${projectName.get()}-${projectVersion.get()}/html") {
+        from("${projectDir}/build/docs/html") {
+            include "**/*"
+            exclude "**/.asciidoctor"
+        }
+    }
+    into("${projectName.get()}-${projectVersion.get()}/pdf") {
+        from("${projectDir}/build/docs/pdf") {
+            include "**/index.pdf"
+            exclude "**/.asciidoctor"
+            rename {
+                "${projectName.get()}-${projectVersion.get()}.pdf"
+            }
+        }
+    }
+}
+
+// TODO: enable when new asciidoc version is available and compatible with configuration caching
+// tasks.build.dependsOn = [asciidoctorZip] // , asciidoctorRevealJs , asciidoctorEditorConfig
+
+/*
+publishing {
+    publications {
+        mavenZip(MavenPublication) {
+            artifact source: asciidoctorZip, classifier: "doc", extension: "zip"
+        }
+    }
+}
+*/
+
+tasks.register("asciidocConfigCopy", Sync) {
+    var destFile = file("${projectDir}/.asciidoctorconfig")
+    onlyIf { !destFile.exists() }
+    group = "documentation"
+    description = "Copy the default Asciidoc editor configuration"
+
+    copy {
+        from "${rootDir}/.mifos/config/asciidoc/.asciidoctorconfig"
+        into "${projectDir}/"
+    }
+}

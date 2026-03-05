@@ -1,0 +1,5 @@
+plugins {
+    id "org.mifos.convention.project.boot.reactive.core"
+}
+
+description = "{{project_name|capitalize}} - {{project_module|capitalize}} - Core"

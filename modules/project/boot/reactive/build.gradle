@@ -1,0 +1,9 @@
+plugins {
+    id "org.mifos.convention.internal.project.template"
+}
+
+description = "Mifos Initiative - Gradle Conventions - Project - Boot - Reactive"
+
+dependencies {
+    api project(":mifos-conventions-gradle-project-boot-base")
+}

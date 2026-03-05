@@ -1,0 +1,17 @@
+= Profiling
+
+TBD
+
+== Gradle Build Profiling
+
+[source,bash]
+----
+./gradlew build --profile
+----
+
+See:
+
+- https://github.com/async-profiler/async-profiler
+- https://github.com/PragmaTech-GmbH/spring-test-profiler
+- https://rieckpil.de/achieve-faster-build-times-with-the-spring-test-profiler
+- https://in.relation.to/2026/05/29/hibernate-json-dirty-checking-performance

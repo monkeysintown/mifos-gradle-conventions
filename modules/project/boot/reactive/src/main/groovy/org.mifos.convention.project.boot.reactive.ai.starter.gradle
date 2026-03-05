@@ -1,0 +1,3 @@
+plugins {
+    id "org.mifos.project.java.base.ai.starter"
+}

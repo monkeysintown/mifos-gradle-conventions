@@ -1,0 +1,71 @@
+= AI Skills
+
+Effective use of AI coding assistants requires deliberate prompt engineering—the skill of crafting instructions that produce accurate, relevant, and safe output. The following prompt patterns have proven effective in the Mifos development context.
+
+**Code Generation Prompts**: Be specific about the technology stack, design patterns, and conventions:
+
+[source,terminaloutput]
+----
+Write a Java 25 Spring Boot @Service class named LoanRepaymentService
+that calculates repayment schedules. Follow these conventions:
+- Use constructor injection (no @Autowired)
+- Return sealed interface Result objects (Success/Failure)
+- Use java.time.Instant for timestamps, never java.util.Date
+- All monetary values use BigDecimal with RoundingMode.HALF_EVEN
+- Include Javadoc on all public methods
+- Follow Google Java Format style
+----
+
+**Refactoring Prompts**: Provide the existing code and a clear description of the target state:
+
+[source,terminaloutput]
+----
+Refactor the following method to use the Result pattern instead of
+throwing exceptions. The method currently throws LoanProcessingException
+for validation failures. Replace each throw with a Result.Failure
+containing the error code and message. Preserve all business logic.
+
+[paste existing method]
+----
+
+**Testing Prompts**: Request tests that cover edge cases, not just the happy path:
+
+[source,terminaloutput]
+----
+Write JUnit 5 tests for LoanRepaymentService.calculateSchedule().
+Cover these scenarios:
+1. Normal repayment with fixed interest rate
+2. Loan with grace period
+3. Zero principal (should return Failure)
+4. Negative interest rate (should return Failure)
+5. Balloon payment at maturity
+Use @ParameterizedTest where applicable. Mock the repository
+with Mockito. Use AssertJ for fluent assertions.
+----
+
+**Documentation Prompts**: Ask for documentation in a specific format:
+
+[source,terminaloutput]
+----
+Generate AsciiDoc documentation for the LoanRepaymentService REST API.
+Include:
+- Endpoint paths and HTTP methods
+- Request/response JSON examples
+- Error code table (MIFOS-3xxx range)
+- curl examples for each endpoint
+Format as an AsciiDoc section with [source,json] and [source,bash] blocks.
+----
+
+See:
+
+- https://github.com/ciembor/agent-rules-books/
+- https://github.com/letta-ai/skills
+- https://github.com/github/awesome-copilot
+- https://github.com/humanlayer/12-factor-agents
+- https://github.com/humanlayer/advanced-context-engineering-for-coding-agents/blob/main/ace-fca.md
+- https://www.humanlayer.dev/
+- https://github.com/obra/superpowers
+- https://github.com/arconia-io/agent-skills
+- https://github.com/AI-Unified-Process/marketplace/tree/main/aiup-vaadin-jooq/skills
+- https://github.com/mvysny/karibu-testing/tree/master
+- https://skillsforge.dev/skills/plantuml

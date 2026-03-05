@@ -1,0 +1,24 @@
+@startuml
+!include <C4/C4_Container>
+
+LAYOUT_WITH_LEGEND()
+
+title System Context Diagram — VSLA Self-Funded Groups
+
+Person(groupMember, "Group Member / Treasurer", "Manages self-funded group finances, meetings, savings, and loans via mobile app.")
+Person(facilitator, "Facilitating NGO / MFI Staff", "Oversees multiple groups, configures operational parameters, reviews group accounting.")
+
+System(vslaSystem, "VSLA Service", "Standalone Spring Boot application. System of record for group lifecycle, internal lending, group-level accounting, offline mobile sync, and share-out computation.")
+System(fineractSystem, "Apache Fineract Core", "Institution-level financial ledger. System of record for client registry, savings account balances, external group loans (bank/MFI), and institution-level GL postings.")
+
+System_Ext(yapePlin, "YAPE / PLIN", "Peruvian mobile payment gateways providing real-time payment notifications.")
+System_Ext(bankMfi, "Banks & Microfinance Institutions", "External lenders that disburse loans to the group and receive repayments.")
+
+Rel(groupMember, vslaSystem, "Manages group meetings, savings, internal loans, votes, attendance", "Mobile App / REST / WebSocket")
+Rel(facilitator, vslaSystem, "Configures group parameters, reviews dashboards, monitors reconciliation alerts", "Web UI / REST")
+Rel(vslaSystem, fineractSystem, "Synchronizes financial state", "REST API (official fineract-client)")
+Rel(yapePlin, vslaSystem, "Sends payment webhooks", "HTTPS JSON")
+Rel(bankMfi, fineractSystem, "Disburses external loans & receives repayment", "Banking APIs / File")
+Rel(vslaSystem, bankMfi, "Tracks external funding agreements & repayment schedules", "Domain tracking / Outbox")
+
+@enduml

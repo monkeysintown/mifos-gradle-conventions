@@ -1,0 +1,94 @@
+@startuml
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam shadowing false
+skinparam handwritten false
+
+' Modern folder styling
+skinparam folder {
+    BackgroundColor<<domain>> #E3F2FD
+    BackgroundColor<<application>> #E8F5E9
+    BackgroundColor<<infrastructure>> #FFF3E0
+    BackgroundColor<<interface>> #F3E5F5
+    BackgroundColor<<config>> #FFFDE7
+    BackgroundColor<<test>> #ECEFF1
+    BorderColor<<domain>> #1976D2
+    BorderColor<<application>> #388E3C
+    BorderColor<<infrastructure>> #F57C00
+    BorderColor<<interface>> #7B1FA2
+    BorderColor<<config>> #FBC02D
+    BorderColor<<test>> #546E7A
+    FontColor #212121
+    FontName "Segoe UI"
+    FontSize 13
+    RoundCorner 8
+    BorderThickness 1.5
+}
+
+' File styling for contrast
+skinparam file {
+    BackgroundColor #FFFFFF
+    BorderColor #BDBDBD
+    FontSize 11
+    FontColor #616161
+}
+
+title Hexagonal Architecture — Project Layout
+
+folder "root-project" as root {
+
+    folder "domain" <<domain>> {
+        file "build.gradle.kts"
+        file "Entity.kt"
+        file "Repository.kt"
+    }
+
+    folder "application" <<application>> {
+        file "build.gradle.kts"
+        file "UseCase.kt"
+        file "Service.kt"
+    }
+
+    folder "infrastructure" {
+
+        folder "persistence" <<infrastructure>> {
+            file "build.gradle.kts"
+            file "JpaAdapter.kt"
+        }
+
+        folder "web" <<interface>> {
+            file "build.gradle.kts"
+            file "RestController.kt"
+        }
+
+        folder "messaging" <<infrastructure>> {
+            file "build.gradle.kts"
+            file "EventPublisher.kt"
+        }
+    }
+
+    folder "gradle" <<config>> {
+        file "libs.versions.toml"
+    }
+
+    folder "src/test" <<test>> {
+        file "IntegrationTest.kt"
+    }
+
+    file "build.gradle.kts"
+    file "settings.gradle.kts"
+    file "project-layout.yaml"
+}
+
+' Legend with color codes
+legend right
+    |= Color |= Category |
+    | <#E3F2FD> | **Domain** — Core business logic |
+    | <#E8F5E9> | **Application** — Use cases & orchestration |
+    | <#FFF3E0> | **Infrastructure** — Persistence, external APIs |
+    | <#F3E5F5> | **Interface** — Controllers, CLI, UI |
+    | <#FFFDE7> | **Config** — Build & tooling |
+    | <#ECEFF1> | **Test** — Verification & fixtures |
+endlegend
+
+@enduml

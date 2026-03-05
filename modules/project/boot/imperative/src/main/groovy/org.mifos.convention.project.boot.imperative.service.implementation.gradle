@@ -1,0 +1,7 @@
+plugins {
+    id "org.mifos.convention.project.boot.base.service.implementation"
+}
+
+dependencies {
+    testImplementation "org.mifos:mifos-commons-java-boot-testing"
+}

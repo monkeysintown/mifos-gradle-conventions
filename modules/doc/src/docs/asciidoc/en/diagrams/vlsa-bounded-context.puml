@@ -1,0 +1,53 @@
+@startuml
+skinparam componentStyle rectangle
+
+title VSLA Bounded Context Map
+
+package "VSLA Service" {
+    [Group Lifecycle] as GL #LightBlue
+    [Capital & Shares] as CS #LightGreen
+    [Internal Lending] as IL #LightYellow
+    [External Funding] as EF #LightCoral
+    [Group Accounting] as GA #LightGray
+    [Membership & Governance] as MG #Plum
+    [Mobile & Payments] as MP #LightPink
+}
+
+package "Fineract Core" as Fineract {
+    [Clients] as F_Clients
+    [Savings Accounts] as F_Savings
+    [Loans] as F_Loans
+    [Accounting GL] as F_Acc
+}
+
+GL --> CS : publishes (SelfFundedGroupCreated, MemberEnrolled, MeetingHeld)
+CS --> IL : publishes (SharesPurchased)
+IL --> GA : publishes (InternalLoanRepaid)
+EF --> GA : publishes (ExternalFundingReceived)
+MG --> GL : reads (UserGroupMapping)
+MP --> CS : commands
+MP --> IL : commands
+
+CS ..> F_Savings : ACL (Outbox)
+IL ..> F_Savings : ACL (AccountTransfer)
+EF ..> F_Loans : ACL (Outbox)
+GA ..> F_Acc : ACL (JournalEntry)
+GL ..> F_Clients : ACL (Outbox)
+
+note right of GL
+  **Upstream Context**
+  Drives all others
+end note
+
+note right of GA
+  **Published Language**
+  Subscriber to all
+  monetary events
+end note
+
+note right of MP
+  **Open Host Service**
+  Webhooks & mobile sync
+end note
+
+@enduml

@@ -1,0 +1,100 @@
+= Date and Time Handling
+
+Date and time handling is one of the most error-prone areas in financial software. Interest calculations, repayment schedules, and audit trails all depend on correct temporal logic. Mifos mandates the use of the `java.time` API introduced in Java 8 and forbids the legacy `java.util.Date` and `java.util.Calendar` classes.
+
+The core rules are:
+
+. **Always store timestamps in UTC** in the database. No exceptions.
+. **Use `Instant`** for machine timestamps (audit logs, creation dates).
+. **Use `LocalDate`** for business dates without time (loan disbursement date, maturity date).
+. **Use `ZonedDateTime`** for display purposes where the timezone matters.
+. **Never use `java.util.Date`** or `java.util.Calendar** in new code.
+
+Example of a properly handled timestamp:
+
+[source,java]
+----
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+
+public class LoanDisbursement {
+
+    // Stored in the database as UTC timestamp
+    private Instant disbursementTimestamp;
+
+    // Business date (no time component)
+    private LocalDate disbursementDate;
+
+    // Factory method capturing the current moment
+    public static LoanDisbursement now(ZoneId tenantZone) {
+        var disbursement = new LoanDisbursement();
+        disbursement.disbursementTimestamp = Instant.now();
+        disbursement.disbursementDate = LocalDate.now(tenantZone);
+        return disbursement;
+    }
+
+    // Display in the tenant's timezone
+    public ZonedDateTime getDisbursementInTenantZone(ZoneId tenantZone) {
+        return disbursementTimestamp.atZone(tenantZone);
+    }
+
+    // Serialization pattern (ISO-8601)
+    public String getDisbursementTimestampIso() {
+        return disbursementTimestamp.toString();
+        // Output: 2025-06-15T09:30:00Z
+    }
+}
+----
+
+For JPA entity mapping, use the `@Column` annotation with the correct column definition:
+
+[source,java]
+----
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import java.time.Instant;
+import java.time.LocalDate;
+
+@Entity
+public class Loan {
+
+    @Column(name = "created_at", nullable = false, updatable = false,
+            columnDefinition = "TIMESTAMP WITH TIME ZONE")
+    private Instant createdAt;
+
+    @Column(name = "maturity_date", nullable = false)
+    private LocalDate maturityDate;
+}
+----
+
+Pattern conventions for serialization:
+
+[source,java]
+----
+import java.time.format.DateTimeFormatter;
+import java.time.Instant;
+import java.time.LocalDate;
+
+public class SomeClass {
+    public void someFunction() {
+        // Machine-readable: ISO-8601 (always UTC, always with 'Z' suffix)
+        DateTimeFormatter.ISO_INSTANT.format(Instant.now());
+        // → "2025-06-15T09:30:00Z"
+
+        // Human-readable date: ISO local date
+        DateTimeFormatter.ISO_LOCAL_DATE.format(LocalDate.now());
+        // → "2025-06-15"
+
+        // Custom display format for tenant locale
+        DateTimeFormatter.ofPattern("dd-MMM-yyyy")
+            .localizedBy(Locale.FRANCE)
+            .format(LocalDate.of(2025, 6, 15));
+        // → "15-juin-2025"
+    }
+}
+----
+
+CAUTION: Never use `LocalDateTime` for timestamps that represent a specific moment in time. `LocalDateTime` has no timezone information and is ambiguous—it could represent 9 AM in Nairobi or 9 AM in New York, which are different instants. Use `Instant` for moments and `ZonedDateTime` for display.

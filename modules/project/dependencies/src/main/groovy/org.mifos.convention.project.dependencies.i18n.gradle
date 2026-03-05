@@ -1,0 +1,8 @@
+dependencies {
+    constraints {
+        implementation "com.ibm.icu:icu4j:78.3"
+
+        implementation "com.googlecode.libphonenumber:libphonenumber:8.13.52"
+        implementation "com.googlecode.libphonenumber:prefixmapper:2.246"
+    }
+}

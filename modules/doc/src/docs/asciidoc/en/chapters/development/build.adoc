@@ -1,0 +1,133 @@
+= Build
+
+The Gradle build is the single source of truth for compiling, testing, and packaging Mifos projects. Understanding the lifecycle and available tasks is essential for every contributor.
+
+The primary build tasks are:
+
+[source,bash]
+----
+# Full build: compile, test, quality checks, JAR packaging
+./gradlew build
+
+# Run all verification tasks (tests, checkstyle, JaCoCo, etc.)
+./gradlew check
+
+# Assemble all JAR/WAR artifacts without running tests
+./gradlew assemble
+
+# Run only unit tests
+./gradlew test
+
+# Run only integration tests (if configured)
+./gradlew integrationTest
+
+# Clean all build outputs
+./gradlew clean
+
+# Build a specific module
+./gradlew :fineract-provider:build
+----
+
+Performance is critical for developer productivity. Mifos projects enable several Gradle performance features by default:
+
+[source,properties]
+----
+# gradle.properties
+org.gradle.parallel=true           # Build modules in parallel
+org.gradle.caching=true            # Reuse outputs from previous builds
+org.gradle.configuration-cache=true # Cache the configuration phase
+----
+
+To take advantage of the build cache, you can also configure a remote cache shared across the team:
+
+[source,bash]
+----
+# Use the remote build cache
+./gradlew build --build-cache
+----
+
+To run a subset of tests with pattern matching:
+
+[source,bash]
+----
+# Run all tests matching a pattern
+./gradlew test --tests "org.mifos.portfolio.loan.*"
+
+# Run a single test class
+./gradlew test --tests "org.mifos.portfolio.loan.LoanServiceTest"
+
+# Run a single test method
+./gradlew test --tests "org.mifos.portfolio.loan.LoanServiceTest.calculateInterest"
+----
+
+== Conventions
+
+Coding conventions in Mifos are not merely suggestions—they are enforced by automated tooling in the CI pipeline. A PR that violates code style will fail the build. This section documents the key conventions and the Gradle configuration that enforces them.
+
+**Java 25 Baseline**: All server-side Java code targets Java 25. Language features introduced in Java 25 are encouraged where they improve readability. No module may set a lower source level.
+
+**Kotlin Policy**: Kotlin is used exclusively for Android application code and Gradle plugin/script development (i.e., `buildSrc` and convention plugins). Server-side application code is written in Java. This policy avoids a split codebase and keeps the server stack accessible to the broadest contributor base.
+
+**Checkstyle**: Mifos uses Checkstyle based on the Google Java Style Guide with project-specific modifications. The configuration lives in `config/checkstyle/checkstyle.xml` at the repository root. The following Gradle snippet shows how it is applied:
+
+[source,kotlin]
+----
+// In mifos-java-conventions.gradle.kts
+plugins {
+    checkstyle
+}
+
+checkstyle {
+    toolVersion = "10.20.0"
+    configDirectory = rootProject.file("config/checkstyle")
+    isShowViolations = true
+}
+
+tasks.named("checkstyleMain") {
+    group = "verification"
+}
+
+tasks.named("checkstyleTest") {
+    group = "verification"
+}
+----
+
+**Spotless**: For automatic formatting, Mifos uses the Spotless plugin with Palantir Java Format:
+
+[source,kotlin]
+----
+// In mifos-java-conventions.gradle.kts
+plugins {
+    id("com.diffplug.spotless")
+}
+
+spotless {
+    java {
+        palantirJavaFormat()
+        removeUnusedImports()
+        trimTrailingWhitespace()
+        endWithNewline()
+        targetExclude("**/generated/**")
+    }
+}
+----
+
+To auto-format your code before committing:
+
+[source,bash]
+----
+./gradlew spotlessApply
+----
+
+To check formatting without modifying files:
+
+[source,bash]
+----
+./gradlew spotlessCheck
+----
+
+**Import Ordering**: Imports are ordered as `java.`, `javax.`, `org.`, `com.`, with a blank line between groups. Static imports come last. This is enforced by both Checkstyle and Spotless.
+
+== Gradle
+
+TBD

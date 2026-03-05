@@ -1,0 +1,66 @@
+plugins {
+    id "org.mifos.convention.project.dependencies.ai"
+    id "org.mifos.convention.project.dependencies.amazon"
+    id "org.mifos.convention.project.dependencies.cache"
+    id "org.mifos.convention.project.dependencies.camel"
+    id "org.mifos.convention.project.dependencies.cep"
+    id "org.mifos.convention.project.dependencies.check"
+    id "org.mifos.convention.project.dependencies.cli"
+    // id "org.mifos.convention.project.dependencies.cloudevents"
+    id "org.mifos.convention.project.dependencies.collections"
+    id "org.mifos.convention.project.dependencies.comm"
+    id "org.mifos.convention.project.dependencies.commons"
+    id "org.mifos.convention.project.dependencies.crypto"
+    id "org.mifos.convention.project.dependencies.data"
+    id "org.mifos.convention.project.dependencies.doc"
+    id "org.mifos.convention.project.dependencies.finance"
+    id "org.mifos.convention.project.dependencies.format"
+    id "org.mifos.convention.project.dependencies.geo"
+    id "org.mifos.convention.project.dependencies.google"
+    id "org.mifos.convention.project.dependencies.graphic"
+    id "org.mifos.convention.project.dependencies.i18n"
+    id "org.mifos.convention.project.dependencies.jakarta"
+    id "org.mifos.convention.project.dependencies.json"
+    id "org.mifos.convention.project.dependencies.keycloak"
+    id "org.mifos.convention.project.dependencies.kubernetes"
+    id "org.mifos.convention.project.dependencies.lock"
+    id "org.mifos.convention.project.dependencies.logging"
+    id "org.mifos.convention.project.dependencies.manifold"
+    id "org.mifos.convention.project.dependencies.mapping"
+    id "org.mifos.convention.project.dependencies.math"
+    id "org.mifos.convention.project.dependencies.measure"
+    id "org.mifos.convention.project.dependencies.net"
+    id "org.mifos.convention.project.dependencies.observability"
+    id "org.mifos.convention.project.dependencies.reporting"
+    id "org.mifos.convention.project.dependencies.springboot"
+    id "org.mifos.convention.project.dependencies.template"
+    id "org.mifos.convention.project.dependencies.test"
+    id "org.mifos.convention.project.dependencies.util"
+    id "org.mifos.convention.project.dependencies.vaadin"
+    id "org.mifos.convention.project.dependencies.validation"
+    id "org.mifos.convention.project.dependencies.web"
+    id "org.mifos.convention.project.dependencies.workflow"
+    id "org.mifos.convention.project.dependencies.xml"
+}
+
+dependencies {
+    constraints {
+        modules {
+            module("junit:junit") {
+                replacedBy("org.junit.vintage:junit-vintage-engine", "Use JUnit 5!")
+            }
+            module("com.google.guava:listenablefuture") {
+                replacedBy("com.google.guava:guava", "listenablefuture is part of guava")
+            }
+            module("com.google.collections:google-collections") {
+                replacedBy("com.google.guava:guava", "google-collections is part of guava")
+            }
+            module("org.springframework.boot:spring-boot-starter-tomcat") {
+                replacedBy("org.springframework.boot:spring-boot-starter-jetty", "Use Jetty instead of Tomcat")
+            }
+            // module("org.springframework.boot:spring-boot-starter-logging") {
+            //     replacedBy("org.springframework.boot:spring-boot-starter-log4j2", "Use Log4j2 instead of Logback")
+            // }
+        }
+    }
+}

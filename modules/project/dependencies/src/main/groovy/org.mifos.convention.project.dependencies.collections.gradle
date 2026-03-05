@@ -1,0 +1,8 @@
+dependencies {
+    constraints {
+        implementation "org.eclipse.collections:eclipse-collections-api:13.0.0"
+        implementation "org.eclipse.collections:eclipse-collections:13.0.0"
+        implementation "com.carrotsearch:hppc:0.10.0"
+        implementation "org.pcollections:pcollections:5.0.0"
+    }
+}

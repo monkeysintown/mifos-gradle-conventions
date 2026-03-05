@@ -1,0 +1,119 @@
+= AI Providers
+
+TBD
+
+== Anthropic
+
+Anthropic's Claude models are among the most capable for code generation and reasoning tasks. In the Mifos development workflow, Claude is used through the Claude API and the Claude Code CLI tool for tasks including code review, test generation, and documentation drafting.
+
+The Claude API is accessed through the standard HTTP endpoint or the official SDK:
+
+[source,bash]
+----
+# Install the Anthropic SDK
+pip install anthropic
+
+# Or via the Java SDK for integration into Mifos tooling
+./gradlew add-dependency com.anthropic:anthropic-sdk-java:0.8.0
+----
+
+Claude Code is a CLI tool that provides interactive code-aware assistance directly in the terminal:
+
+[source,bash]
+----
+# Install Claude Code
+npm install -g @anthropic-ai/claude-code
+
+# Navigate to the Mifos project and launch
+cd fineract
+claude
+# Claude will index the project and can answer questions about the codebase
+----
+
+Best practices for using Claude in development:
+
+* **Provide context files** when asking about specific modules. Reference the relevant source files and tests.
+* **Break large tasks into smaller prompts**. "Refactor the LoanService to use result objects" is better than "Refactor the entire loan module."
+* **Validate generated tests against the actual behavior** of the system under test. AI may generate tests that pass vacuously.
+* **Use Claude for documentation generation** and code explanation—tasks where its strengths in natural language are most valuable.
+
+== OpenAI
+
+OpenAI's GPT-4 and GPT-4o models provide strong code generation capabilities, particularly for boilerplate generation, test writing, and explaining unfamiliar code patterns. The OpenAI API is accessible through the official SDK:
+
+[source,bash]
+----
+# Install the OpenAI SDK
+pip install openai
+
+# Or the Java SDK
+./gradlew add-dependency com.theokanning.openai-gpt3-java:service:0.18.2
+----
+
+OpenAI's Codex product (and its successor models) are designed specifically for code tasks and can be integrated into CI pipelines for automated code review suggestions. In the Mifos workflow, OpenAI models are typically used for:
+
+* Generating boilerplate code for new REST endpoints and DTOs
+* Writing Javadoc comments for existing methods
+* Explaining legacy code during refactoring
+* Generating test cases from method signatures
+
+When using OpenAI models, be mindful of token costs for large codebases and the importance of never sending production data through the API.
+
+== Z.ai
+
+Z.ai provides AI development tools with an emphasis on integration with enterprise development workflows. The Z.ai SDK offers capabilities for code generation, refactoring assistance, and automated documentation that can be integrated directly into the Mifos build pipeline.
+
+The SDK is configured through environment variables and can be used programmatically:
+
+[source,bash]
+----
+# Install the Z.ai SDK
+pip install z-ai-sdk
+
+# Configure API access
+export ZAI_API_KEY=your-api-key
+export ZAI_MODEL=z-ai-latest
+----
+
+In the Mifos context, Z.ai can be used for build-aware code analysis, where the AI understands the Gradle build structure and convention plugins, enabling suggestions that are consistent with the project's architecture.
+
+== Kimi2/Moonshot
+
+Moonshot AI's Kimi2 model offers strong multilingual capabilities, which is particularly relevant for a project like Mifos that serves users across dozens of languages. Kimi2 can assist with translating user-facing strings, generating i18n resource bundles, and reviewing documentation for clarity across language barriers.
+
+The Moonshot API is accessible through a REST endpoint:
+
+[source,bash]
+----
+# Set the API key
+export MOONSHOT_API_KEY=your-api-key
+
+# Example API call for code-related tasks
+curl https://api.moonshot.cn/v1/chat/completions \
+  -H "Authorization: Bearer $MOONSHOT_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "kimi2",
+    "messages": [
+      {"role": "user", "content": "Review this Java method for thread safety issues: ..."}
+    ]
+  }'
+----
+
+For Mifos developers, Kimi2 is particularly useful for generating localized error messages and validating that i18n resource bundles are complete and consistent across locales.
+
+== Deepseek
+
+Deepseek provides open-weight models that can be run locally or through their API, making them an attractive option for developers who need AI assistance but prefer not to send proprietary code to external services. The Deepseek Coder models are specifically trained on code and offer strong performance on code generation, completion, and debugging tasks.
+
+[source,bash]
+----
+# Access Deepseek through the API
+export DEEPSEEK_API_KEY=your-api-key
+
+# Or run locally via Ollama (see the Ollama section)
+ollama pull deepseek-coder-v2
+ollama run deepseek-coder-v2
+----
+
+Deepseek's open-weight philosophy aligns with Mifos's open-source values. For sensitive codebases or air-gapped environments, running Deepseek locally via Ollama provides AI assistance without external data transmission.

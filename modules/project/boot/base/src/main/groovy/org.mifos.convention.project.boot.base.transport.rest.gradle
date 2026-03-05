@@ -1,0 +1,16 @@
+plugins {
+    id "org.mifos.convention.project.boot.base.transport"
+}
+
+dependencies {
+    implementation "tools.jackson.datatype:jackson-datatype-moneta"
+    implementation "tools.jackson.datatype:jackson-datatype-eclipse-collections"
+
+    implementation "io.swagger.core.v3:swagger-annotations-jakarta"
+
+    implementation "org.springdoc:springdoc-openapi-starter-common"
+
+    testImplementation "org.springframework.restdocs:spring-restdocs-mockmvc"
+    testImplementation "org.springframework.restdocs:spring-restdocs-asciidoctor"
+    testImplementation "org.springframework.restdocs:spring-restdocs-webtestclient"
+}

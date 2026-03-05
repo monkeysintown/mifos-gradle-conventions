@@ -1,0 +1,4 @@
+plugins {
+    id "org.mifos.convention.project.boot.base.application.cli"
+    id "org.mifos.convention.project.boot.reactive.application"
+}

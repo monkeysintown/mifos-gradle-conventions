@@ -1,0 +1,9 @@
+dependencies {
+    constraints {
+        implementation "io.siddhi:siddhi-core:5.1.33"
+        implementation "io.siddhi:siddhi-query-api:5.1.33"
+        implementation "io.siddhi:siddhi-query-compiler:5.1.33"
+        implementation "io.siddhi:siddhi-annotations:5.1.33"
+        implementation "io.siddhi:siddhi-service:5.1.33"
+    }
+}

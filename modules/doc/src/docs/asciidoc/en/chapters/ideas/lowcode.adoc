@@ -1,0 +1,7 @@
+= Low Code Platform
+
+See:
+
+- https://github.com/windmill-labs/windmill
+- https://github.com/n8n-io
+- https://github.com/axelor/axelor-open-platform (create something simiilar for Mifos)

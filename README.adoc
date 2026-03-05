@@ -1,0 +1,19 @@
+= Mifos Build Conventions
+
+.Building the entire project
+[source,bash]
+----
+./gradlew clean build publish
+----
+
+.Profiling Gradle Builds
+[source,bash]
+----
+./gradlew build --profile
+----
+
+.Generate the documentation
+[source,bash]
+----
+./gradlew asciidoctorZip --no-configuration-cache
+----

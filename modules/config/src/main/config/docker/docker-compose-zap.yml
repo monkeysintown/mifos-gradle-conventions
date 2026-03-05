@@ -1,0 +1,8 @@
+# docker-compose.yml for local testing
+version: '3'
+services:
+  zap:
+    image: zaproxy/zap-stable
+    # command: zap.sh -daemon -host 0.0.0.0 -port 8080 -config api.key=mifos
+    ports:
+      - "9080:8080"

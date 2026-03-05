@@ -1,0 +1,35 @@
+= Spotify Backstage
+
+Spotify Backstage is an open-source developer portal that provides a unified interface for service catalog, documentation, tech radar, and developer productivity tooling. For an organization like Mifos with multiple repositories, services, and contributors across time zones, Backstage serves as the central hub that answers the question: "What services exist, who owns them, and how do I work with them?"
+
+Key Backstage features for Mifos:
+
+* **Service Catalog**: Every microservice, API, and database is registered as an entity with metadata including owner, lifecycle status, documentation links, and API specs. New contributors can browse the catalog to understand the system architecture.
+* **Tech Docs**: Backstage aggregates documentation from each repository's `mkdocs.yml` or AsciiDoc files into a searchable, versioned documentation site. This eliminates the problem of scattered wikis and stale README files.
+* **Tech Radar**: A visualization of the technologies, frameworks, and patterns that Mifos recommends, allows, or discourages. For example, Java 25 is "Adopt," Reactive programming is "Trial," and `java.util.Date` is "Hold."
+* **Templates (Software Templates)**: Scaffolding new services from predefined templates. A Mifos contributor can click "Create Component," select the "Spring Boot Service" template, and get a fully configured repository with CI, Docker, and monitoring.
+
+Mifos Backstage entity registration example:
+
+[source,yaml]
+----
+# catalog-info.yaml (in repository root)
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: fineract-provider
+  description: Core banking REST API providing loan, savings, and client management
+  annotations:
+    github.com/project-slug: mifos/fineract
+    backstage.io/techdocs-ref: dir:.
+spec:
+  type: service
+  lifecycle: production
+  owner: team-core
+  system: fineract-platform
+  dependsOn:
+    - component:fineract-infrastructure
+    - component:fineract-accounting
+  providesApis:
+    - fineract-api
+----

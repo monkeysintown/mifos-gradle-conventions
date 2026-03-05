@@ -1,0 +1,13 @@
+dependencies {
+    implementation platform("org.keycloak.bom:keycloak-spi-bom:26.6.1")
+    implementation platform("org.keycloak.bom:keycloak-adapter-bom:25.0.6")
+    implementation platform("org.keycloak.bom:keycloak-misc-bom:25.0.6")
+
+    constraints {
+        implementation "org.keycloak:keycloak-admin-client:26.1.2"
+
+        implementation "org.keycloak:keycloak-services:26.1.2"
+
+        implementation "org.keycloak:keycloak-server-spi-private:26.1.2"
+    }
+}

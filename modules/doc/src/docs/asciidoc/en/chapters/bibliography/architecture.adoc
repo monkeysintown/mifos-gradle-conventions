@@ -1,0 +1,6 @@
+[bibliography]
+= Software Architecture
+
+* [[[sdia]]] Mark Richards & Neal Ford. _Software Architecture: The Hard Parts_. O'Reilly Media. 2021. A practical guide to making architectural trade-off decisions in distributed systems, covering service granularity, data ownership, and distributed transactions. The Mifos modularization effort has benefited from the decision frameworks presented in this book, particularly the analysis of when to split a monolith into microservices and when to keep related functionality together.
+
+* [[[fifo]]] Sam Newman. _Building Microservices: Designing Fine-Grained Systems_. 2nd Edition. O'Reilly Media. 2021. A comprehensive guide to microservice architecture, covering decomposition, integration, splitting, and testing strategies. The Mifos platform's transition from a monolithic architecture to a modular, event-driven system follows many of the patterns and anti-patterns described in this book.

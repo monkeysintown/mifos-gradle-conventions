@@ -1,0 +1,90 @@
+file("${rootDir}/modules").listFiles().each {
+    if(!it.name.contains("common")) {
+
+        // ai (spring ai, langchain4j)
+        if(file("${rootDir}/modules/${it.name}/ai/mcp/build.gradle").exists()) {
+            include(":${it.name}-ai-mcp")
+            project(":${it.name}-ai-mcp").projectDir = file("${rootDir}/modules/${it.name}/ai/mcp")
+        }
+        if(file("${rootDir}/modules/${it.name}/ai/starter/build.gradle").exists()) {
+            include(":${it.name}-ai-starter")
+            project(":${it.name}-ai-starter").projectDir = file("${rootDir}/modules/${it.name}/ai/starter")
+        }
+
+        // client
+        if(file("${rootDir}/modules/${it.name}/client/core/build.gradle").exists()) {
+            include(":${it.name}-client-core")
+            project(":${it.name}-client-core").projectDir = file("${rootDir}/modules/${it.name}/client/core")
+        }
+        if(file("${rootDir}/modules/${it.name}/client/transport/rest/build.gradle").exists()) {
+            include(":${it.name}-client-transport-rest")
+            project(":${it.name}-client-transport-rest").projectDir = file("${rootDir}/modules/${it.name}/client/transport/rest")
+        }
+        if(file("${rootDir}/modules/${it.name}/client/transport/rsocket/build.gradle").exists()) {
+            include(":${it.name}-client-transport-rsocket")
+            project(":${it.name}-client-transport-rsocket").projectDir = file("${rootDir}/modules/${it.name}/client/transport/rest")
+        }
+        if(file("${rootDir}/modules/${it.name}/client/transport/grpc/build.gradle").exists()) {
+            include(":${it.name}-client-transport-grpc")
+            project(":${it.name}-client-transport-grpc").projectDir = file("${rootDir}/modules/${it.name}/client/transport/rest")
+        }
+        if(file("${rootDir}/modules/${it.name}/client/starter/build.gradle").exists()) {
+            include(":${it.name}-client-starter")
+            project(":${it.name}-client-starter").projectDir = file("${rootDir}/modules/${it.name}/client/starter")
+        }
+
+        // integration (camel, spring integration)
+        if(file("${rootDir}/modules/${it.name}/integration").exists()) {
+            var integrationName = it.name
+            var integrationBase = "${rootDir}/modules/${it.name}/integration"
+
+            file(integrationBase).listFiles().each {
+                if(!it.name.contains("build")) {
+                    if(file("${integrationBase}/${it.name}/core/build.gradle").exists()) {
+                        include(":${integrationName}-integration-${it.name}-core")
+                        project(":${integrationName}-integration-${it.name}-core").projectDir = file("${integrationBase}/${it.name}/core")
+                    }
+                    if(file("${integrationBase}/${it.name}/sdk/build.gradle").exists()) {
+                        include(":${integrationName}-integration-${it.name}-sdk")
+                        project(":${integrationName}-integration-${it.name}-sdk").projectDir = file("${integrationBase}/${it.name}/sdk")
+                    }
+                    if(file("${integrationBase}/${it.name}/mapping/build.gradle").exists()) {
+                        include(":${integrationName}-integration-${it.name}-mapping")
+                        project(":${integrationName}-integration-${it.name}-mapping").projectDir = file("${integrationBase}/${it.name}/mapping")
+                    }
+                    if(file("${integrationBase}/${it.name}/implementation/build.gradle").exists()) {
+                        include(":${integrationName}-integration-${it.name}-implementation")
+                        project(":${integrationName}-integration-${it.name}-implementation").projectDir = file("${integrationBase}/${it.name}/implementation")
+                    }
+                    if(file("${integrationBase}/${it.name}/starter/build.gradle").exists()) {
+                        include(":${integrationName}-integration-${it.name}-starter")
+                        project(":${integrationName}-integration-${it.name}-starter").projectDir = file("${integrationBase}/${it.name}/starter")
+                    }
+                }
+            }
+        }
+
+        // orchestration
+        if(file("${rootDir}/modules/${it.name}/orchestration").exists()) {
+            var orchestrationName = it.name
+            var orchestrationBase = "${rootDir}/modules/${it.name}/orchestration"
+
+            file(orchestrationBase).listFiles().each {
+                if(!it.name.contains("build")) {
+                    if(file("${orchestrationBase}/${it.name}/core/build.gradle").exists()) {
+                        include(":${orchestrationName}-orchestration-${it.name}-core")
+                        project(":${orchestrationName}-orchestration-${it.name}-core").projectDir = file("${orchestrationBase}/${it.name}/core")
+                    }
+                    if(file("${orchestrationBase}/${it.name}/implementation/build.gradle").exists()) {
+                        include(":${orchestrationName}-orchestration-${it.name}-implementation")
+                        project(":${orchestrationName}-orchestration-${it.name}-implementation").projectDir = file("${orchestrationBase}/${it.name}/implementation")
+                    }
+                    if(file("${orchestrationBase}/${it.name}/starter/build.gradle").exists()) {
+                        include(":${orchestrationName}-orchestration-${it.name}-starter")
+                        project(":${orchestrationName}-orchestration-${it.name}-starter").projectDir = file("${orchestrationBase}/${it.name}/starter")
+                    }
+                }
+            }
+        }
+    }
+}

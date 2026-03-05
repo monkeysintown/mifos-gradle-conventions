@@ -1,0 +1,68 @@
+import io.github.emaarco.bpmn.adapter.GenerateBpmnModelsTask
+import io.github.emaarco.bpmn.domain.shared.OutputLanguage
+import io.github.emaarco.bpmn.domain.shared.ProcessEngine
+
+plugins {
+    id "org.mifos.convention.project.boot.base"
+    // TODO: very simple, parse BPMN model (with Jackson), extract constants
+    id "io.github.emaarco.bpmn-to-code-gradle"
+}
+
+if(file("${projectDir}/src/main/resources/camunda8").exists()) {
+    dependencies {
+        api "io.camunda:camunda-spring-boot-4-starter"
+    }
+
+    var pkg = ext["mifos.projects.base.package"]
+    var module = ext["mifos.projects.module"]
+
+    tasks.register("generateCamunda8Api" + module.toString().capitalize(), GenerateBpmnModelsTask) {
+        group = "bpmn"
+        baseDir = projectDir.toString()
+        filePattern = "src/main/resources/camunda8/**/*.bpmn"
+        outputFolderPath = "$projectDir/src/main/java"
+        packagePath = "${pkg}.${module}.flow.adapter.camunda8".toString()
+        outputLanguage = OutputLanguage.JAVA
+        processEngine = ProcessEngine.ZEEBE
+    }
+}
+
+if(file("${projectDir}/src/main/resources/camunda7").exists()) {
+    dependencies {
+        api "org.cibseven.bpm.springboot:cibseven-bpm-spring-boot-starter-4"
+    }
+
+    var pkg = ext["mifos.projects.base.package"]
+    var module = ext["mifos.projects.module"]
+
+    tasks.register("generateBpmnCamunda7Api", GenerateBpmnModelsTask) {
+        group = "bpmn"
+        baseDir = projectDir.toString()
+        filePattern = "src/main/resources/camunda7/**/*.bpmn"
+        outputFolderPath = "$projectDir/src/main/java"
+        packagePath = "${pkg}.${module}.flow.adapter.camunda7".toString()
+        outputLanguage = OutputLanguage.JAVA
+        processEngine = ProcessEngine.CAMUNDA_7
+    }
+}
+
+if(file("${projectDir}/src/main/resources/operaton").exists()) {
+    dependencies {
+        api "org.operaton.bpm.springboot:operaton-bpm-spring-boot-starter"
+    }
+
+    var pkg = ext["mifos.projects.base.package"]
+    var module = ext["mifos.projects.module"]
+
+    tasks.register("generateOpteronBpmnModelApi" + module.toString().capitalize(), GenerateBpmnModelsTask) {
+        group = "bpmn"
+        baseDir = projectDir.toString()
+        filePattern = "src/main/resources/operaton/**/*.bpmn"
+        outputFolderPath = "$projectDir/src/main/java"
+        packagePath = "${pkg}.${module}.flow.adapter.operaton".toString()
+        outputLanguage = OutputLanguage.JAVA
+        processEngine = ProcessEngine.OPERATON
+    }
+}
+
+// println "--- Flow module: ${ext.getProperties().entrySet().stream().filter {it.key.startsWith("mifos.projects.base")}.map {it.key + ' = ' + it.value}.toList()}"

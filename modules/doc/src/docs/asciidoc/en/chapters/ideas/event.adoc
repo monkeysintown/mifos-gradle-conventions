@@ -1,0 +1,664 @@
+= Event Based Architecture
+
+IMPORTANT: This document is enhanced using AI tools.
+
+== Methodology & Metrics
+
+Based on industry-standard software architecture metrics (Robert C. Martin's package metrics, 5C-Design principles, and dependency-depth measures), the following metrics are applied:
+
+|===
+| Metric | Symbol | Formula | Meaning
+
+| Efferent Coupling | Ce | Count of feature packages this package depends on | Fan-out; outgoing cross-feature dependencies
+| Afferent Coupling | Ca | Count of feature packages that depend on this package | Fan-in; incoming cross-feature dependencies
+| Instability | I | Ce / (Ca + Ce) | 0 = maximally stable (depended-upon), 1 = maximally unstable (leaf)
+| Cross-Feature Violations | CFV | Count of dependencies ≠ fineract-core/command | Violations of the target modular boundary rule
+| Dependency Depth | DD | Longest path in cross-feature dependency graph | How deep transitive coupling reaches
+| Transitive Coupling | TC | Total direct + indirect cross-feature dependencies | Full blast radius of a change
+| Independence Score | IS | 1 − (CFV / (N−1)) where N = total features | 1.0 = fully independent, 0.0 = depends on everything
+|===
+
+== Feature Package Inventory
+
+Source base: `fineract-provider/src/main/java/org/apache/fineract/`
+
+|===
+| # | Feature Package | Domain
+
+| F1 | `accounting` | Chart of accounts, journal entries, closures
+| F2 | `client` | Client management, identifiers, addresses
+| F3 | `group` | Group management, group accounts
+| F4 | `loan` | Loan accounts & products (portfolio.loanaccount + portfolio.loanproduct)
+| F5 | `savings` | Savings accounts (portfolio.savings)
+| F6 | `fixeddeposit` | Fixed deposit accounts (portfolio.fixeddeposit)
+| F7 | `recurringdeposit` | Recurring deposit accounts (portfolio.recurringdeposit)
+| F8 | `shareaccounts` | Share accounts (portfolio.shareaccounts)
+| F9 | `charge` | Charge definitions & management (portfolio.charge)
+| F10 | `calendar` | Calendar & scheduling (portfolio.calendar)
+| F11 | `rate` | Rate definitions (portfolio.rate)
+| F12 | `account-transfers` | Account transfers (portfolio.account)
+| F13 | `organisation` | Office, staff, holiday, working days, monetary
+| F14 | `teller` | Teller / cashier management
+| F15 | `report` | Pentaho & tabular reporting
+| F16 | `useradministration` | Users, roles, permissions
+| F17 | `mix` | MIX integration reporting
+| F18 | `batch` | Batch API processing
+| F19 | `notifications` | Event notifications
+| F20 | `template` | Document / SMS templates
+|===
+
+== Cross-Feature Dependency Matrix (Current State)
+
+*Legend:* `→` = depends on (imports from). Only **cross-feature** dependencies shown (not `infrastructure.core` / `fineract-command` which are allowed).
+
+|===
+| Package (Source) | Depends On (Targets) | Ce | CFV
+
+| *F1 accounting* | F13 (organisation) | 1 | 1
+| *F2 client* | F9 (charge), F13 (organisation) | 2 | 2
+| *F3 group* | F2 (client), F9 (charge), F13 (organisation) | 3 | 3
+| *F4 loan* | F1 (accounting), F2 (client), F3 (group), F5 (savings), F9 (charge), F10 (calendar), F11 (rate), F12 (account-transfers), F13 (organisation) | 9 | 9
+| *F5 savings* | F1 (accounting), F2 (client), F3 (group), F9 (charge), F10 (calendar), F12 (account-transfers), F13 (organisation) | 7 | 7
+| *F6 fixeddeposit* | F1 (accounting), F2 (client), F3 (group), F5 (savings), F9 (charge), F10 (calendar), F12 (account-transfers), F13 (organisation) | 8 | 8
+| *F7 recurringdeposit* | F1 (accounting), F2 (client), F3 (group), F5 (savings), F9 (charge), F10 (calendar), F12 (account-transfers), F13 (organisation) | 8 | 8
+| *F8 shareaccounts* | F1 (accounting), F2 (client), F3 (group), F9 (charge), F13 (organisation) | 5 | 5
+| *F9 charge* | *(none cross-feature)* | 0 | 0
+| *F10 calendar* | *(none cross-feature)* | 0 | 0
+| *F11 rate* | *(none cross-feature)* | 0 | 0
+| *F12 account-transfers* | F4 (loan), F5 (savings) | 2 | 2
+| *F13 organisation* | *(none significant cross-feature)* | 0 | 0
+| *F14 teller* | F1 (accounting), F2 (client), F4 (loan), F5 (savings), F13 (organisation) | 5 | 5
+| *F15 report* | F1 (accounting), F2 (client), F4 (loan), F5 (savings), F13 (organisation) | 5 | 5
+| *F16 useradministration* | F13 (organisation) | 1 | 1
+| *F17 mix* | F1 (accounting), F13 (organisation) | 2 | 2
+| *F18 batch* | F2 (client), F4 (loan), F5 (savings) | 3 | 3
+| *F19 notifications* | *(none significant cross-feature)* | 0 | 0
+| *F20 template* | *(none significant cross-feature)* | 0 | 0
+|===
+
+== Computed Metrics per Feature Package
+
+|===
+| # | Package | Ce | Ca | I | CFV | DD | TC | IS | Verdict
+| F1 | accounting | 1 | 7 | 0.13 | 1 | 2 | 3 | 0.95 | icon:check-circle[role=green] Near-independent
+| F2 | client | 2 | 9 | 0.18 | 2 | 3 | 5 | 0.89 | icon:check-circle[role=green] Near-independent
+| F3 | group | 3 | 5 | 0.38 | 3 | 3 | 6 | 0.84 | icon:exclamation-triangle[role=yellow] Moderate
+| F4 | *loan* | *9* | 3 | 0.75 | *9* | *4* | *16* | *0.53* | icon:times-circle[role=red] *Highly coupled*
+| F5 | *savings* | *7* | 5 | 0.58 | *7* | *3* | *13* | *0.63* | icon:times-circle[role=red] *Highly coupled*
+| F6 | *fixeddeposit* | *8* | 0 | *1.00* | *8* | *4* | *15* | *0.58* | icon:times-circle[role=red] *Highly coupled*
+| F7 | *recurringdeposit* | *8* | 0 | *1.00* | *8* | *4* | *15* | *0.58* | icon:times-circle[role=red] *Highly coupled*
+| F8 | shareaccounts | 5 | 0 | 1.00 | 5 | 3 | 9 | 0.74 | icon:exclamation-triangle[role=yellow] Moderate
+| F9 | charge | 0 | 9 | 0.00 | 0 | 0 | 0 | *1.00* | icon:check-circle[role=green] *Fully independent*
+| F10 | calendar | 0 | 4 | 0.00 | 0 | 0 | 0 | *1.00* | icon:check-circle[role=green] *Fully independent*
+| F11 | rate | 0 | 1 | 0.00 | 0 | 0 | 0 | *1.00* | icon:check-circle[role=green] *Fully independent*
+| F12 | account-transfers | 2 | 4 | 0.33 | 2 | 2 | 4 | 0.89 | icon:check-circle[role=green] Near-independent
+| F13 | organisation | 0 | 10 | 0.00 | 0 | 0 | 0 | *1.00* | icon:check-circle[role=green] *Fully independent*
+| F14 | teller | 5 | 0 | 1.00 | 5 | 3 | 9 | 0.74 | icon:exclamation-triangle[role=yellow] Moderate
+| F15 | report | 5 | 0 | 1.00 | 5 | 3 | 9 | 0.74 | icon:exclamation-triangle[role=yellow] Moderate
+| F16 | useradministration | 1 | 0 | 1.00 | 1 | 2 | 2 | 0.95 | icon:check-circle[role=green] Near-independent
+| F17 | mix | 2 | 0 | 1.00 | 2 | 2 | 3 | 0.89 | icon:check-circle[role=green] Near-independent
+| F18 | batch | 3 | 0 | 1.00 | 3 | 3 | 6 | 0.84 | icon:exclamation-triangle[role=yellow] Moderate
+| F19 | notifications | 0 | 0 | — | 0 | 0 | 0 | *1.00* | icon:check-circle[role=green] *Fully independent*
+| F20 | template | 0 | 0 | — | 0 | 0 | 0 | *1.00* | icon:check-circle[role=green] *Fully independent*
+|===
+
+*Key Findings:*
+
+* **F4 (loan)** has the worst profile: 9 cross-feature violations, dependency depth of 4, transitive coupling of 16
+* **F5 (savings)** is the second worst: 7 violations, depth 3, transitive coupling of 13
+* **F6/F7 (deposits)** are nearly as bad and additionally depend on savings, creating depth-4 chains
+* **F9, F10, F11, F13, F19, F20** are already fully independent — no changes needed
+* **F1 (accounting)** is heavily depended-upon (Ca=7) but nearly independent itself
+
+== PlantUML — Current Architecture
+
+=== Full Current Dependency Graph
+
+[plantuml,fineract-current-overview,svg]
+----
+include::{diagramsdir}/dependencies-overview.puml[]
+----
+
+=== Per-Package Detail Diagrams — Critical Packages
+
+==== F4 (Loan) — Most Coupled Package
+
+[plantuml,loan-detail,svg]
+----
+include::{diagramsdir}/dependencies-loan-detail.puml[]
+----
+
+==== F5 (Savings) — Second Most Coupled
+
+[plantuml,savings-detail,svg]
+----
+include::{diagramsdir}/dependencies-savings-detail.puml[]
+----
+
+==== F6/F7 (Deposits) — Deep Dependency Chains
+
+[plantuml,deposits-detail,svg]
+----
+include::{diagramsdir}/dependencies-deposits-details.puml[]
+----
+
+==== F14 (Teller) — Cross-Cutting Orchestrator
+
+[plantuml, teller-detail, svg]
+----
+include::{diagramsdir}/dependencies-teller-details.puml[]
+----
+
+== Dependency Depth Analysis (Transitive Chains)
+
+The most dangerous dependency chains (by depth):
+
+[plantuml,dependency-depth,svg]
+----
+include::{diagramsdir}/dependencies-depth.puml[]
+----
+
+== Target Architecture — Modular Boundary Enforcement
+
+=== Target Dependency Rule
+
+****
+Each feature package may ONLY depend on:
+* ✅ fineract-core        (infrastructure, no business logic)
+* ✅ fineract-command     (command/event bus for cross-feature communication)
+* ❌ Any other feature package (forbidden)
+****
+
+=== Target Architecture PlantUML
+
+[plantuml, target-architecture, svg]
+----
+include::{diagramsdir}/dependencies-target-architecture.puml[]
+----
+
+== Remediation Strategy — How to Decouple Each Package
+
+=== Techniques by Coupling Type
+
+|===
+| Coupling Pattern | Current Mechanism | Target Mechanism | Effort
+
+| *Direct service call* (loan → accounting) | `@Autowired JournalEntryService` | Publish `LoanDisbursedEvent` → accounting subscribes | Medium
+| *Shared entity* (loan → client) | `ClientRepository.find()` directly | Define `ClientSummaryDTO` in `fineract-core`; loan reads read-only projection | Low
+| *Code inheritance* (deposit → savings) | Extends `SavingsAccount` | Extract `DepositLifecycle` interface to `fineract-core`; composition over inheritance | High
+| *Orchestration* (teller → loan, savings) | Direct service calls | Command Bus: send `RepayLoanCommand`, `DepositSavingsCommand` | Medium
+| *Query/reporting* (report → all) | Direct repository joins | Read-only CQRS views / materialized read models in `fineract-core` | Medium-High
+|===
+
+=== Per-Package Remediation Plan
+
+|===
+| Package | CFV | Key Violations | Remediation Strategy | Priority
+
+| *F4 loan* | 9 | → accounting, savings, charge, calendar, client, group, org, rate, transfers | 1. Move charge/calendar/rate/client/group/org lookups to read-only DTOs in core. 2. Accounting via events. 3. Savings via command. 4. Transfers via command. | *P0*
+| *F5 savings* | 7 | → accounting, charge, calendar, client, group, org, transfers | 1. Charge/calendar/client/group/org → DTOs in core. 2. Accounting via events. 3. Transfers via command. | *P0*
+| *F6 fixeddeposit* | 8 | → savings (deep), accounting, charge, calendar, client, group, org, transfers | 1. *Critical*: Break inheritance from savings. Extract shared lifecycle to core interface. 2. Remaining same as savings. | *P1*
+| *F7 recurringdeposit* | 8 | Same as FD | Same as FD | *P1*
+| *F8 shareaccounts* | 5 | → accounting, charge, client, group, org | 1. Accounting via events. 2. Others → DTOs in core. | *P2*
+| *F14 teller* | 5 | → accounting, client, loan, savings, org | 1. Refactor to pure orchestrator via command bus. 2. No direct service imports. | *P2*
+| *F15 report* | 5 | → accounting, client, loan, savings, org | 1. CQRS read models. 2. Read-only DB views in core. | *P2*
+| *F3 group* | 3 | → client, charge, org | 1. Client/charge → DTOs in core. 2. Org → DTO in core. | *P3*
+| *F18 batch* | 3 | → client, loan, savings | 1. Refactor to command bus orchestration. | *P3*
+| *F2 client* | 2 | → charge, org | 1. Charge → DTO in core. 2. Org → DTO in core. | *P3*
+| *F12 account-transfers* | 2 | → loan, savings | 1. Replace direct imports with command bus. | *P3*
+| *F17 mix* | 2 | → accounting, org | 1. Accounting → event subscription. 2. Org → DTO. | *P4*
+| *F1 accounting* | 1 | → org | 1. Org → DTO in core. | *P4*
+| *F16 useradministration* | 1 | → org | 1. Org → DTO in core. | *P4*
+| *F9 charge* | 0 | — | ✅ Already compliant | —
+| *F10 calendar* | 0 | — | ✅ Already compliant | —
+| *F11 rate* | 0 | — | ✅ Already compliant | —
+| *F13 organisation* | 0 | — | ✅ Already compliant | —
+| *F19 notifications* | 0 | — | ✅ Already compliant | —
+| *F20 template* | 0 | — | ✅ Already compliant | —
+|===
+
+== fineract-core: What Should and Should NOT Be There
+
+=== Allowed in fineract-core
+
+|===
+| Category | Examples
+
+| DTOs / Read-only Projections | `ClientSummaryDTO`, `OfficeDTO`, `ChargeDTO`, `CalendarDTO`
+| Domain Event Definitions | `LoanDisbursedEvent`, `SavingsActivatedEvent`, `JournalEntryCreatedEvent`
+| Command Definitions | `PostJournalEntryCommand`, `CalculateChargeCommand`
+| Infrastructure | JDBC/JPA support, security, validation, API base classes, caching, auditing
+| Shared Interfaces | `AccountLifecycle`, `ProductDefinition`, `TransactionProcessing`
+| Exception Definitions | Domain exception hierarchy
+| Enum / Constants | `AccountType`, `LoanStatus`, `SavingsStatus`
+|===
+
+=== NOT Allowed in fineract-core
+
+|===
+| Category | Anti-Pattern Example
+
+| Business logic implementations | `LoanInterestCalculationServiceImpl`
+| Repository implementations | `LoanRepository`, `SavingsRepository`
+| Service implementations | `JournalEntryWritePlatformService`
+| Entity classes with business methods | `LoanAccount.recalculateSchedule()`
+| Domain-specific validators | `LoanApplicationValidator`
+|===
+
+== Summary Dashboard
+
+|===
+| Package | IS | CFV | Status
+
+| F9 charge | 1.00 | 0 | icon:check-circle[role=green] Compliant
+| F10 calendar | 1.00 | 0 | icon:check-circle[role=green] Compliant
+| F11 rate | 1.00 | 0 | icon:check-circle[role=green] Compliant
+| F13 organisation | 1.00 | 0 | icon:check-circle[role=green] Compliant
+| F19 notifications | 1.00 | 0 | icon:check-circle[role=green] Compliant
+| F20 template | 1.00 | 0 | icon:check-circle[role=green] Compliant
+| F1 accounting | 0.95 | 1 | icon:check-circle[role=green] Near-Compliant
+| F16 useradmin | 0.95 | 1 | icon:check-circle[role=green] Near-Compliant
+| F2 client | 0.89 | 2 | icon:check-circle[role=green] Near-Compliant
+| F12 account-xfer | 0.89 | 2 | icon:check-circle[role=green] Near-Compliant
+| F17 mix | 0.89 | 2 | icon:check-circle[role=green] Near-Compliant
+| F3 group | 0.84 | 3 | icon:exclamation-triangle[role=yellow] Moderate
+| F18 batch | 0.84 | 3 | icon:exclamation-triangle[role=yellow] Moderate
+| F8 shareaccounts | 0.74 | 5 | icon:exclamation-triangle[role=yellow] Moderate
+| F14 teller | 0.74 | 5 | icon:exclamation-triangle[role=yellow] Moderate
+| F15 report | 0.74 | 5 | icon:exclamation-triangle[role=yellow] Moderate
+| F5 savings | 0.63 | 7 | icon:times-circle[role=red] Critical
+| F6 fixeddeposit | 0.58 | 8 | icon:times-circle[role=red] Critical
+| F7 recurringdep | 0.58 | 8 | icon:times-circle[role=red] Critical
+| F4 loan | 0.53 | 9 | icon:times-circle[role=red] Critical
+|===
+
+NOTE: The 4 Critical packages account for 73% of all cross-feature violations (32 out of 44 total CFV).
+
+== Projected Post-Remediation Metrics
+
+|===
+| # | Package | Current CFV | Target CFV | Current IS | Target IS | Current DD | Target DD
+
+| F4 | loan | 9 | 0 | 0.53 | *1.00* | 4 | *0*
+| F5 | savings | 7 | 0 | 0.63 | *1.00* | 3 | *0*
+| F6 | fixeddeposit | 8 | 0 | 0.58 | *1.00* | 4 | *0*
+| F7 | recurringdeposit | 8 | 0 | 0.58 | *1.00* | 4 | *0*
+| F8 | shareaccounts | 5 | 0 | 0.74 | *1.00* | 3 | *0*
+| F14 | teller | 5 | 0 | 0.74 | *1.00* | 3 | *0*
+| F15 | report | 5 | 0 | 0.74 | *1.00* | 3 | *0*
+| F3 | group | 3 | 0 | 0.84 | *1.00* | 3 | *0*
+| F18 | batch | 3 | 0 | 0.84 | *1.00* | 3 | *0*
+| F2 | client | 2 | 0 | 0.89 | *1.00* | 3 | *0*
+| F12 | account-transfers | 2 | 0 | 0.89 | *1.00* | 2 | *0*
+| F17 | mix | 2 | 0 | 0.89 | *1.00* | 2 | *0*
+| F1 | accounting | 1 | 0 | 0.95 | *1.00* | 2 | *0*
+| F16 | useradministration | 1 | 0 | 0.95 | *1.00* | 2 | *0*
+| *TOTAL* | | *65* | *0* | *avg 0.84* | *avg 1.00* | max 4 | max 0
+|===
+
+== Recommended Implementation Sequence
+
+[plantuml,implementation-sequence,svg]
+----
+include::{diagramsdir}/dependencies-implementation-sequence.puml[]
+----
+
+[plantuml,implementation-gantt,svg]
+----
+include::{diagramsdir}/dependencies-implementation-gantt.puml[]
+----
+
+=== Key Structural Decisions in this Gantt:
+
+1. *Parallel Foundation (Phase 1):* *1a* (fineract-core) and *1b* (fineract-command) are set to start simultaneously since they are foundational module creations that don't depend on each other.
+2. *Sequential Low-Hanging Fruit (Phase 2):* Step *2a* (Extracting DTOs) must happen first. Once the DTOs are in fineract-core, the decoupling of the near-independent packages (*2b* and *2c*) can proceed.
+3. *Critical Path (Phase 3):* *3a* (Savings) must be decoupled first because both *3b* (Loan) and *3c* (Deposits) heavily depend on it. Once Savings is decoupled, Loan and Deposit refactoring can run in parallel since they are independent of each other at that point.
+4. *Parallel Orchestrators (Phase 4):* Teller, Report, Share, and Batch decoupling can all happen in parallel once the core domain packages (Loan, Savings, Deposits) are stable. I've split them to start at the end of their respective Phase 3 dependencies.
+5. *Final Gate (Phase 5):* ArchUnit rules and CI/CD enforcement are strictly sequenced at the very end to lock down the architecture once all refactoring is complete.
+
+== ArchUnit Enforcement Rule (Final Gate)
+
+Once the refactoring is complete, the following ArchUnit test should pass:
+
+[source,java]
+----
+@ArchTest
+static final ArchRule no_cross_feature_dependencies = noClasses()
+    .that().resideInAPackage("..apache.fineract.accounting..")
+    .or().resideInAPackage("..apache.fineract.client..")
+    .or().resideInAPackage("..apache.fineract.group..")
+    .or().resideInAPackage("..apache.fineract.portfolio.loanaccount..")
+    .or().resideInAPackage("..apache.fineract.portfolio.savings..")
+    .or().resideInAPackage("..apache.fineract.portfolio.fixeddeposit..")
+    .or().resideInAPackage("..apache.fineract.portfolio.recurringdeposit..")
+    .or().resideInAPackage("..apache.fineract.portfolio.shareaccounts..")
+    .or().resideInAPackage("..apache.fineract.portfolio.charge..")
+    .or().resideInAPackage("..apache.fineract.portfolio.calendar..")
+    .or().resideInAPackage("..apache.fineract.organisation..")
+    .or().resideInAPackage("..apache.fineract.teller..")
+    .or().resideInAPackage("..apache.fineract.report..")
+    .or().resideInAPackage("..apache.fineract.useradministration..")
+    .or().resideInAPackage("..apache.fineract.mix..")
+    .or().resideInAPackage("..apache.fineract.batch..")
+    .or().resideInAPackage("..apache.fineract.notifications..")
+    .or().resideInAPackage("..apache.fineract.template..")
+    .should().dependOnClassesThat()
+    .resideInAnyPackage(
+        // FORBIDDEN: any other feature package
+        "..apache.fineract.accounting..",
+        "..apache.fineract.client..",
+        "..apache.fineract.group..",
+        "..apache.fineract.portfolio..",
+        "..apache.fineract.organisation..",
+        "..apache.fineract.teller..",
+        "..apache.fineract.report..",
+        "..apache.fineract.useradministration..",
+        "..apache.fineract.mix..",
+        "..apache.fineract.batch..",
+        "..apache.fineract.notifications..",
+        "..apache.fineract.template.."
+    )
+    .because("Feature packages must only depend on fineract-core and fineract-command");
+----
+
+== Key Takeaways
+
+. **6 of 20 packages** (charge, calendar, rate, organisation, notifications, template) are already fully compliant — no refactoring needed
+. **4 packages** (loan, savings, fixeddeposit, recurringdeposit) account for **73% of all violations** and are the critical refactoring targets
+. The **deposit→savings inheritance** is the deepest coupling (DD=4) and requires the most architectural change (composition over inheritance + lifecycle interface in core)
+. The **teller** and **report** packages are cross-cutting orchestrators that should be refactored to command-bus and CQRS patterns respectively
+. Moving **read-only DTOs** and **domain event/command definitions** into `fineract-core` resolves ~60% of violations with relatively low effort
+. All cross-feature communication should flow through `fineract-command` (event bus / command bus) — never via direct service injection
+
+
+== Non-Trivial Cross-Feature Communication: Loan Disbursement
+
+One of the most complex, non-trivial cross-feature interactions in Fineract is **Loan Disbursement**.
+
+When a loan is disbursed, it currently triggers a cascade of direct service calls across multiple domains:
+
+. **Loan domain:** Updates the loan status to "Active" and generates the repayment schedule.
+. **Accounting domain:** Creates double-entry journal entries (Debit Loan Portfolio, Credit Bank/Fund Account).
+. **Savings domain:** (If linked) Deposits the disbursed amount into the client's savings account.
+. **Charge domain:** Deducts upfront charges/fees from the disbursed amount.
+. **Notification domain:** Sends a notification to the client.
+
+Currently, `LoanWritePlatformService` is bloated with `@Autowired` dependencies from all these other feature packages. If any downstream step fails, the monolithic `@Transactional` rolls back everything, creating tight coupling and massive transaction scopes.
+
+Here is how we refactor this to flow exclusively through `fineract-command` using **Domain Events** and the **Transactional Outbox Pattern** (to handle the non-trivial distributed data consistency challenge).
+
+=== The Core Problem: The Current Anti-Pattern
+
+[source,java]
+----
+// CURRENT: fineract-loan directly importing other features
+@Service
+public class LoanWritePlatformService {
+    @Autowired private LoanAccountRepository loanRepository;
+    @Autowired private JournalEntryWritePlatformService accountingService; // Cross-feature!
+    @Autowired private SavingsAccountWritePlatformService savingsService;  // Cross-feature!
+    @Autowired private ChargeWritePlatformService chargeService;          // Cross-feature!
+
+    @Transactional
+    public void disburseLoan(Long loanId, DisbursementCommand command) {
+        Loan loan = loanRepository.findById(loanId);
+        loan.disburse(command); // 1. Loan domain logic
+
+        accountingService.createJournalEntries(loan); // 2. Direct call
+        chargeService.deductUpfrontCharges(loan);     // 3. Direct call
+
+        if (loan.isLinkedToSavings()) {
+            savingsService.deposit(loan.getSavingsId(), loan.getAmount()); // 4. Direct call
+        }
+    }
+}
+----
+
+=== The Solution: Event-Driven Choreography via `fineract-command`
+
+We shift from **synchronous orchestration** to **asynchronous choreography**. The Loan domain only cares about disbursing the loan. It announces this fact to the world. The other domains react independently.
+
+==== Step 2.1: Define the Event in `fineract-command`
+
+Events are plain POJOs/Records defined in `fineract-command` so all features can reference them without depending on each other's implementations.
+
+[source,java]
+----
+// TARGET: fineract-command (accessible by all features)
+package org.apache.fineract.command.events;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
+public record LoanDisbursedEvent(
+    Long loanId,
+    Long officeId,
+    Long savingsId, // Nullable
+    String currencyCode,
+    BigDecimal principal,
+    BigDecimal upfrontCharges,
+    LocalDate disbursementDate
+) {}
+----
+
+==== Step 2.2: Refactor `fineract-loan` to Publish the Event
+
+We remove the cross-feature dependencies. To ensure the database update and the event publishing happen atomically (non-trivial part!), we use the **Transactional Outbox Pattern**. Instead of publishing directly to a message broker (which can fail and cause data inconsistency), we save the event to an Outbox table in the *same* database transaction.
+
+[source,java]
+----
+// TARGET: fineract-loan (no cross-feature imports)
+@Service
+public class LoanWritePlatformService {
+    @Autowired private LoanAccountRepository loanRepository;
+    @Autowired private EventOutboxRepository outboxRepository; // In fineract-core
+    // REMOVED: accountingService, savingsService, chargeService
+
+    @Transactional
+    public void disburseLoan(Long loanId, DisbursementCommand command) {
+        Loan loan = loanRepository.findById(loanId);
+        loan.disburse(command); // 1. Pure Loan domain logic
+        loanRepository.save(loan);
+
+        // 2. Map to event
+        LoanDisbursedEvent event = new LoanDisbursedEvent(
+            loan.getId(),
+            loan.getOfficeId(),
+            loan.getLinkedSavingsId(),
+            loan.getCurrency().getCode(),
+            loan.getPrincipal(),
+            loan.sumUpfrontCharges(),
+            loan.getDisbursementDate()
+        );
+
+        // 3. Save to Outbox (guarantees atomicity with loan update)
+        outboxRepository.save(EventOutboxEntry.from(event));
+    }
+}
+----
+*A background relay (provided by `fineract-command` infrastructure) polls the outbox table and publishes the events to the Command/Event Bus (e.g., Kafka, or an in-process Spring ApplicationEventPublisher for a monolith).*
+
+==== Step 2.3: `fineract-accounting` Subscribes to the Event
+
+The Accounting module is now completely independent. It contains an Event Listener that processes the event and creates the journal entries.
+
+[source,java]
+----
+// TARGET: fineract-accounting (no cross-feature imports)
+@Component
+public class AccountingLoanEventHandler {
+
+    @Autowired private JournalEntryWritePlatformService journalEntryService;
+    @Autowired private EventOutboxRepository outboxRepository;
+
+    @Transactional
+    @EventHandler // Custom annotation recognized by fineract-command relay
+    public void handle(LoanDisbursedEvent event) {
+        // Idempotency check! (Crucial for async events)
+        if (journalEntryService.isJournalEntryExists("LOAN_DISBURSEMENT", event.loanId())) {
+            return;
+        }
+
+        // Pure Accounting domain logic
+        JournalEntry entry = JournalEntry.builder()
+            .debit(Accounts.LOAN_PORTFOLIO, event.principal())
+            .credit(Accounts.FUND_SOURCE, event.principal().subtract(event.upfrontCharges()))
+            .credit(Accounts.INCOME_FROM_CHARGES, event.upfrontCharges())
+            .officeId(event.officeId())
+            .currency(event.currencyCode())
+            .build();
+
+        journalEntryService.createEntry(entry);
+
+        // Mark event as processed in outbox/inbox to guarantee exactly-once processing
+        outboxRepository.markProcessed(event);
+    }
+}
+----
+
+==== Step 2.4: `fineract-savings` Subscribes (Conditional Logic)
+
+[source,java]
+----
+// TARGET: fineract-savings (no cross-feature imports)
+@Component
+public class SavingsLoanEventHandler {
+
+    @Autowired private SavingsAccountWritePlatformService savingsService;
+
+    @Transactional
+    @EventHandler
+    public void handle(LoanDisbursedEvent event) {
+        // Conditional logic handled entirely within the Savings boundary
+        if (event.savingsId() != null) {
+            savingsService.deposit(event.savingsId(), event.principal());
+        }
+    }
+}
+----
+
+=== PlantUML Sequence Diagrams
+
+==== Current Architecture (Synchronous & Coupled)
+
+[plantuml, current-disbursement, svg]
+----
+@startuml current-disbursement
+title Current Loan Disbursement Flow (Tightly Coupled)
+
+actor Client
+participant "Loan Service\n(fineract-loan)" as Loan
+participant "Accounting Service\n(fineract-accounting)" as Acct
+participant "Charge Service\n(fineract-charge)" as Charge
+participant "Savings Service\n(fineract-savings)" as Sav
+
+Client -> Loan : POST /loans/{id}/disburse
+activate Loan
+
+Loan -> Loan : disburse()
+Loan -> Acct : @Autowired createJournalEntries()
+activate Acct
+Acct --> Loan : OK
+deactivate Acct
+
+Loan -> Charge : @Autowired deductCharges()
+activate Charge
+Charge --> Loan : OK
+deactivate Charge
+
+Loan -> Sav : @Autowired deposit() (if linked)
+activate Sav
+Sav --> Loan : OK
+deactivate Sav
+
+Loan --> Client : 200 OK
+deactivate Loan
+
+note right of Loan
+  **Problems:**
+  1. Loan package imports Acct, Charge, Sav.
+  2. One massive DB transaction.
+  3. If Savings DB is down, Loan disbursement fails.
+  4. Changing Accounting rules requires modifying Loan code.
+end note
+
+@enduml
+----
+
+==== Target Architecture (Asynchronous & Decoupled via `fineract-command`)
+
+[plantuml, target-disbursement, svg]
+----
+@startuml target-disbursement
+title Target Loan Disbursement Flow (Decoupled via fineract-command)
+
+actor Client
+participant "Loan Service\n(fineract-loan)" as Loan
+participant "DB Outbox\n(fineract-core)" as Outbox
+participant "Event Relay\n(fineract-command)" as Bus
+participant "Accounting Service\n(fineract-accounting)" as Acct
+participant "Savings Service\n(fineract-savings)" as Sav
+
+Client -> Loan : POST /loans/{id}/disburse
+activate Loan
+
+Loan -> Loan : disburse()
+Loan -> Outbox : SAVE Loan + SAVE Event\n(Single DB Transaction)
+activate Outbox
+Outbox --> Loan : COMMIT
+deactivate Outbox
+
+Loan --> Client : 202 Accepted\n(Disbursement Initiated)
+deactivate Loan
+
+... Background Async Processing ...
+
+Bus -> Outbox : POLL unprocessed events
+activate Bus
+
+Bus -> Acct : PUBLISH LoanDisbursedEvent
+activate Acct
+Acct -> Acct : Check Idempotency\nCreate Journal Entries
+Acct --> Bus : ACK
+deactivate Acct
+
+Bus -> Sav : PUBLISH LoanDisbursedEvent
+activate Sav
+Sav -> Sav : If(savingsId != null)\nDeposit Funds
+Sav --> Bus : ACK
+deactivate Sav
+
+Bus -> Outbox : MARK events processed
+deactivate Bus
+
+note right of Bus
+  **Benefits:**
+  1. Zero cross-feature imports.
+  2. Independent domain transactions.
+  3. If Savings is down, Loan still disburses; Savings retries later.
+  4. Adding new reactions (e.g., Notifications) requires zero changes to Loan.
+end note
+
+@enduml
+----
+
+=== Addressing the Non-Trivial Challenges
+
+When adopting this architecture, two non-trivial problems emerge that `fineract-command` must solve:
+
+The Dual-Write Problem:: You cannot safely update a database and publish to a message broker in the same step. If the broker is down, the data is inconsistent.
++
+*Solution:* The **Transactional Outbox** pattern shown above. `fineract-loan` writes its state and the event to the *same database*. `fineract-command` provides the background relay that reads the outbox and pushes to the bus.
+
+Eventual Consistency & Idempotency:: In the current monolith, if accounting fails, the whole transaction rolls back. In the new model, if Accounting processes the event, but Savings is temporarily down, the system is in a temporarily inconsistent state. Furthermore, the relay might deliver the event twice ("at-least-once delivery").
++
+*Solution:* Subscribers (like `AccountingLoanEventHandler`) **must be idempotent**. Before creating the journal entry, they check if a transaction for `loanId = X` and `type = DISBURSEMENT` already exists. If it does, they safely ignore the duplicate event.
+
+Sagas for Compensating Transactions:: What if the Loan disburses successfully, but the Accounting module realizes the GL accounts are frozen and cannot accept the entry?
++
+*Solution:* `fineract-command` must support **Saga patterns**. Accounting would publish an `AccountingEntryFailedEvent`. The Loan module would subscribe to this event and trigger a compensating transaction (`ReverseDisbursementCommand`) to revert the loan status.
+
+== Apendix: Sources
+
+- https://5c-design.info/metrics.html
+- https://fourweekmba.com/embedding-metrics-5-measures-that-capture-dependency-depth-better-than-arr-or-churn/

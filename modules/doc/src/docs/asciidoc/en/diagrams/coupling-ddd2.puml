@@ -1,0 +1,66 @@
+@startuml
+title Clean Architecture: The Boundary Line
+
+' --- STYLING ---
+skinparam backgroundColor #FEFEFE
+skinparam participantStyle uml2
+skinparam ArrowColor #333333
+
+' --- SCENARIO 1: VIOLATION ---
+box "Scenario A: Architecture Violation" #LightCoral
+    participant "High-Level Module\n(Domain)" as Domain_Bad
+    participant "Low-Level Module\n(Infrastructure)" as Infra_Bad
+end box
+
+note over Domain_Bad
+    <b>VIOLATION:</b>
+    Dependency Rule Broken.
+    The Domain crosses the boundary
+    to touch Infrastructure.
+end note
+
+Domain_Bad -> Infra_Bad : <color:white><b>saveToOracleDB()</b>\n(Crossing the line)
+activate Infra_Bad
+Infra_Bad --> Domain_Bad : Result
+deactivate Infra_Bad
+
+== Refactoring: Introducing the Adapter ==
+
+' --- SCENARIO 2: COMPLIANCE WITH BOUNDARY ---
+
+' INNER LAYER (Left Side)
+box "APPLICATION CORE\n(Inner Layer)" #E6F7FF
+    participant "High-Level Module\n(Domain)" as Domain_Good
+    participant "Interface\n(Application Boundary)" as Interface
+end box
+
+' OUTER LAYER (Right Side)
+box "INFRASTRUCTURE\n(Outer Layer)" #F0F0F0
+    participant "Adapter\n(Infrastructure)" as Adapter
+    participant "Low-Level Module\n(External)" as Infra_Good
+end box
+
+' --- INTERACTIONS ---
+Domain_Good -> Interface : <b>saveReport()</b>\n(Stays inside Core)
+activate Interface
+
+Interface -> Adapter : <b>saveReport()</b>\n<color:#666666><i>Dependency Inversion</i></color>
+activate Adapter
+
+note right of Adapter
+    Adapter protects the Domain
+    from the ugly details.
+end note
+
+Adapter -> Infra_Good : <b>INSERT INTO...</b>\n(Stays inside Infrastructure)
+activate Infra_Good
+Infra_Good --> Adapter : ResultSet
+deactivate Infra_Good
+
+Adapter --> Interface : Success
+deactivate Adapter
+
+Interface --> Domain_Good : Confirmation
+deactivate Interface
+
+@enduml

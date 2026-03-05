@@ -1,0 +1,54 @@
+@startuml loan-detail
+title F4 loan — Dependency Detail (Ce=9, CFV=9, DD=4, IS=0.53)
+
+package "fineract-loan" #LightPink {
+    component [LoanReadService] as LRS
+    component [LoanWriteService] as LWS
+    component [LoanAssembler] as LA
+    component [LoanAccountingAdapter] as LAA
+    component [LoanRepaymentSchedule] as LRSch
+    component [LoanProductDomain] as LPD
+}
+
+package "fineract-core" #LightGreen {
+    component [CommandProcessing] as CMD
+    component [DataValidator] as DV
+    component [JdbcSupport] as JDBC
+}
+
+' --- Violations ---
+package "Other Features" #LightYellow {
+    component [accounting\nJournalEntryService] as ACCT
+    component [client\nClientReadService] as CL
+    component [group\nGroupReadService] as GR
+    component [savings\nSavingsReadService] as SAV
+    component [charge\nChargeReadService] as CHG
+    component [calendar\nCalendarService] as CAL
+    component [rate\nRateReadService] as RAT
+    component [account-transfers\nTransferService] as AT
+    component [organisation\nOfficeReadService] as ORG
+}
+
+LA --> ACCT : #Red "direct import"
+LA --> CL   : #Red "direct import"
+LA --> GR   : #Red "direct import"
+LWS --> SAV : #Red "linked savings"
+LWS --> CHG : #Red "loan charges"
+LRSch --> CAL : #Red "scheduling"
+LPD --> RAT : #Red "interest rates"
+LAA --> ACCT : #Red "accounting entries"
+LWS --> AT  : #Red "transfers"
+LA --> ORG  : #Red "office lookup"
+
+' --- Allowed ---
+LWS ..> CMD : #Green
+LRS ..> DV  : #Green
+LA ..> JDBC : #Green
+
+legend right
+  |= Color |= Meaning |
+  | <#Red> | Cross-feature violation (9 total) |
+  | <#Green> | Allowed dependency |
+endlegend
+
+@enduml

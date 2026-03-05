@@ -1,0 +1,181 @@
+= Release Workflow
+
+This guide describes a release workflow using **GitHub Flow**, **semantic-release** for git operations (versioning, tagging, changelog), and **JReleaser** for artifact publishing and GitHub release management.
+
+== Overview
+
+The workflow supports four release stages:
+
+[cols="1,1,1,1"]
+|===
+| Stage | Branch | semantic-release tag | GitHub Release Type
+
+| Alpha | `alpha` | `v1.1.0-alpha.1` | Prerelease
+| Beta | `beta` | `v1.1.0-beta.1` | Prerelease
+| Release Candidate | `rc` | `v1.1.0-rc.1` | Prerelease
+| Production | `main` | `v1.1.0` | Full release
+|===
+
+== Branching Model (GitHub Flow)
+
+There is **no long-lived `develop` branch**. Feature branches are short-lived and merge directly toward production.
+
+=== Protected Branches
+
+Protect these four branches on GitHub:
+
+[cols="1,2,2,1"]
+|===
+| Branch | Purpose | Receives merges from | Version
+
+| `main` | Production releases | `rc` (and hotfix branches) | `1.0.0`
+| `rc` | Release candidates | `beta` | `1.0.0-rc.1`
+| `beta` | Beta pre-releases | `alpha` | `1.0.0-beta.1`
+| `alpha` | Alpha / integration | Feature branches (`feat/*`, `fix/*`) | `1.0.0-alpha.1`
+|===
+
+=== Workflow Steps
+
+1. **Feature Development**: Open a feature branch from `alpha`, merge it back via PR.
+2. **Beta Promotion**: When the milestone is feature-complete, merge `alpha` into `beta`.
+3. **RC Promotion**: When stable, merge `beta` into `rc` for final validation.
+4. **Production Release**: When ready to ship, merge `rc` into `main`.
+5. **Hotfixes**: Branch from `main`, merge back to `main` directly; then fast-forward `rc`, `beta`, and `alpha` so they stay in sync.
+
+Merging a prerelease branch into another promotes the version to the next channel (e.g., `alpha` → `beta` creates `1.0.0-beta.1`).
+
+== semantic-release Configuration
+
+semantic-release analyzes commits, bumps the version, writes `CHANGELOG.md`, commits the bump, and creates the git tag. **It must not create the GitHub release** — JReleaser owns that.
+
+=== `.releaserc.json`
+
+[source,json]
+----
+{
+  "branches": [
+    "main",
+    { "name": "rc", "prerelease": true },
+    { "name": "beta", "prerelease": true },
+    { "name": "alpha", "prerelease": true }
+  ],
+  "plugins": [
+    "@semantic-release/commit-analyzer",
+    "@semantic-release/release-notes-generator",
+    "@semantic-release/changelog",
+    ["@semantic-release/git", {
+      "assets": ["CHANGELOG.md"],
+      "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+    }]
+  ]
+}
+----
+
+=== Key Points
+
+* `prerelease: true` uses the branch name as the SemVer prerelease token (`alpha`, `beta`, `rc`).
+* `@semantic-release/github` is **intentionally omitted** so semantic-release does not publish a GitHub release.
+* If your project is not Node-based, add `@semantic-release/exec` to bump `pom.xml`, `Cargo.toml`, etc. before the `@semantic-release/git` step.
+
+== JReleaser Configuration
+
+JReleaser picks up the tag that semantic-release already created, builds/publishes artifacts, and creates the GitHub release.
+
+=== `jreleaser.yml`
+
+[source,yaml]
+----
+project:
+  name: my-project
+  versionPattern: SEMVER
+
+release:
+  github:
+    owner: my-org
+    name: my-repo
+    skipTag: true
+    prerelease:
+      pattern: '.*-(alpha|beta|rc)\.\d+'
+    changelog:
+      formatted: ALWAYS
+      preset: conventional-commits
+
+distributions:
+  my-app:
+    artifacts:
+      - path: build/distributions/{{distributionName}}-{{projectVersion}}.zip
+----
+
+=== Key Points
+
+* `skipTag: true` — semantic-release already created the tag (e.g., `v1.0.0-alpha.1`).
+* `prerelease.pattern` — automatically marks alpha, beta, and RC releases as GitHub prereleases.
+* `changelog.preset: conventional-commits` — JReleaser generates release notes from the commits between tags.
+
+== GitHub Actions Workflow
+
+Run on every push to the four release branches. semantic-release runs first; if it creates a new tag, JReleaser publishes the artifacts.
+
+=== `.github/workflows/release.yml`
+
+[source,yaml]
+----
+name: Release
+
+on:
+  push:
+    branches: [main, rc, beta, alpha]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx semantic-release
+
+      - name: Extract version from tag
+        run: |
+          VERSION=$(git describe --tags --abbrev=0 | sed 's/^v//')
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Build artifacts
+        run: ./build.sh
+
+      - name: Run JReleaser
+        uses: jreleaser/release-action@v2
+        with:
+          arguments: full-release
+        env:
+          JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          JRELEASER_PROJECT_VERSION: ${{ env.VERSION }}
+----
+
+=== How It Works
+
+1. A contributor merges a PR to `alpha`.
+2. semantic-release analyzes commits, bumps to `1.1.0-alpha.1`, commits the changelog, and creates tag `v1.1.0-alpha.1`.
+3. The workflow extracts `1.1.0-alpha.1` from the tag, builds artifacts, and runs JReleaser.
+4. JReleaser creates a **prerelease** on GitHub (because the version matches the `alpha|beta|rc` pattern) and uploads the artifacts.
+5. Later, merging `alpha` → `beta` causes semantic-release to tag `v1.1.0-beta.1`; JReleaser publishes another prerelease.
+6. Finally, merging `rc` → `main` produces `v1.1.0`; JReleaser publishes a **full release**.
+
+== Summary
+
+This workflow keeps the GitHub Flow spirit (short-lived feature branches, no `develop`), uses semantic-release strictly for git versioning and tagging, and delegates artifact publishing and GitHub release management to JReleaser.

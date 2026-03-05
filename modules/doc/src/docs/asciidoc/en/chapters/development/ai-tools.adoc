@@ -1,0 +1,198 @@
+= AI Tools
+
+TBD
+
+== OpenCode
+
+OpenCode is an AI coding assistant designed for integration with large codebases. It provides context-aware code suggestions by indexing the entire project and understanding the relationships between modules, classes, and configuration files.
+
+Setup for a Mifos project:
+
+[source,bash]
+----
+# Install OpenCode
+pip install opencode-ai
+
+# Initialize in the project directory
+cd fineract
+opencode init
+
+# The initialization step indexes the codebase, which may take
+# several minutes for a large multi-module Gradle project.
+# OpenCode reads settings.gradle.kts to understand the module structure.
+
+# Start an interactive coding session
+opencode chat
+----
+
+OpenCode is particularly effective for navigating the Mifos codebase because it understands Gradle module boundaries and can suggest changes that respect the project's convention plugin architecture.
+
+== Ollama
+
+Ollama is the easiest way to run large language models locally on your development machine. It handles model downloading, GPU/CPU selection, and API serving, providing a local endpoint compatible with the OpenAI chat completion API. This makes it ideal for Mifos developers who want AI assistance without sending code to external services.
+
+Installation:
+
+[source,bash]
+----
+# Linux (one-line install)
+curl -fsSL https://ollama.com/install.sh | sh
+
+# macOS
+brew install ollama
+
+# Start the Ollama server
+ollama serve
+----
+
+Pulling and running models:
+
+[source,bash]
+----
+# Pull a general-purpose coding model
+ollama pull llama3
+
+# Pull a code-specific model
+ollama pull deepseek-coder-v2
+
+# Pull a smaller model for fast inference on limited hardware
+ollama pull codellama:7b
+
+# List installed models
+ollama list
+
+# Run a model interactively
+ollama run llama3
+# >>> Write a Java record class for a loan repayment schedule entry
+
+# Query the model programmatically via the API
+curl http://localhost:11434/api/chat -d '{
+  "model": "llama3",
+  "messages": [
+    {"role": "user", "content": "Explain the Repository pattern in Java"}
+  ]
+}'
+----
+
+Ollama integrates with IDEs and CLI tools through its OpenAI-compatible endpoint at `http://localhost:11434/v1`. Configure your preferred AI tool to point to this URL for local inference.
+
+TIP: For machines with an NVIDIA GPU, Ollama automatically uses CUDA acceleration. On Apple Silicon Macs, it uses the Metal framework. Check `ollama ps` to see which model is loaded and whether GPU acceleration is active.
+
+== Lama.cpp
+
+llama.cpp is a C/C++ inference engine for running LLaMA-style models on CPUs and GPUs with minimal dependencies. It is the underlying engine that Ollama uses, but it can also be used directly when you need maximum control over inference parameters, custom quantization, or deployment on specialized hardware.
+
+Building from source:
+
+[source,bash]
+----
+# Clone the repository
+git clone https://github.com/ggerganov/llama.cpp.git
+cd llama.cpp
+
+# Build with CUDA support (NVIDIA GPU)
+make LLAMA_CUDA=1 -j$(nproc)
+
+# Build CPU-only (portable, works on any system)
+make -j$(nproc)
+
+# Build with Metal support (Apple Silicon)
+make LLAMA_METAL=1 -j$(nproc)
+----
+
+Running a model:
+
+[source,bash]
+----
+# Download a quantized model (GGUF format)
+# from https://huggingface.co/TheBloke
+wget https://huggingface.co/TheBloke/CodeLlama-7B-GGUF/resolve/main/codellama-7b.Q4_K_M.gguf
+
+# Run inference
+./llama-cli -m codellama-7b.Q4_K_M.gguf -p "Write a Java Spring @Service class for loan processing" -n 512
+
+# Start a server (OpenAI-compatible API)
+./llama-server -m codellama-7b.Q4_K_M.gguf --host 0.0.0.0 --port 8080
+----
+
+When to use llama.cpp directly instead of Ollama:
+
+* You need a custom quantization scheme for a specific hardware target.
+* You are deploying models on embedded devices or servers without container runtime.
+* You need fine-grained control over KV cache size, thread count, or batch size.
+* You are benchmarking inference performance across different configurations.
+
+For most Mifos developers, Ollama provides a simpler experience. Reach for llama.cpp when Ollama's abstractions become limiting.
+
+== Claude Code
+
+Claude Code is Anthropic's dedicated CLI tool for code-aware AI assistance. Unlike browser-based chat interfaces, Claude Code operates directly within the repository, reads and writes files, and can execute shell commands—making it the most integrated AI development tool available for Mifos contributors.
+
+Installation and setup:
+
+[source,bash]
+----
+# Install Claude Code globally
+npm install -g @anthropic-ai/claude-code
+
+# Navigate to the Mifos project
+cd fineract
+
+# Launch Claude Code (it will index the project on first run)
+claude
+
+# Common commands within the Claude Code REPL:
+# > explain the LoanDisbursementService
+# > write unit tests for ClientService
+# > refactor this method to use result objects
+# > find all usages of java.util.Date and suggest replacements
+----
+
+Claude Code understands the Gradle build structure and can:
+
+* Navigate across modules and convention plugins.
+* Generate code that follows the project's style and patterns.
+* Run tests and interpret failures.
+* Create and modify files with proper formatting.
+
+Best practices:
+
+* **Always review changes before accepting** them. Use `git diff` after Claude Code modifies files.
+* **Provide specific instructions**. "Add a REST endpoint at `/api/v1/loans/{id}/repayment-schedule` that returns the repayment schedule as JSON" is far more effective than "add a new endpoint."
+* **Use Claude Code for exploration** before writing code. Ask it to explain complex modules, trace data flows, or identify potential refactoring targets.
+
+== OpenAI Codex
+
+OpenAI Codex is the code-specific model that powers automated code generation and review. While the original Codex model has been superseded by GPT-4-based code models, the Codex brand continues as OpenAI's dedicated code product line.
+
+In the Mifos development workflow, Codex-style tools are used for:
+
+* **Automated code review comments** on pull requests, catching common issues before human review.
+* **Test generation** from method signatures and Javadoc descriptions.
+* **Documentation generation** from code structure and naming conventions.
+
+Integration with GitHub Actions enables Codex-based suggestions on every PR:
+
+[source,bash]
+----
+# Codex CLI for local use
+npm install -g @openai/codex
+
+# Generate tests for a specific class
+codex generate-tests src/main/java/org/mifos/service/LoanService.java
+
+# Explain a complex method
+codex explain src/main/java/org/mifos/domain/Loan.java:142
+----
+
+== OpenNotebook
+
+See: https://www.open-notebook.ai
+
+== SurfSense
+
+See: https://github.com/MODSetter/SurfSense
+
+== NotebookLM
+
+See: https://notebooklm.google

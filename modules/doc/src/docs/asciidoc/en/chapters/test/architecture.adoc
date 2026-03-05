@@ -1,0 +1,195 @@
+= Arch Unit
+
+ArchUnit is a library that lets you write tests to enforce architectural rules in your Java codebase. Unlike code review— which depends on human diligence— ArchUnit tests run automatically in CI and prevent architectural drift. In the Mifos platform, where clean architecture and proper layering are essential for maintainability and security, ArchUnit tests are a mandatory part of the test suite.
+
+ArchUnit can enforce:
+
+* **Layering rules** — Controllers must not call repositories directly; services must not depend on the web layer.
+* **Package dependency rules** — The `domain` package must not depend on `infrastructure` or `web`.
+* **Naming conventions** — Service classes must end in `Service`; repository interfaces must end in `Repository`.
+* **No unwanted dependencies** — The `core` module must not depend on Spring Framework.
+* **Immutability** — Domain entities must use final fields and builder patterns.
+
+== ArchUnit Test Examples for Mifos
+
+[source,java]
+----
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
+import static com.tngtech.archunit.library.dependencies.SlicesRuleDefinition.slices;
+
+import com.tngtech.archunit.core.domain.JavaClasses;
+import com.tngtech.archunit.core.importer.ClassFileImporter;
+import com.tngtech.archunit.junit.AnalyzeClasses;
+import com.tngtech.archunit.junit.ArchTest;
+import com.tngtech.archunit.junit.ArchUnitRunner;
+import com.tngtech.archunit.lang.ArchRule;
+import org.junit.jupiter.api.Test;
+import org.junit.runner.RunWith;
+
+@AnalyzeClasses(packages = "org.mifos")
+class MifosArchitectureTest {
+
+    // --- Layering Rules ---
+
+    @ArchTest
+    static final ArchRule controllers_should_only_depend_on_services =
+        classes().that().resideInAPackage("..web..")
+            .should().onlyDependOnClassesThat()
+            .resideInAnyPackage(
+                "..service..",
+                "..web..",
+                "..dto..",
+                "java..",
+                "org.springframework..",
+                "lombok.."
+            );
+
+    @ArchTest
+    static final ArchRule services_should_not_depend_on_web_layer =
+        noClasses().that().resideInAPackage("..service..")
+            .should().dependOnClassesThat()
+            .resideInAPackage("..web..");
+
+    @ArchTest
+    static final ArchRule repositories_should_not_depend_on_services =
+        noClasses().that().resideInAPackage("..repository..")
+            .should().dependOnClassesThat()
+            .resideInAPackage("..service..");
+
+    @ArchTest
+    static final ArchRule domain_should_not_depend_on_infrastructure =
+        noClasses().that().resideInAPackage("..domain..")
+            .should().dependOnClassesThat()
+            .resideInAnyPackage(
+                "..infrastructure..",
+                "..web..",
+                "org.springframework.."
+            );
+
+    // --- Naming Conventions ---
+
+    @ArchTest
+    static final ArchRule service_classes_should_end_in_Service =
+        classes().that().resideInAPackage("..service..")
+            .and().areNotInterfaces()
+            .and().haveSimpleNameNotContaining("Test")
+            .should().haveSimpleNameEndingWith("Service");
+
+    @ArchTest
+    static final ArchRule repository_interfaces_should_end_in_Repository =
+        classes().that().resideInAPackage("..repository..")
+            .and().areInterfaces()
+            .should().haveSimpleNameEndingWith("Repository");
+
+    @ArchTest
+    static final ArchRule controller_classes_should_end_in_Controller =
+        classes().that().areAnnotatedWith(
+            "org.springframework.web.bind.annotation.RestController")
+            .should().haveSimpleNameEndingWith("Controller");
+
+    // --- No Cyclic Dependencies ---
+
+    @ArchTest
+    static final ArchRule no_cyclic_dependencies_between_packages =
+        slices().matching("org.mifos.(*)..")
+            .should().beFreeOfCycles();
+
+    // --- Security Rules ---
+
+    @ArchTest
+    static final ArchRule financial_endpoints_must_require_authorization =
+        classes().that().areAnnotatedWith("org.springframework.web.bind.annotation.RestController")
+            .should().beAnnotatedWith("org.springframework.security.access.prepost.PreAuthorize")
+            .orShould().beAnnotatedWith("org.springframework.web.bind.annotation.RequestMapping")
+            .because("All financial endpoints must be protected by authorization checks");
+
+    // --- Core Independence ---
+
+    @ArchTest
+    static final ArchRule core_module_must_not_depend_on_spring =
+        noClasses().that().resideInAPackage("..core..")
+            .should().dependOnClassesThat()
+            .resideInAPackage("org.springframework..")
+            .because("Core domain logic must remain framework-independent for testability");
+}
+----
+
+== Additional Self-Contained ArchUnit Test
+
+[source,java]
+----
+import com.tngtech.archunit.core.importer.ClassFileImporter;
+import com.tngtech.archunit.lang.ArchRule;
+import org.junit.jupiter.api.Test;
+
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.fields;
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
+
+class DomainPurityTest {
+
+    private static final JavaClasses MIFOS_CLASSES =
+        new ClassFileImporter().importPackages("org.mifos");
+
+    @Test
+    void domain_entities_should_use_BigDecimal_for_monetary_fields() {
+        ArchRule rule = fields()
+            .that().areDeclaredInClassesThat().resideInAPackage("..domain..")
+            .and().haveNameContaining("amount")
+            .or().haveNameContaining("balance")
+            .or().haveNameContaining("principal")
+            .or().haveNameContaining("interest")
+            .should().haveRawType("java.math.BigDecimal")
+            .because("Monetary fields must use BigDecimal to avoid floating-point precision errors");
+
+        rule.check(MIFOS_CLASSES);
+    }
+
+    @Test
+    void domain_should_not_use_java_util_Date() {
+        ArchRule rule = noClasses()
+            .that().resideInAPackage("..domain..")
+            .should().dependOnClassesThat()
+            .areAssignableTo(java.util.Date.class)
+            .because("Use java.time API instead of the legacy java.util.Date");
+
+        rule.check(MIFOS_CLASSES);
+    }
+}
+----
+
+== Gradle Configuration
+
+[source,kotlin]
+----
+// build.gradle.kts
+dependencies {
+    testImplementation("com.tngtech.archunit:archunit-junit5:1.2.1")
+}
+
+tasks.test {
+    useJUnitPlatform()
+    // ArchUnit tests run as part of the standard test task
+}
+----
+
+[source,bash]
+----
+# Run all ArchUnit tests
+$ ./gradlew test --tests "*ArchitectureTest"
+
+# Run the domain purity test specifically
+$ ./gradlew test --tests "DomainPurityTest"
+
+# ArchUnit failures produce clear messages:
+# Architecture Violation [Priority: MEDIUM] -
+# Rule 'no classes that reside in a package '..domain..'
+# should depend on classes that reside in a package 'org.springframework..''
+# was violated (2 times):
+#   Constructor <org.mifos.domain.Loan.<init>()> has parameter
+#   <org.springframework.context.ApplicationEventPublisher> in (Loan.java:15)
+----
+
+TIP: Add ArchUnit tests to the CI pipeline with a separate Gradle task so they run on every pull request. Violations should block the merge. Over time, the architecture test suite becomes a safety net that prevents new developers from accidentally violating established patterns.
+
+WARNING: Do not make ArchUnit rules so strict that they impede pragmatic development. Start with a few critical rules (no cycles, domain independence, naming conventions) and expand the suite as the team identifies patterns worth enforcing. Overly strict rules lead developers to add `@Suppress` annotations, which defeats the purpose.

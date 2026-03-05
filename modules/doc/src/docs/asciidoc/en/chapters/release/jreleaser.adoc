@@ -1,0 +1,82 @@
+= JReleaser
+
+https://jreleaser.org[JReleaser^] is a release automation tool designed specifically for the Java ecosystem. While semantic-release excels at version derivation from commit history, JReleaser focuses on the downstream release activities that matter to Java projects: publishing to Maven Central, creating GitHub Releases with assembled distributions, pushing Docker images, and generating package metadata for Homebrew, Scoop, JBang, and other package managers.
+
+JReleaser integrates seamlessly with Gradle, making it the natural complement to semantic-release in the Mifos toolchain. The typical workflow is: semantic-release determines the version and creates the Git tag, then JReleaser picks up that tag and handles the distribution and publication steps. This separation of concerns ensures each tool does what it does best.
+
+Add the JReleaser Gradle plugin to your build:
+
+[source,groovy]
+----
+plugins {
+    id 'org.jreleaser' version '1.14.0'
+}
+----
+
+Configure JReleaser in `jreleaser.yml` at the project root:
+
+[source,yaml]
+----
+project:
+  name: mifos-fineract
+  version: {{projectVersion}}
+  description: Mifos Fineract - Open Source Core Banking Platform
+  links:
+    homepage: https://mifos.org
+    documentation: https://mifos.org/docs
+  license: MPL-2.0
+  authors:
+    - Mifos Initiative
+  inceptionYear: 2024
+
+release:
+  github:
+    owner: openmf
+    name: fineract
+    tagName: '{{projectVersion}}'
+    releaseName: 'Release {{projectVersion}}'
+    overwrite: true
+    draft: false
+    prerelease:
+      pattern: '.*-(alpha|beta|rc)\.\d+'
+    changelog:
+      formatted: ALWAYS
+      preset: conventional-commits
+      contributors:
+        format: '- {{contributorName}}{{#contributorUsernameAsLink}} ({{.}}){{/contributorUsernameAsLink}}'
+
+distributions:
+  fineract:
+    type: SINGLE_JAR
+    artifacts:
+      - path: fineract-provider/build/libs/{{projectName}}-{{projectVersion}}.jar
+
+packagers:
+  docker:
+    active: RELEASE
+    images:
+      - name: openmf/fineract
+        tags:
+          - 'latest'
+          - '{{projectVersion}}'
+----
+
+Run JReleaser from the command line to perform a full release:
+
+[source,bash]
+----
+# Perform a dry run to verify configuration
+./gradlew jreleaserFullRelease --dry-run
+
+# Execute the full release
+./gradlew jreleaserFullRelease
+
+# Or use the CLI directly
+jreleaser full-release
+----
+
+JReleaser also supports publishing to Maven Central via the Sonatype OSSRH portal. Configure your Sonatype credentials as environment variables (`JRELEASER_NEXUS2_USERNAME`, `JRELEASER_NEXUS2_PASSWORD`) and JReleaser will handle the staging, close, and release workflow automatically.
+
+see:
+
+- https://jreleaser.org

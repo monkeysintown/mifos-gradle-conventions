@@ -1,0 +1,13 @@
+plugins {
+    id "org.mifos.convention.project.boot.base.persistence"
+}
+
+dependencies {
+    implementation "org.mifos:mifos-commons-java-boot-persistence"
+    api "org.springframework.boot:spring-boot-starter-data-r2dbc"
+    api "com.infobip:infobip-spring-data-r2dbc-querydsl-boot-starter"
+    implementation "io.r2dbc:r2dbc-proxy"
+    implementation "org.postgresql:r2dbc-postgresql"
+
+    testImplementation "org.mifos:mifos-commons-java-boot-testing"
+}

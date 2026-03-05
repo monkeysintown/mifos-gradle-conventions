@@ -1,0 +1,16 @@
+plugins {
+    id "org.mifos.convention.project.java.test"
+    id "de.qualersoft.jmeter"
+}
+
+jmeter {
+    resultDir = file("${projectDir}/build/jmeter-results")
+    generateReport = true
+}
+
+tasks.register("jmeterRun", JMeterRunTask) {
+    group = "jmeter"
+    description = "Run JMeter test"
+    jmxFile = "${projectDir}/src/test/jmeter/test.jmx"
+    // maxHeap.set("16m")
+}

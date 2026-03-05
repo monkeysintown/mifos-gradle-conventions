@@ -1,0 +1,29 @@
+plugins {
+    id "org.mifos.convention.internal.project.java"
+    id "groovy-gradle-plugin"
+    id "java-gradle-plugin"
+}
+
+tasks.register("mifosTemplatePack", Tar) {
+    group = "mifos"
+    description = "Package Mifos Project Templates"
+    archiveBaseName = "mifos-conventions-gradle-template"
+    archiveExtension = "tgz"
+    compression = Compression.GZIP
+
+    into("template") {
+        from("${projectDir}/src/main/template") {
+            include "**/*"
+        }
+    }
+}
+
+tasks.build.dependsOn.add(tasks.named("mifosTemplatePack").get())
+
+publishing {
+    publications {
+        mavenZip(MavenPublication) {
+            artifact source: mifosTemplatePack, classifier: "template", extension: "tgz"
+        }
+    }
+}

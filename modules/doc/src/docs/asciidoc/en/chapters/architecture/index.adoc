@@ -1,0 +1,33 @@
+= Software Architecture
+
+TBD
+
+See:
+
+- https://docs.arconia.io/arconia/latest
+- https://unifiedprocess.ai
+- https://cdn.bookey.app/files/pdf/book/en/scale-by-geoffrey-west.pdf
+- https://www.scribd.com/document/846550349/Balancing-Coupling-in-Software-Design-Universal-Design-Principles-for-Architecting-Modular-Software-Systems-Vlad-Khononov?v=0.884
+
+
+include::topic.adoc[leveloffset=+1]
+
+include::ddd.adoc[leveloffset=+1]
+
+include::cqrs.adoc[leveloffset=+1]
+
+include::event.adoc[leveloffset=+1]
+
+include::cep.adoc[leveloffset=+1]
+
+include::orchestration.adoc[leveloffset=+1]
+
+include::data.adoc[leveloffset=+1]
+
+include::resilience.adoc[leveloffset=+1]
+
+include::durable.adoc[leveloffset=+1]
+
+include::ui.adoc[leveloffset=+1]
+
+include::12factor.adoc[leveloffset=+1]

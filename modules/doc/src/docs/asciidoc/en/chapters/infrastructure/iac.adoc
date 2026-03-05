@@ -1,0 +1,332 @@
+= Infrastructure as Code
+
+Infrastructure as Code (IaC) is the practice of managing and provisioning infrastructure through machine-readable definition files rather than through manual processes or interactive configuration tools. In the Mifos ecosystem, IaC is not optional—it is a fundamental requirement for every deployment, from a single-node development environment to a multi-region production cluster.
+
+The benefits of IaC are numerous and well-documented. **Reproducibility** ensures that every environment is provisioned from the same definitions, eliminating configuration drift between development, staging, and production. **Version control** provides a complete audit trail of every infrastructure change, answering the questions "who changed what, when, and why?" **Peer review** through pull requests ensures that infrastructure changes receive the same scrutiny as application code changes. **Disaster recovery** becomes a matter of re-running the infrastructure definitions rather than reconstructing a system from memory or incomplete documentation. **Consistency** eliminates the "snowflake server" problem where each environment is subtly different in ways that cause unpredictable failures.
+
+IaC also enables **self-service infrastructure**: a new team member can provision a complete development environment by running a single command, rather than following a ten-page wiki document. This reduces onboarding time and ensures that every developer works in an environment that matches the production configuration.
+
+== Terraform
+
+https://www.terraform.io[Terraform^] by HashiCorp is the primary infrastructure-as-code tool for Mifos deployments. Terraform uses HashiCorp Configuration Language (HCL) to declare the desired state of infrastructure resources, and its provider ecosystem supports every major cloud platform and many SaaS services. With over 3,000 providers available, Terraform can manage nearly any infrastructure component from a single tool.
+
+Terraform's core workflow consists of three commands: `init` initializes the working directory and downloads providers, `plan` shows a preview of the changes that will be made, and `apply` executes those changes. This plan-then-apply workflow provides a safety net: you can review exactly what Terraform will do before it does it, preventing accidental resource deletion or misconfiguration.
+
+Terraform manages state— a mapping between your configuration and the real-world resources it describes. State is stored in a backend, which for Mifos projects should be a remote backend such as an S3 bucket with DynamoDB locking or a Terraform Cloud workspace. Never store state locally for shared projects, as local state cannot be shared among team members and is vulnerable to loss.
+
+The following example shows a basic Terraform configuration for a Mifos PostgreSQL database on AWS:
+
+[source,hcl]
+----
+terraform {
+  required_version = ">= 1.7"
+
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+
+  backend "s3" {
+    bucket         = "mifos-terraform-state"
+    key            = "fineract/production/terraform.tfstate"
+    region         = "eu-west-1"
+    dynamodb_table = "terraform-locks"
+    encrypt        = true
+  }
+}
+
+provider "aws" {
+  region = "eu-west-1"
+}
+
+resource "aws_db_instance" "fineract" {
+  identifier           = "mifos-fineract-prod"
+  engine               = "postgres"
+  engine_version       = "16"
+  instance_class       = "db.r6g.large"
+  allocated_storage    = 100
+  storage_encrypted    = true
+  db_name              = "fineract"
+  username             = "fineract"
+  password             = var.db_password
+  skip_final_snapshot  = false
+  final_snapshot_identifier = "mifos-fineract-prod-final"
+
+  vpc_security_group_ids = [aws_security_group.database.id]
+  db_subnet_group_name   = aws_db_subnet_group.fineract.name
+
+  backup_retention_period = 30
+  backup_window           = "03:00-04:00"
+  maintenance_window      = "Mon:04:00-Mon:05:00"
+
+  tags = {
+    Project     = "Mifos"
+    Environment = "production"
+    ManagedBy   = "Terraform"
+  }
+}
+----
+
+[source,bash]
+----
+# Initialize the Terraform working directory
+terraform init
+
+# Preview the changes that will be applied
+terraform plan -out=mifos.plan
+
+# Apply the changes (requires confirmation)
+terraform apply mifos.plan
+
+# Destroy all managed resources (use with extreme caution)
+terraform destroy
+----
+
+TIP: Always run `terraform plan` before `terraform apply` and review the output carefully. Terraform will clearly indicate which resources will be created, modified, or destroyed. For production environments, require that the plan output be reviewed by a second team member before applying.
+
+== OpenTofu
+
+https://opentofu.org[OpenTofu^] is the open-source fork of Terraform, created in response to HashiCorp's 2023 license change from Mozilla Public License 2.0 to the Business Source License 1.1. The license change meant that Terraform could no longer be used by competitors to HashiCorp's managed Terraform Cloud product, which was incompatible with the values and practices of the open-source community that had built the Terraform ecosystem.
+
+OpenTofu is a drop-in replacement for Terraform. The configuration syntax (HCL), the command-line interface (`init`, `plan`, `apply`, `destroy`), the state management, and the provider ecosystem are all compatible. Existing Terraform configurations work with OpenTofu without modification, and the workflow is identical:
+
+[source,bash]
+----
+# OpenTofu commands are identical to Terraform
+tofu init
+tofu plan -out=mifos.plan
+tofu apply mifos.plan
+----
+
+The Mifos project recommends OpenTofu for all new infrastructure projects to ensure long-term open-source compatibility. If your organization has standardized on Terraform, the configurations are interchangeable and you can migrate between the two tools at any time. The key consideration is licensing: if your organization's use of Terraform might be affected by the BSL 1.1 license (for example, if you offer managed infrastructure services), OpenTofu provides a legally safe alternative.
+
+== Palumi
+
+https://www.pulumi.com[Pulumi^] takes a fundamentally different approach to infrastructure as code: instead of using a domain-specific language like HCL, Pulumi lets you define infrastructure using general-purpose programming languages such as TypeScript, Python, Go, and C#. This approach offers several advantages: you can use the same language for both application code and infrastructure code, you get IDE support (autocomplete, type checking, refactoring), and you can leverage the full power of the language's ecosystem (loops, conditionals, error handling, testing frameworks).
+
+Pulumi is particularly well-suited for teams that find HCL's limited expressiveness frustrating. Complex infrastructure patterns that require loops, conditionals, and data transformations are naturally expressed in a real programming language, whereas HCL requires workarounds like `for_each`, `count`, and `dynamic` blocks that can make configurations harder to read and maintain.
+
+The following TypeScript example provisions a Mifos database using Pulumi with the AWS provider:
+
+// TODO: show script in Java
+
+[source,typescript]
+----
+import * as aws from "@pulumi/aws";
+import * as pulumi from "@pulumi/pulumi";
+
+const config = new pulumi.Config();
+const dbPassword = config.requireSecret("dbPassword");
+
+const dbSubnetGroup = new aws.rds.SubnetGroup("mifos-subnet-group", {
+  subnetIds: ["subnet-abc123", "subnet-def456"],
+  tags: { Project: "Mifos", Environment: "production" },
+});
+
+const database = new aws.rds.Instance("mifos-fineract", {
+  engine: "postgres",
+  engineVersion: "16",
+  instanceClass: "db.r6g.large",
+  allocatedStorage: 100,
+  storageEncrypted: true,
+  dbName: "fineract",
+  username: "fineract",
+  password: dbPassword,
+  dbSubnetGroupName: dbSubnetGroup.name,
+  backupRetentionPeriod: 30,
+  skipFinalSnapshot: false,
+  finalSnapshotIdentifier: "mifos-fineract-prod-final",
+  tags: { Project: "Mifos", Environment: "production", ManagedBy: "Pulumi" },
+});
+
+export const dbEndpoint = database.endpoint;
+----
+
+Choose Pulumi when your team is more comfortable with general-purpose programming languages than with HCL, when you need complex logic in your infrastructure definitions, or when you want to apply software engineering practices (unit testing, code review, CI/CD) to infrastructure code using the same tooling you already use for application code.
+
+== Ansible
+
+https://www.ansible.com[Ansible^] is a configuration management tool that complements infrastructure provisioning tools like Terraform and Pulumi. While Terraform provisions the raw infrastructure (servers, networks, databases), Ansible configures the software running on those resources: installing packages, managing services, writing configuration files, and applying security hardening. Ansible is agentless, connecting to target machines over SSH, which makes it easy to adopt without modifying the target infrastructure.
+
+Ansible uses **playbooks** (YAML files) to define the desired configuration state. **Roles** organize playbooks into reusable, shareable units. **Inventory** files define the target hosts and groups. Ansible's operations are **idempotent**: running the same playbook multiple times produces the same result, and tasks that have already been applied are skipped. This idempotency is critical for configuration management, where you want to ensure that a server's configuration converges to the desired state regardless of its current state.
+
+The following Ansible playbook configures a Mifos application server:
+
+[source,yaml]
+----
+---
+- name: Configure Mifos Fineract server
+  hosts: fineract_servers
+  become: true
+  vars:
+    fineract_version: "2.0.0"
+    java_version: "25"
+    fineract_user: "fineract"
+    fineract_home: "/opt/fineract"
+
+  tasks:
+    - name: Install required packages
+      ansible.builtin.apt:
+        name:
+          - "openjdk-{{ java_version }}-jdk"
+          - curl
+          - unzip
+        state: present
+        update_cache: true
+
+    - name: Create Fineract user
+      ansible.builtin.user:
+        name: "{{ fineract_user }}"
+        system: true
+        home: "{{ fineract_home }}"
+        shell: /bin/bash
+
+    - name: Deploy Fineract application
+      ansible.builtin.get_url:
+        url: "https://github.com/openmf/fineract/releases/download/{{ fineract_version }}/fineract-provider-{{ fineract_version }}.jar"
+        dest: "{{ fineract_home }}/fineract-provider.jar"
+        owner: "{{ fineract_user }}"
+        mode: "0644"
+
+    - name: Deploy Fineract systemd service
+      ansible.builtin.template:
+        src: templates/fineract.service.j2
+        dest: /etc/systemd/system/fineract.service
+        mode: "0644"
+      notify: Restart Fineract
+
+    - name: Ensure Fineract is running
+      ansible.builtin.systemd:
+        name: fineract
+        state: started
+        enabled: true
+
+  handlers:
+    - name: Restart Fineract
+      ansible.builtin.systemd:
+        name: fineract
+        state: restarted
+----
+
+[source,bash]
+----
+# Run a playbook against an inventory
+ansible-playbook -i inventory/production fineract.yml
+
+# Run with verbose output for debugging
+ansible-playbook -i inventory/production fineract.yml -vv
+
+# Encrypt sensitive variables with Ansible Vault
+ansible-vault encrypt group_vars/production/secrets.yml
+
+# Edit an encrypted file
+ansible-vault edit group_vars/production/secrets.yml
+
+# Run a playbook with vault-encrypted variables
+ansible-playbook -i inventory/production fineract.yml --ask-vault-pass
+----
+
+== Amazon Cloudformation
+
+https://aws.amazon.com/cloudformation/[Amazon CloudFormation^] is AWS's native infrastructure-as-code service. Unlike Terraform, which is a third-party tool that manages AWS resources through API calls, CloudFormation is deeply integrated into the AWS platform. CloudFormation templates are written in YAML or JSON and describe the desired state of AWS resources. CloudFormation handles the provisioning, dependency resolution, and rollback automatically.
+
+CloudFormation's primary advantage is its deep AWS integration. It supports every AWS service and feature on the day of release (Terraform typically lags by days or weeks for new features). CloudFormation Drift Detection can identify when resources have been modified outside of CloudFormation, and Stack Policies can prevent accidental deletion or modification of critical resources. Change Sets provide a preview of the changes that a stack update will make, similar to Terraform's `plan` command.
+
+Choose CloudFormation over Terraform when your organization is fully committed to AWS and does not need multi-cloud portability, when you need day-one support for new AWS features, or when your compliance requirements mandate the use of AWS-native tooling. However, be aware that CloudFormation templates are AWS-specific and cannot be ported to other cloud providers.
+
+The following CloudFormation template snippet creates an RDS PostgreSQL instance for Mifos:
+
+[source,yaml]
+----
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Mifos Fineract Database
+
+Parameters:
+  DbPassword:
+    Type: String
+    NoEcho: true
+    Description: Database master password
+
+  DbInstanceClass:
+    Type: String
+    Default: db.r6g.large
+    AllowedValues:
+      - db.r6g.large
+      - db.r6g.xlarge
+      - db.r6g.2xlarge
+
+Resources:
+  FineractDatabase:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBInstanceIdentifier: mifos-fineract-prod
+      Engine: postgres
+      EngineVersion: '16'
+      DBInstanceClass: !Ref DbInstanceClass
+      AllocatedStorage: '100'
+      StorageEncrypted: true
+      DBName: fineract
+      MasterUsername: fineract
+      MasterUserPassword: !Ref DbPassword
+      VPCSecurityGroups:
+        - !Ref DatabaseSecurityGroup
+      DBSubnetGroupName: !Ref DbSubnetGroup
+      BackupRetentionPeriod: 30
+      DeletionPolicy: Snapshot
+      UpdateReplacePolicy: Snapshot
+      Tags:
+        - Key: Project
+          Value: Mifos
+        - Key: Environment
+          Value: production
+        - Key: ManagedBy
+          Value: CloudFormation
+
+  DatabaseSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow database access from application servers
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          SourceSecurityGroupId: !Ref AppSecurityGroup
+
+Outputs:
+  DatabaseEndpoint:
+    Description: Database connection endpoint
+    Value: !GetAtt FineractDatabase.Endpoint.Address
+  DatabasePort:
+    Description: Database connection port
+    Value: !GetAtt FineractDatabase.Endpoint.Port
+----
+
+[source,bash]
+----
+# Create a CloudFormation stack
+aws cloudformation create-stack \
+  --stack-name mifos-fineract-db \
+  --template-body file://cfn-database.yml \
+  --parameters ParameterKey=DbPassword,ParameterValue=SecretPass123!
+
+# Preview changes before updating
+aws cloudformation create-change-set \
+  --stack-name mifos-fineract-db \
+  --change-set-name preview-update \
+  --template-body file://cfn-database.yml
+
+# Apply the change set
+aws cloudformation execute-change-set \
+  --stack-name mifos-fineract-db \
+  --change-set-name preview-update
+
+# Check for configuration drift
+aws cloudformation detect-stack-drift \
+  --stack-name mifos-fineract-db
+
+# Delete the stack (creates a final snapshot due to DeletionPolicy)
+aws cloudformation delete-stack \
+  --stack-name mifos-fineract-db
+----

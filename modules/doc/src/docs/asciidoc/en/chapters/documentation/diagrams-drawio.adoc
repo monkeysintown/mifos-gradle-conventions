@@ -1,0 +1,45 @@
+= Draw.io
+
+Draw.io (now diagrams.net, https://www.drawio.com) is a visual diagram editor that stores diagrams as XML files, making it suitable for version control while providing a WYSIWYG editing experience. Unlike text-based tools, Draw.io allows free-form layout with drag-and-drop precision, making it ideal for complex architectural diagrams that require precise positioning, custom shapes, or layered compositions that are difficult to express in text.
+
+The Mifos project uses Draw.io for architecture overview diagrams that combine multiple layers (business, application, technology) and for diagrams that need to be edited by non-technical stakeholders who may not be comfortable with text-based syntax.
+
+.Workflow
+
+. Create or edit diagrams in the Draw.io editor (web-based at diagrams.net, or the VS Code extension).
+. Save the diagram as an XML file (`.drawio`) in the repository, typically under `src/docs/diagrams/`.
+. Export the diagram as SVG for inclusion in AsciiDoc documentation.
+. Commit both the `.drawio` source and the exported SVG.
+
+[source,bash]
+----
+# Install the Draw.io VS Code extension
+code --install-extension hediet.vscode-drawio
+
+# Export a Draw.io diagram to SVG using the CLI
+# (requires draw.io desktop app)
+/Applications/draw.io.app/Contents/MacOS/draw.io \
+    --export --format svg \
+    --output build/diagrams/architecture-overview.svg \
+    src/docs/diagrams/architecture-overview.drawio
+
+# Batch export all Draw.io diagrams
+for f in src/docs/diagrams/*.drawio; do
+    /Applications/draw.io.app/Contents/MacOS/draw.io \
+        --export --format svg \
+        --output "build/diagrams/$(basename "$f" .drawio).svg" \
+        "$f"
+done
+----
+
+.Include in AsciiDoc
+[source,asciidoc]
+----
+.Architecture Overview
+// image::diagrams/architecture-overview.svg[Architecture Overview,opts=interactive]
+----
+
+[NOTE]
+====
+Always commit the `.drawio` source file alongside the exported SVG. The XML source is version-controllable and can be diffed, ensuring that diagram changes are reviewable in pull requests. The exported SVG is a build artifact that can be regenerated at any time.
+====

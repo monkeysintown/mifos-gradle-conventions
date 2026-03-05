@@ -1,0 +1,114 @@
+plugins {
+    id "org.mifos.convention.internal.project.base"
+    id "java"
+    id "java-library"
+    id "maven-publish"
+    // id "io.freefair.lombok"
+    // id "io.freefair.javadocs"
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
+
+    withSourcesJar()
+    withJavadocJar()
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = "UTF-8"
+    options.fork = false
+    options.incremental = true
+    options.deprecation = true
+
+    // TODO: gradually enable -Xlint:all (see "javac -help -X")
+
+    options.compilerArgs += [
+            "-parameters",
+            "-XDcompilePolicy=simple",
+            "-Xlint:unchecked",
+            "-Xlint:cast",
+            "-Xlint:auxiliaryclass",
+            "-Xlint:deprecation",
+            "-Xlint:dep-ann",
+            "-Xlint:divzero",
+            "-Xlint:empty",
+            "-Xlint:exports",
+            "-Xlint:fallthrough",
+            "-Xlint:finally",
+            "-Xlint:module",
+            "-Xlint:opens",
+            "-Xlint:options",
+            "-Xlint:overloads",
+            "-Xlint:overrides",
+            "-Xlint:path",
+            "-Xlint:-processing",
+            "-Xlint:removal",
+            "-Xlint:requires-automatic",
+            "-Xlint:requires-transitive-automatic",
+            "-Xlint:try",
+            "-Xlint:varargs",
+            "-Xlint:preview",
+            "-Xlint:static",
+            "-Xmaxwarns",
+            "1500",
+            "-Xmaxerrs",
+            "1500"
+    ]
+}
+
+// TODO: more here https://jspecify.dev/
+
+jar {
+    manifest {
+        attributes(
+                "Implementation-Title": "${project.description}",
+                "Implementation-Version": "${project.version}",
+                "Built-By": System.getProperty("user.name"),
+                "Built-Date": java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssZ").withZone(ZoneId.from(ZoneOffset.UTC)).format(Instant.now()),
+                "Built-JDK": System.getProperty("java.version"),
+        )
+    }
+}
+
+// sourceSets.main.java.srcDirs += ["build/generated/sources/xjc/main/java"]
+
+javadoc {
+    // dependsOn = [delombok]
+    failOnError = false
+
+    classpath += sourceSets.main.compileClasspath
+
+    classpath += sourceSets.main.output
+
+    doFirst {
+        // options.docletpath = configurations.asciidoc.files.asType(List)
+        options.JFlags = [
+                "--add-exports=jdk.javadoc/jdk.javadoc.internal.tool=ALL-UNNAMED",
+                "--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED",
+                "--add-exports=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED",
+                "--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED",
+                "--add-exports=jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED",
+                "--add-opens=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED",
+                "--add-opens=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED",
+        ]
+    }
+    options {
+        // outputLevel = JavadocOutputLevel.VERBOSE
+        memberLevel = JavadocMemberLevel.PUBLIC
+        // TODO: enable when ascidoclet available
+        // doclet = "org.asciidoctor.asciidoclet.Asciidoclet"
+        // TODO: use custom stylesheet!
+        // stylesheetFile = new File("")
+        // TODO: fix this!
+        // overview = "src/main/java/overview.adoc"
+        addBooleanOption "Xdoclint:none", true
+        addBooleanOption "author", true
+        addStringOption "package", "-quiet"
+        // addBooleanOption "version", true
+        // TODO: enable when ascidoclet available
+        // addStringOption "-base-dir", "${projectDir}"
+        // TODO: enable when ascidoclet available
+        // addStringOption "-attribute", "name=${project.name},version=${project.version},title-link=https://mifos.org[${project.name} ${project.version}]"
+    }
+}

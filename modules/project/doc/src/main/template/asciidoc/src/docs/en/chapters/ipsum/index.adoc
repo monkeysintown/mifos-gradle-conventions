@@ -1,0 +1,7 @@
+= Ipsum Chapter
+
+include::foo.adoc[leveloffset=+1]
+
+include::bar.adoc[leveloffset=+1]
+
+include::baz.adoc[leveloffset=+1]

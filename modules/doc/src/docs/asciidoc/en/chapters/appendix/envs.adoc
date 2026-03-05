@@ -1,0 +1,21 @@
+[appendix]
+= Environment Variables
+
+TBD
+
+.Supported Environment Variables
+|===
+|Name |Description |Default
+
+|MIFOS_APP_VAR1
+|Some description 1
+|Default value 1
+
+|MIFOS_APP_VAR2
+|Some description 2
+|Default value 2
+
+|MIFOS_APP_VAR3
+|Some description 3
+|Default value 3
+|===

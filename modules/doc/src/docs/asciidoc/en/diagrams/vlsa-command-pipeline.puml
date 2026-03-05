@@ -1,0 +1,61 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+
+ title Component Diagram — Command Processing & Event Pipeline
+
+Container_Boundary(vslaApp, "VSLA Application (Spring Boot)") {
+    Component(apiLayer, "API Layer", "Spring REST Controllers", "HTTP endpoints for mobile sync, dashboards, and YAPE/PLIN webhooks")
+
+    Component(commandBus, "Command Bus", "Java, Spring", "Routes commands through middleware pipeline to handlers")
+
+    Component(valMiddleware, "Validation Middleware", "Java", "Jakarta Bean Validation on command DTOs")
+    Component(authMiddleware, "Auth Middleware", "Java", "User-to-group mapping validation")
+    Component(idemMiddleware, "Idempotency Middleware", "Java", "Deduplication by externalTransactionId")
+    Component(offlineMiddleware, "Offline Conflict Middleware", "Java", "Detects mobile offline sync conflicts; applies merge strategy")
+    Component(txMiddleware, "Transaction Middleware", "Java", "Spring @Transactional wrapper")
+    Component(outboxMiddleware, "Outbox Middleware", "Java", "Persists domain events as OutboxEvent rows in same TX")
+
+    Component(groupHandler, "Group Handler", "Java", "CreateSelfFundedGroupHandler")
+    Component(sharesHandler, "Shares Handler", "Java", "PurchaseSharesHandler")
+    Component(loanHandler, "Loan Handler", "Java", "ApplyInternalLoanHandler, ApproveInternalLoanHandler, RepayInternalLoanHandler")
+    Component(paymentHandler, "Payment Handler", "Java", "ReceiveMobilePaymentHandler")
+    Component(batchHandler, "Batch Handler", "Java", "OfflineBatchCommandHandler")
+
+    Component(eventPublisher, "Event Publisher", "Java", "Publishes VslaDomainEvents within transaction")
+    Component(outboxProcessor, "Outbox Processor", "Java", "@Scheduled async processor; polls and executes Fineract REST calls")
+    Component(dashboardProjector, "Dashboard Projector", "Java", "Async CQRS read model updates from domain events")
+    Component(mobilePush, "Mobile Push Service", "Java", "Firebase / WebSocket push notifications to group devices")
+}
+
+ContainerDb(vslaDb, "VSLA Database", "PostgreSQL", "")
+Container(fineractApp, "Fineract Core", "Spring Boot", "")
+
+Rel(apiLayer, commandBus, "Dispatches commands to", "Java method call")
+Rel(commandBus, valMiddleware, "Pipeline step 1", "Function composition")
+Rel(valMiddleware, authMiddleware, "Pipeline step 2", "")
+Rel(authMiddleware, idemMiddleware, "Pipeline step 3", "")
+Rel(idemMiddleware, offlineMiddleware, "Pipeline step 4", "")
+Rel(offlineMiddleware, txMiddleware, "Pipeline step 5", "")
+Rel(txMiddleware, outboxMiddleware, "Pipeline step 6", "")
+Rel(outboxMiddleware, groupHandler, "Forwards to handler", "CreateSelfFundedGroupCommand")
+Rel(outboxMiddleware, sharesHandler, "Forwards to handler", "PurchaseSharesCommand")
+Rel(outboxMiddleware, loanHandler, "Forwards to handler", "ApplyInternalLoanCommand")
+Rel(outboxMiddleware, paymentHandler, "Forwards to handler", "ReceiveMobilePaymentCommand")
+Rel(outboxMiddleware, batchHandler, "Forwards to handler", "OfflineBatchCommand")
+
+Rel(groupHandler, eventPublisher, "Publishes", "SelfFundedGroupCreated")
+Rel(sharesHandler, eventPublisher, "Publishes", "SharesPurchased")
+Rel(loanHandler, eventPublisher, "Publishes", "InternalLoanApproved, InternalLoanRepaid")
+Rel(paymentHandler, eventPublisher, "Publishes", "MobilePaymentReceived")
+Rel(batchHandler, eventPublisher, "Publishes", "OfflineDataMerged")
+
+Rel(eventPublisher, outboxProcessor, "Triggers via Spring Events", "FineractSyncRequired")
+Rel(eventPublisher, dashboardProjector, "Triggers via Spring Events", "VslaDomainEvent")
+Rel(eventPublisher, mobilePush, "Triggers via Spring Events", "Async after TX commit")
+
+Rel(outboxProcessor, vslaDb, "Polls pending rows from", "JDBC")
+Rel(outboxProcessor, fineractApp, "Executes REST calls to", "fineract-client")
+Rel(dashboardProjector, vslaDb, "Writes projections to", "JDBC")
+@enduml

@@ -1,0 +1,131 @@
+= Integrated Development Environments
+
+TBD
+
+== IntelliJ
+
+IntelliJ IDEA is the recommended IDE for Mifos server-side development. Its deep understanding of Gradle, Spring Boot, and Java makes it the most productive environment for working with the Mifos codebase. The Community Edition is sufficient for most tasks; Ultimate adds Spring Boot-specific features.
+
+To get started, import the Mifos project as a Gradle project:
+
+. Launch IntelliJ and select *File → New → Project from Existing Sources*.
+. Navigate to the repository root and select the `settings.gradle.kts` file.
+. Choose *"Import project from external model"* and select **Gradle**.
+. Ensure *"Use Gradle wrapper"* is selected (never use a local Gradle installation).
+. Click *Finish* and wait for the initial sync to complete.
+
+Recommended settings:
+
+* Enable *Build, Execution, Deployment → Compiler → Annotation Processors → Enable annotation processing* (required for Lombok, MapStruct, and QueryDSL).
+* Set *Editor → Code Style → Java* to import from the project's Checkstyle configuration.
+* Enable *Version Control → Git → Commit → Sign commit* if GPG signing is configured.
+
+Essential plugins:
+
+[cols="1,2,1"]
+|===
+|Name |Description |Link
+
+|Gradle
+|First-class Gradle build support with sync and task execution
+|https://plugins.jetbrains.com/plugin/13112-gradle
+
+|GitLive
+|Real-time collaboration and pull request management inside the IDE
+|https://plugins.jetbrains.com/plugin/11913-gitlive
+
+|AsciiDoc
+|AsciiDoc preview and syntax highlighting for documentation
+|https://plugins.jetbrains.com/plugin/7391-asciidoc
+|===
+
+Additional plugins worth installing:
+
+* **Lombok** — if the module uses Lombok annotations.
+* **Spring Boot** — for run configuration generation and application property completion (Ultimate only).
+* **Checkstyle-IDEA** — displays Checkstyle violations inline during editing.
+* **Spotless** — integrates Spotless formatting with IntelliJ's reformat action.
+
+== VSCode
+
+Visual Studio Code is a lightweight alternative for contributors who prefer a fast, extensible editor. With the right extensions, VSCode provides a capable Java development environment, though it lacks some of the deep refactoring and Spring integration found in IntelliJ.
+
+Setup steps:
+
+. Install the https://code.visualstudio.com[latest VSCode].
+. Install the **Extension Pack for Java** from the marketplace.
+. Open the Mifos repository folder: `File → Open Folder`.
+. VSCode will detect the Gradle build and index the project automatically.
+. Configure `java.configuration.runtimes` in `settings.json` to point to JDK 25.
+
+Example VSCode `settings.json` for Mifos:
+
+[source,json]
+----
+{
+  "java.configuration.runtimes": [
+    {
+      "name": "JavaSE-25",
+      "path": "/home/user/.sdkman/candidates/java/25.0.0-tem",
+      "default": true
+    }
+  ],
+  "java.format.enabled": true,
+  "editor.formatOnSave": true,
+  "java.checkstyle.configuration": "${workspaceFolder}/config/checkstyle/checkstyle.xml"
+}
+----
+
+Essential extensions:
+
+[cols="1,2,1"]
+|===
+|Name |Description |Link
+
+|Extension Pack for Java
+|Bundles Java language support, debugger, Maven/Gradle integration
+|https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-pack
+
+|Gradle for Java
+|Gradle build and task management within VS Code
+|https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-gradle
+
+|AsciiDoc
+|Live preview and syntax support for AsciiDoc documents
+|https://marketplace.visualstudio.com/items?itemName=asciidoctor.asciidoctor-vscode
+|===
+
+TIP: Use the **Gradle for Java** extension to run specific tasks without switching to the terminal. Click the Gradle elephant icon in the sidebar, expand the task tree, and double-click a task to run it.
+
+== Eclipse
+
+Eclipse remains a viable option for contributors who have invested in the Eclipse ecosystem. The key requirement is Buildship, the official Gradle integration for Eclipse, which handles project synchronization and task execution.
+
+Setup steps:
+
+. Install https://www.eclipse.org/downloads/[Eclipse IDE for Enterprise Java and Web Developers].
+. Install Buildship via *Help → Eclipse Marketplace* (search for "Buildship").
+. Import the project: *File → Import → Gradle → Existing Gradle Project*.
+. Select the repository root and click *Finish*.
+. Wait for the Gradle sync to complete; this may take several minutes on first import.
+
+Essential plugins:
+
+[cols="1,2,1"]
+|===
+|Name |Description |Link
+
+|Buildship
+|Gradle integration for Eclipse with sync and task execution
+|https://projects.eclipse.org/projects/tools.buildship
+
+|EGit
+|Git integration for Eclipse based on JGit
+|https://www.eclipse.org/egit/
+
+|Eclipse AsciiDoc
+|AsciiDoc editor with preview and syntax highlighting
+|https://marketplace.eclipse.org/content/asciidoctor-editor
+|===
+
+NOTE: Eclipse's Java formatter may conflict with the project's Checkstyle/Spotless rules. Always run `./gradlew spotlessApply` before committing to ensure formatting compliance, regardless of IDE auto-format settings.

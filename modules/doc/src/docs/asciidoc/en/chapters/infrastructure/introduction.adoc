@@ -1,0 +1,7 @@
+= Introduction
+
+Infrastructure is the backbone of every Mifos deployment. As a financial inclusion platform that processes sensitive data for millions of users across the globe, Mifos demands infrastructure that is secure, reliable, reproducible, and auditable. The days of manually provisioning servers, configuring firewalls by hand, and hoping that staging matches production are firmly behind us. Modern Mifos deployments treat infrastructure as a first-class concern, managed with the same rigor and discipline as application code.
+
+The Mifos infrastructure philosophy rests on three pillars. First, **reproducibility**: every environment—from a developer's local machine to the production cluster—must be provisioned from the same declarative definitions, ensuring that "works on my machine" extends to "works in production." Second, **security by default**: financial data demands encryption at rest and in transit, strict access controls, and continuous compliance monitoring. Infrastructure as code makes security policies auditable and enforceable. Third, **automation**: provisioning, scaling, and recovery must be automated to reduce human error and enable the small team at Mifos to manage global deployments efficiently.
+
+This chapter covers the cloud providers that Mifos supports, the infrastructure-as-code tools used to manage them, and the conventions that ensure consistency across deployments. Whether you are deploying a community edition on a single server or a multi-region production cluster, the same principles and tools apply.

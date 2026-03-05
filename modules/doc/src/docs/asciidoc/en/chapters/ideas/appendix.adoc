@@ -1,0 +1,35 @@
+= Appendix
+
+.Priority Definitions
+|===
+| Priority | Definition
+
+| **P0**
+| Must have — MVP blocking; core functionality required for launch
+| **P1**
+| Should have — Important for v1.0 or early post-launch; significant user value
+| **P2**
+| Nice to have — Enhancement; can be deferred to post-launch roadmap
+|===
+
+.Compliance Frameworks Reference
+|===
+| Name | Description
+
+| **PCI DSS**
+| Payment Card Industry Data Security Standard
+| **SOC 2**
+| Service Organization Control Type 2
+| **GDPR**
+| General Data Protection Regulation (EU)
+| **CCPA**
+| California Consumer Privacy Act
+| **SOX**
+| Sarbanes-Oxley Act
+| **MiFID II**
+| Markets in Financial Instruments Directive (EU)
+| **AML/KYC**
+| Anti-Money Laundering / Know Your Customer
+| **OFAC**
+| Office of Foreign Assets Control (US sanctions)
+|===

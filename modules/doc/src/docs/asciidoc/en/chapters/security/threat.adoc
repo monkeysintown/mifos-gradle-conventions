@@ -1,0 +1,37 @@
+= Threat Modelling
+
+TBD
+
+See:
+
+- https://owasp.org/www-community/Threat_Modeling_Process
+- https://gist.github.com/potiuk/da14a826283038ddfe38cc9fe6310573
+- https://www.practical-devsecops.com/what-is-stride-threat-model/
+- https://www.opengroup.org/certifications/openfair
+- https://gist.github.com/potiuk/da14a826283038ddfe38cc9fe6310573
+- https://plot4.ai
+- https://www.threatmodelingmanifesto.org
+- https://en.wikipedia.org/wiki/STRIDE_model
+- https://github.com/awslabs/threat-composer
+- https://github.com/awslabs/threat-designer
+- https://aws.amazon.com/blogs/security/how-to-approach-threat-modeling/
+- https://cheatsheetseries.owasp.org/cheatsheets/Threat_Modeling_Cheat_Sheet.html
+- https://safecode.org/wp-content/uploads/2017/05/SAFECode_TM_Whitepaper.pdf
+- https://en.wikipedia.org/wiki/Attack_tree
+- https://openssf.org/
+- https://www.pentagrid.ch/en/blog/fuzzing_java_with_jqf
+- https://github.com/rohanpadhye/JQF
+- https://dannyvanheumen.nl/post/java-fuzzing-with-afl-and-jqf/
+- https://www.etsi.org/deliver/etsi_ts/104200_104299/104219/01.01.01_60/ts_104219v010101p.pdf
+- https://github.com/yevh/TaaC-AI
+- https://security.cms.gov/learn/cms-threat-modeling-handbook
+- https://infosec.mozilla.org/guidelines/risk/rapid_risk_assessment.html
+- https://docs.google.com/document/d/1uD-wofmkXBz5BVq49JQQqC3DnE77vwOPDSbHdWIve9s/preview?tab=t.0#heading=h.ufs6i6416jwo
+- https://shostack.org/resources/threat-modeling
+- https://github.com/hysnsec/awesome-threat-modelling
+- https://csrc.nist.gov/files/pubs/sp/800/154/ipd/docs/sp800_154_draft.pdf
+- https://shostack.org/blog/how-executives-can-use-threat-modeling/
+- https://fuzz-introspector.readthedocs.io/en/latest/
+- https://www.practical-devsecops.com/what-is-stride-threat-model/
+- https://github.com/rusakovichma/TicTaaC
+- https://plot4.ai/

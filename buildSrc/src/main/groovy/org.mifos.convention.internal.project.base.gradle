@@ -1,0 +1,66 @@
+plugins {
+    id "base"
+    id "maven-publish"
+    id "com.github.ben-manes.versions"
+    // id "org.owasp.dependencycheck"
+    id "com.autonomousapps.dependency-analysis"
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral().content {
+        excludeModule("javax.media", "jai_core")
+    }
+    gradlePluginPortal()
+    maven {
+        url = uri("https://mifos.jfrog.io/artifactory/mifosx-gradle-local")
+    }
+    maven {
+        url = uri("https://central.sonatype.com/repository/maven-snapshots")
+    }
+}
+
+version = rootProject.version
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            versionMapping {
+                usage("java-api") {
+                    fromResolutionOf("runtimeClasspath")
+                }
+                usage("java-runtime") {
+                    fromResolutionResult()
+                }
+            }
+
+            pom {
+                url = "https://mifos.org"
+                licenses {
+                    license {
+                        name = "Copyright (C) 2026 Mifos Initiative - info@mifos.org - All Rights Reserved"
+                        url = "https://spdx.org/licenses/MPL-2.0.html"
+                    }
+                }
+                developers {
+                    developer {
+                        id = "vidakovic"
+                        name = "Aleksandar Vidakovic"
+                        email = "aleks@mifos.org"
+                    }
+                }
+                scm {
+                    connection = "scm:git:git://github.com:monkeysintown/mifos-conventions-gradle.git"
+                    developerConnection = "scm:git:ssh://github.com:monkeysintown/mifos-conventions-gradle.git"
+                    url = "https://mifos.org"
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            url = layout.buildDirectory.dir("staging-deploy")
+        }
+        // mavenLocal()
+    }
+}

@@ -1,0 +1,58 @@
+= Adjust gradle.properties
+
+== Edit Project Metadata
+
+Open the `gradle.properties` in the project root folder and adjust to your project.
+
+.gradle.properties Project Metadata
+[source,properties]
+----
+# project metadata <1>
+mifos.projects.license.name=MPL-2.0
+mifos.projects.license.link=https://spdx.org/licenses/MPL-2.0.html
+mifos.projects.homepage=https://mifos.org
+mifos.projects.bug.tracker=https://mifosforge.jira.com
+mifos.projects.contact=https://mifos.org/about-us/contact-us
+mifos.projects.inception.year=2026
+mifos.projects.vendor=Mifos Initiative
+mifos.projects.copyright=Copyright (c) 2026 Mifos Initiative
+mifos.projects.scm.url=https://github.com/openMF/dummy
+mifos.projects.scm.connection.main=git@github.com:openMF/dummy.git
+mifos.projects.scm.connection.developer=git@github.com:openMF/dummy.git
+mifos.projects.contribute=https://github.com/openMF/dummy/CONTRIBUTE.md
+mifos.projects.documentation=https://docs.mifos.org/dummy
+mifos.projects.donation=https://mifos.org/donations
+mifos.projects.faq=https://mifos.org/faq
+mifos.projects.help=https://mifos.org
+mifos.projects.translate=https://github.com/openMF/dummy/TRANSLATE.md
+
+# contributing developer information <2>
+mifos.developers.0.username=vidakovic
+mifos.developers.0.firstname=Aleksandar
+mifos.developers.0.lastname=Vidakovic
+mifos.developers.0.email=aleks@mifos.org
+mifos.developers.0.url=https://github.com/vidakovic
+mifos.developers.0.timezone=UTC+2
+mifos.developers.0.organisation=Mifos Initiative
+mifos.developers.0.organisationUrl=https://mifos.org
+mifos.developers.0.gpg.public.key=
+----
+
+<1> Please adjust to your specific project
+<2> Please put your own information
+
+== Edit Gradle Cache Configuration
+
+The new Mifos build conventions allow you to turn on very aggressive caching configurations. All plugins used in the build are able to take advantage of these performance improving settings, except for the Asciidoc plugin. This is not really a constraint as this plugin is not enabled by default when you do a `./gradlew build`. Building the documentation is anyway more important for the release and not for the day to day builds. See more in the section about the documentation module.
+
+.gradle.properties Caching
+[source,properties]
+----
+org.gradle.daemon=true
+org.gradle.caching=true
+org.gradle.configuration-cache=true
+org.gradle.configuration-cache.problems=warn
+org.gradle.parallel=true
+org.gradle.logging.level=quiet
+org.gradle.configureondemand=true
+----

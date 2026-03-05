@@ -1,0 +1,5 @@
+plugins {
+    id "org.mifos.convention.project.java"
+}
+
+description = "Mifos Initiative - Dummy"

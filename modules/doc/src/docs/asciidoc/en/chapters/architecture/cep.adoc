@@ -1,0 +1,11 @@
+= Complex Event Processing
+
+TBD
+
+See:
+
+- https://www.espertech.com/esper/
+- https://ei.docs.wso2.com/en/latest/streaming-integrator/quick-start-guide/quick-start-guide/
+- https://medium.com/@parinpatel094/mastering-complex-event-processing-cep-with-apache-flink-a-comprehensive-guide-868afcd651a9
+- https://github.com/siddhi-io/siddhi
+- 

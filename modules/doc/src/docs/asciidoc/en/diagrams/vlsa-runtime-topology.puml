@@ -1,0 +1,45 @@
+@startuml
+title VSLA Service Deployment Topology
+
+node "Mobile Client" as Mobile {
+    [Offline-First App]
+}
+
+node "VSLA Service Node" as VSLA_Node {
+    package "Spring Boot" {
+        [VSLA Application] as VSLA_App
+        [Port 8081]
+    }
+    database "PostgreSQL" as VSLA_DB {
+        [vsla_db schema]
+    }
+}
+
+node "Fineract Core Node" as Fineract_Node {
+    package "Spring Boot" {
+        [Fineract Application] as Fineract_App
+        [Port 8443]
+    }
+    database "PostgreSQL" as Fineract_DB {
+        [fineract_db schema]
+    }
+}
+
+Mobile --> VSLA_Node : HTTPS / REST / WebSocket
+VSLA_Node --> Fineract_Node : HTTPS / REST
+fineract-client
+VSLA_App --> VSLA_DB : JDBC
+Fineract_App --> Fineract_DB : JDBC
+
+note right of VSLA_Node
+  **No shared database**
+  Loose coupling via REST only
+end note
+
+note right of Fineract_Node
+  **Unmodified Fineract**
+  Consumed via official
+  Java REST API client
+end note
+
+@enduml

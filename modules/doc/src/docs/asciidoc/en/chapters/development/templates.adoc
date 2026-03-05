@@ -1,0 +1,19 @@
+= Code Generation Templates
+
+TBD
+
+== Cookiecutter
+
+TBD
+
+See: https://cookiecutter.readthedocs.io/en/stable/
+
+== IntelliJ Templates
+
+TBD
+
+== Yeoman
+
+TBD
+
+See: https://yeoman.io

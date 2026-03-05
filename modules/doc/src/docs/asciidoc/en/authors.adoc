@@ -1,0 +1,9 @@
+.Authors
+|===
+^| Name ^| Email
+
+| Edward Cable | mailto:edcable@mifos.org[]
+| David Higgins | mailto:dhiggins@mifos.org[]
+| Tom Daly | mailto:tdaly61@gmail.com[]
+| Aleksandar Vidakovic | mailto:aleks@mifos.org[]
+|===

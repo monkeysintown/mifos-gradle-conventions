@@ -1,0 +1,13 @@
+= Files in The Root Folder
+
+- CLA
+- Code of Conduct
+- Developer Certificate of Origin (https://en.wikipedia.org/wiki/Developer_Certificate_of_Origin)
+- LICENSE
+- NOTICE
+- CONTRIBUTORS (`.all-contributorsrc`)
+- .gitignore
+- README.adoc
+- SECURITY.adoc
+- .gitattributes
+- https://slsa.dev/spec/v0.1/provenance

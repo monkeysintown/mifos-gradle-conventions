@@ -1,0 +1,71 @@
+= Git Branching Model
+
+The Mifos project follows a structured branching model that aligns with semantic versioning and supports multiple concurrent release streams. This model is inspired by GitHub Flow but adds explicit support for pre-release channels, which are essential for a financial platform that must undergo rigorous testing before production deployment.
+
+The primary branches and their roles are as follows:
+
+* **`main`** — The production branch. Code on `main` represents the latest stable release. Every merge to `main` triggers a full semantic-release run that produces a production version (e.g., `1.2.3`). This branch is protected and requires passing CI checks and at least one approved review.
+* **`alpha`** — The integration branch. All feature branches target `alpha` for initial integration testing. Merges to `alpha` produce pre-release versions with the `alpha` channel (e.g., `1.2.0-alpha.3`). This is where automated integration tests run against the combined work of multiple contributors.
+* **`beta`** — The pre-release branch. When `alpha` stabilizes and passes all integration tests, it is merged into `beta` for broader testing, including performance benchmarks and security scans. Merges to `beta` produce `beta` pre-releases (e.g., `1.2.0-beta.1`).
+* **`rc`** — The release candidate branch. After `beta` passes acceptance criteria, it is merged into `rc` for final validation. Release candidates are deployed to staging environments that mirror production. Merges to `rc` produce `rc` pre-releases (e.g., `1.2.0-rc.1`). Once validated, `rc` is merged into `main` for the production release.
+
+The relationship between branches and version numbers is deterministic and managed by semantic-release:
+
+|===
+|Branch |Version Pattern |Example |Purpose
+
+|`main`
+|`MAJOR.MINOR.PATCH`
+|`2.1.0`
+|Production release
+
+|`alpha`
+|`MAJOR.MINOR.PATCH-alpha.N`
+|`2.1.0-alpha.3`
+|Integration testing
+
+|`beta`
+|`MAJOR.MINOR.PATCH-beta.N`
+|`2.1.0-beta.1`
+|Pre-release testing
+
+|`rc`
+|`MAJOR.MINOR.PATCH-rc.N`
+|`2.1.0-rc.1`
+|Release candidate
+|===
+
+Feature branches follow the naming convention `<type>/<description>` (e.g., `feat/loan-repayment-api`, `fix/null-pointer-audit`, `refactor/tenant-datasource-pool`). Hotfix branches are created from `main` and merged back into both `main` and `alpha` to ensure the fix propagates to all active streams.
+
+[source,bash]
+----
+# Create a feature branch from alpha
+git checkout alpha
+git pull origin alpha
+git checkout -b feat/loan-repayment-api
+
+# After development, push and open a PR against alpha
+git push -u origin feat/loan-repayment-api
+
+# Promote from alpha to beta
+git checkout beta
+git merge alpha
+git push origin beta
+
+# Promote from beta to rc
+git checkout rc
+git merge beta
+git push origin rc
+
+# Final promotion to main (triggers production release)
+git checkout main
+git merge rc
+git push origin main
+----
+
+see:
+
+- main
+- alpha
+- beta
+- rc

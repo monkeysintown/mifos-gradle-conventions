@@ -1,0 +1,150 @@
+= Hosting
+
+TBD
+
+== GitHub Pages
+
+GitHub Pages is the simplest option for hosting Mifos documentation sites. It serves static content directly from a GitHub repository, supports custom domains, and integrates with GitHub Actions for automated deployment.
+
+=== Setup
+
+- Create a `gh-pages` branch in the documentation repository, or configure GitHub Pages to serve from the `/docs` directory on the `main` branch.
+- Configure a GitHub Actions workflow to build the Antora site and deploy the output to the `gh-pages` branch.
+
+.GitHub Actions Deployment Workflow
+[source,yaml]
+----
+name: Deploy Documentation
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Antora
+        run: npm install -g @antora/cli @antora/site-generator
+
+      - name: Generate Site
+        run: antora antora-playbook.yml
+
+      - name: Upload Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+----
+
+=== Custom Domain Configuration
+
+To serve documentation at `docs.mifos.org`:
+
+- Add a `CNAME` file to the `gh-pages` branch containing `docs.mifos.org`.
+- Configure DNS with your domain registrar: add a CNAME record pointing `docs.mifos.org` to `<org>.github.io`.
+-  Enable "Enforce HTTPS" in the GitHub Pages settings.
+
+=== Limitations
+
+GitHub Pages is suitable for most documentation hosting scenarios, but it has limitations: sites are limited to 1 GB in size, builds run once per push (no preview deployments for PRs without additional configuration), and there is no built-in authentication for private documentation. For more advanced requirements, consider Netlify.
+
+== GitBook
+
+GitBook (https://www.gitbook.com) is a commercial documentation platform that provides a polished editing experience, a modern UI, and built-in collaboration features. It integrates with Git repositories, allowing documentation to be edited either through the GitBook web interface or through the repository directly—changes sync bidirectionally.
+
+=== When to Choose GitBook
+
+GitBook is a good fit when the documentation team includes non-developers who prefer a WYSIWYG editing experience, when the organization values the polished default UI, or when built-in search, analytics, and visitor authentication are required out of the box. For the Mifos project, GitBook may be appropriate for user-facing documentation (field officer guides, administrator manuals) that is maintained by product managers and support staff rather than engineers.
+
+=== Pricing Considerations
+
+GitBook's free plan supports a single space with basic features. The Pro plan (paid per user per month) adds multiple spaces, SSO, and advanced permissions. For open-source projects, GitBook offers a free Pro plan—apply through their open-source program. Evaluate the cost carefully if the documentation team is large, as per-user pricing scales quickly.
+
+=== Integration with Git
+
+GitBook can sync with a GitHub repository, reading and writing Markdown files. Note that GitBook uses its own flavor of Markdown and does not natively support AsciiDoc. If the Mifos project standardizes on AsciiDoc (as recommended in this chapter), GitBook is not the ideal hosting platform—Antora with GitHub Pages or Netlify is a better fit.
+
+== Netlify
+
+Netlify (https://www.netlify.com) is a powerful platform for hosting static sites with features that go well beyond simple file serving. For documentation sites, Netlify's standout features are deploy previews (automatically building and deploying a preview of the documentation site for every pull request) and instant rollbacks (reverting to any previous deploy with a single click).
+
+=== Deploy from Git
+
+Netlify connects directly to GitHub (and other Git providers). When a push is made to the configured branch, Netlify clones the repository, runs the build command, and deploys the output directory. The configuration can live in the Netlify UI or in a `netlify.toml` file in the repository.
+
+.netlify.toml Configuration
+[source,toml]
+----
+[build]
+  command = "npm install -g @antora/cli @antora/site-generator && antora antora-playbook.yml"
+  publish = "build/site"
+
+[context.deploy-preview]
+  command = "npm install -g @antora/cli @antora/site-generator && antora antora-playbook.yml --url $DEPLOY_PRIME_URL"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Content-Security-Policy = "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'"
+----
+
+=== Preview Deployments for Pull Requests
+
+When a contributor opens a pull request that modifies documentation, Netlify automatically builds a preview and posts a comment on the PR with a link to the preview site. Reviewers can see the rendered documentation before merging, catching formatting errors, broken links, and missing images that would otherwise go undetected until the next production deploy.
+
+=== CDN and Performance
+
+Netlify serves documentation through a global CDN with automatic HTTPS, ensuring fast load times for Mifos contributors and users worldwide. Build caching and edge caching reduce build times and improve Time to First Byte (TTFB).
+
+[source,bash]
+----
+# Install Netlify CLI for local development
+npm install -g netlify-cli
+
+# Login to Netlify
+netlify login
+
+# Initialize a new site
+netlify init
+
+# Deploy a draft (preview) build
+netlify deploy --dir=build/site
+
+# Deploy to production
+netlify deploy --prod --dir=build/site
+
+# Open the deployed site
+netlify open
+----

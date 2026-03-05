@@ -1,0 +1,38 @@
+@startuml implementation-sequence
+title Recommended Implementation Sequence
+
+rectangle "Phase 1\nFoundation" as P1 #LightGreen {
+    rectangle "1a. Create fineract-core module\n(move DTOs, interfaces, events, commands, infrastructure)" as S1a
+    rectangle "1b. Create fineract-command module\n(Command Bus, Event Bus, definitions)" as S1b
+    rectangle "1c. Verify F9,F10,F11,F13,F19,F20\nalready compile against core only" as S1c
+}
+
+rectangle "Phase 2\nLow-Hanging Fruit" as P2 #PaleGreen {
+    rectangle "2a. Extract read-only DTOs for\nclient, organisation, charge, calendar, rate\ninto fineract-core" as S2a
+    rectangle "2b. Decouple F1, F2, F16\n(replace direct imports with DTOs)" as S2b
+    rectangle "2c. Decouple F3, F12, F17\n(DTOs + command bus)" as S2c
+}
+
+rectangle "Phase 3\nCritical Packages" as P3 #LightYellow {
+    rectangle "3a. Decouple F5 savings\n(accounting via events, rest via DTOs)" as S3a
+    rectangle "3b. Decouple F4 loan\n(savings via command, accounting via events)" as S3b
+    rectangle "3c. Break deposit→savings inheritance\n(F6, F7) — extract lifecycle interface to core" as S3c
+}
+
+rectangle "Phase 4\nOrchestrators & Reporting" as P4 #LightPink {
+    rectangle "4a. Decouple F14 teller\n(pure command-bus orchestrator)" as S4a
+    rectangle "4b. Decouple F15 report\n(CQRS read models)" as S4b
+    rectangle "4c. Decouple F8 shareaccounts, F18 batch" as S4c
+}
+
+rectangle "Phase 5\nEnforcement" as P5 #White {
+    rectangle "5a. ArchUnit rules\n(no cross-feature imports allowed)" as S5a
+    rectangle "5b. CI/CD enforcement" as S5b
+}
+
+P1 -down-> P2
+P2 -down-> P3
+P3 -down-> P4
+P4 -down-> P5
+
+@enduml

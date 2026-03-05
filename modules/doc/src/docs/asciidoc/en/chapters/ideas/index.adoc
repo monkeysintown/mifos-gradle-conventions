@@ -1,0 +1,25 @@
+= Ideas
+
+TBD
+
+include::marketplace.adoc[leveloffset=+1]
+
+include::license.adoc[leveloffset=+1]
+
+include::event.adoc[leveloffset=+1]
+
+include::vsla.adoc[leveloffset=+1]
+
+include::iso8583.adoc[leveloffset=+1]
+
+include::supplychain.adoc[leveloffset=+1]
+
+include::metaframework.adoc[leveloffset=+1]
+
+include::lowcode.adoc[leveloffset=+1]
+
+include::threatmodel.adoc[leveloffset=+1]
+
+<<<
+
+include::appendix.adoc[leveloffset=+1]

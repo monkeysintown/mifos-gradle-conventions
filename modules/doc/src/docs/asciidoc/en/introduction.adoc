@@ -1,0 +1,114 @@
+= Introduction
+
+Welcome to *Gradle Conventions: Mifos Initiative* -- the definitive guide to development conventions, tooling standards, and best practices for the Mifos Initiative engineering team.
+
+Mifos Initiative is a global open-source platform dedicated to financial inclusion. Our mission -- empowering underserved communities through accessible financial technology -- depends on software that is reliable, maintainable, and welcoming to contributors around the world. This book exists to ensure that every line of code written under the Mifos banner meets that standard, regardless of who writes it or where they are.
+
+== What This Document Is
+
+This book is a comprehensive reference that codifies the conventions governing Java and Gradle development across all Mifos Initiative projects. It covers everything from code style and project structure to release workflows and infrastructure automation. These conventions are not arbitrary rules imposed from above; they are the distilled wisdom of years of collaborative development, drawn from real-world experience building financial inclusion software at scale.
+
+Every convention in this document has one purpose: to make it easier for *any* developer to read, understand, modify, and ship Mifos code with confidence.
+
+== Who Should Read This
+
+This book is written for three audiences:
+
+[horizontal]
+New team members:: If you have just joined the Mifos engineering team, this book is your onboarding companion. It will give you the mental model you need to be productive from day one.
+
+Existing contributors:: If you have been contributing to Mifos for some time, this book serves as a definitive reference. When questions arise about naming, structure, or process, the answer is here.
+
+External open-source contributors:: If you are a community member submitting a pull request, these conventions describe exactly what the maintainers expect. Following them significantly increases the speed and likelihood of your contributions being accepted.
+
+TIP: If you are a first-time contributor, start with the <<development,Development>> chapter and then read <<testing,Testing>>. Those two chapters cover the conventions you will encounter most often in day-to-day work.
+
+== How This Document Is Organized
+
+The book is divided into five major parts, each addressing a different facet of the development lifecycle:
+
+[cols="1,3",options="header"]
+|===
+| Chapter | Description
+
+| <<development,Development>>
+| Project structure, code style, dependency management, and Gradle build conventions. This is the foundation on which everything else rests.
+
+| <<testing,Testing>>
+| Unit testing, integration testing, code coverage requirements, and test naming conventions. Quality is not optional in financial software.
+
+| <<documentation,Documentation>>
+| Javadoc standards, README requirements, and guidelines for writing developer-facing documentation that stays accurate over time.
+
+| <<releases,Releases>>
+| Versioning strategy, changelog maintenance, release workflow, and artifact publishing. Shipping is a feature, and it deserves its own conventions.
+
+| <<infrastructure,Infrastructure>>
+| CI/CD pipelines, containerization, environment configuration, and operational tooling. How we build, deploy, and monitor what we ship.
+|===
+
+The following diagram illustrates how these chapters relate to the development lifecycle:
+
+[plantuml, book-structure, svg]
+....
+skinparam backgroundColor #FEFEFE
+skinparam defaultFontSize 12
+skinparam ArrowColor #444444
+
+rectangle "Development" as dev #E8F5E9
+rectangle "Testing" as test #E3F2FD
+rectangle "Documentation" as doc #FFF8E1
+rectangle "Releases" as rel #FCE4EC
+rectangle "Infrastructure" as inf #F3E5F5
+
+dev -right-> test : verify
+test -right-> doc : explain
+doc -right-> rel : ship
+rel -right-> inf : deploy
+inf -down-> dev : feedback
+....
+
+Each chapter is self-contained, but the conventions build on one another. The testing chapter assumes you follow the project structure defined in the development chapter; the releases chapter assumes you adhere to the documentation standards; and so on.
+
+== Why Conventions Matter
+
+In an open-source project with distributed contributors spanning multiple time zones, cultures, and experience levels, conventions are not a luxury -- they are a necessity. Without shared conventions, every pull request becomes a debate about style, every unfamiliar module requires hours of orientation, and every new contributor faces a steeper cliff before making their first meaningful contribution.
+
+Conventions serve three critical functions in the Mifos ecosystem:
+
+*Reduced cognitive load.* When code follows a predictable structure and style, you spend less mental energy parsing *how* something is written and more energy understanding *what* it does. In a domain as complex as financial inclusion, that mental bandwidth is precious.
+
+*Faster onboarding.* A new developer joining the project should not have to reverse-engineer implicit assumptions. With explicit conventions, the path from "clone the repository" to "submit a first pull request" becomes shorter and clearer.
+
+*Consistent quality.* Conventions encode hard-won lessons about what works and what does not. They raise the floor for code quality across the entire project, ensuring that the baseline remains high even as the team grows and changes.
+
+NOTE: These conventions are guidelines, not straitjackets. If you encounter a situation where following a convention would produce demonstrably worse code, use your judgment and document your reasoning. Conventions exist to serve the project, not the other way around.
+
+== How to Use This Document
+
+There is no single right way to read this book. Choose the approach that fits your situation:
+
+*Onboarding path.* If you are new to Mifos, read the chapters sequentially from <<development,Development>> through <<infrastructure,Infrastructure>>. This gives you the full picture and ensures you understand how each piece connects.
+
+*Reference path.* If you are an existing contributor looking for a specific guideline, use the table of contents to jump directly to the relevant chapter. Each section is written to be understood in isolation, with cross-references where context from other chapters is needed.
+
+*Contribution path.* If you are preparing a pull request, the <<development,Development>> and <<testing,Testing>> chapters contain the conventions most likely to be checked during code review. Skim those first, then consult other chapters as needed.
+
+== Contributing to This Document
+
+This book lives alongside the source code in the main Mifos repository. It is maintained using the same conventions it describes -- because a document about conventions should practice what it preaches.
+
+Contributions are welcome and encouraged. If you find a convention that is outdated, ambiguous, or missing entirely, please submit a pull request. The process is straightforward:
+
+. Fork the repository.
+. Edit the relevant `.adoc` file in the `docs/` directory.
+. Ensure your changes follow the writing conventions described in the <<documentation,Documentation>> chapter.
+. Submit a pull request with a clear description of the change and the rationale behind it.
+
+TIP: Before proposing a new convention, consider whether it solves a problem that the existing conventions do not already address. The best conventions are the ones that remove ambiguity without adding complexity.
+
+This is a living document. As the Mifos platform evolves, so will the conventions that shape it. Your experience and feedback are essential to keeping it relevant, accurate, and useful. Welcome to the team -- your journey begins here.
+
+See:
+
+- https://nurkiewicz.com/2021/10/the-missing-readme-book-review.html

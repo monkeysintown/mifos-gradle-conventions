@@ -1,0 +1,93 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+title C4 Component Diagram - Legacy SynchronousCommandProcessingService (Apache Fineract)
+
+Person(apiClient, "API Client / Frontend", "Sends write requests via REST API")
+
+System_Boundary(fineractSystem, "Apache Fineract System (Legacy)") {
+    Container(restApi, "REST API Layer", "JAX-RS / Jersey", "Receives HTTP write requests as raw JSON strings")
+
+    Container_Boundary(legacyCommandModule, "Legacy Command Processing (fineract-provider)") {
+        Component(commandWrapperBuilder, "CommandWrapperBuilder", "Java Class", "Builder pattern to construct CommandWrapper with entityName, actionName, resourceId, JSON payload, and various context IDs (office, group, client, loan, savings, etc.)")
+
+        Component(commandWrapper, "CommandWrapper", "Java Class", "Legacy command envelope: entityName, actionName, resourceId, subResourceId, officeId, groupId, clientId, loanId, savingsId, transactionId, productId, creditBureauId, jobName, href, JSON string payload, idempotencyKey")
+
+        Component(portfolioCommandSource, "PortfolioCommandSourceWrite\nPlatformService", "Spring Service Interface", "Entry point: logCommandSource(CommandWrapper)")
+
+        Component(portfolioCommandSourceImpl, "PortfolioCommandSourceWrite\nPlatformServiceImpl", "Spring Service", "Validates permissions, parses JSON via fromApiJsonHelper, wraps in retry loop for deadlock handling, delegates to SynchronousCommandProcessingService")
+
+        Component(syncCommandProc, "SynchronousCommandProcessing\nService", "Spring Service", "Core orchestrator: idempotency check, maker-checker validation, command source persistence, handler lookup, transaction management, error handling with retry logic")
+
+        Component(commandSourceService, "CommandSourceService", "Spring Service", "Manages CommandSource entity lifecycle: getInitialCommandSource, saveInitialNewTransaction, processCommand, generateErrorInfo")
+
+        Component(commandSource, "CommandSource", "JPA Entity", "Persistent audit record: actionName, entityName, resourceId, commandAsJson, maker, checker, processingResult, idempotencyKey, status (processed/awaiting.approval/rejected)")
+
+        Component(commandSourceRepo, "CommandSourceRepository", "Spring Data JPA", "CRUD operations for m_portfolio_command_source table")
+
+        Component(jsonCommand, "JsonCommand", "Java Class", "Parsed command with JsonElement tree, fromApiJsonHelper reference, and all entity context IDs extracted from CommandWrapper")
+
+        Component(fromApiJsonHelper, "FromApiJsonHelper", "GSON-based Helper", "Parses raw JSON strings into JsonElement using Google GSON; provides type-safe extraction methods")
+
+        Component(commandHandlerProvider, "CommandHandlerProvider", "Spring Component", "Registry/factory that resolves entityName + actionName to the correct NewCommandDomainService handler")
+
+        Component(newCommandHandler, "NewCommandHandler\n(Domain Service)", "Spring Service Interface", "Domain-specific handler implementing business logic (e.g., ClientWritePlatformService, LoanWritePlatformService)")
+
+        Component(securityContext, "PlatformSecurityContext", "Spring Component", "Retrieves authenticated AppUser, validates permissions against wrapper.getTaskPermissionName()")
+
+        Component(configurationService, "ConfigurationDomainService", "Spring Service", "Checks if maker-checker is enabled for specific actions, same-maker-checker policy")
+
+        Component(idempotencyResolver, "IdempotencyKeyResolver", "Spring Component", "Resolves idempotency key from request context to detect duplicate submissions")
+
+        Component(retryConfig, "RetryConfigurationAssembler", "Spring Component", "Configures retry policies for deadlock/optimistic locking recovery")
+
+        Component(fineractContext, "FineractRequestContextHolder", "ThreadLocal Context", "Stores commandSourceId and other request-scoped attributes across transaction boundaries")
+
+        Component(batchContext, "BatchRequestContextHolder", "ThreadLocal Context", "Tracks whether request is part of a batch/enclosing transaction")
+
+        Component(errorHandler, "ErrorHandler", "Utility Class", "Maps Throwables to RuntimeException, generates ErrorInfo with status codes for API responses")
+
+        Component(rollbackException, "RollbackTransactionAsCommandIsNot\nApprovedByCheckerException", "Runtime Exception", "Thrown when maker-checker requires approval; triggers transaction rollback and sets status to 'awaiting.approval'")
+    }
+
+    Container(domainServices, "Domain Business Services", "Spring Services", "Core banking business logic (Client, Loan, Savings, Charge, etc.)")
+    ContainerDb(database, "Fineract Database", "PostgreSQL / MySQL", "Stores m_portfolio_command_source audit log, domain entities, and idempotency records")
+}
+
+Rel(apiClient, restApi, "Sends write requests (POST/PUT/DELETE)", "HTTP/JSON")
+Rel(restApi, commandWrapperBuilder, "Builds command via", "Java")
+Rel(commandWrapperBuilder, commandWrapper, "Creates", "Java")
+
+Rel(restApi, portfolioCommandSource, "Calls logCommandSource()", "Java")
+Rel(portfolioCommandSource, portfolioCommandSourceImpl, "Implemented by", "Java")
+
+Rel(portfolioCommandSourceImpl, securityContext, "Validates user permissions via", "Java")
+Rel(portfolioCommandSourceImpl, fromApiJsonHelper, "Parses JSON payload via", "Java")
+Rel(portfolioCommandSourceImpl, syncCommandProc, "Delegates to executeCommand()", "Java")
+
+Rel(syncCommandProc, idempotencyResolver, "Checks duplicate requests via", "Java")
+Rel(syncCommandProc, securityContext, "Retrieves authenticated AppUser via", "Java")
+Rel(syncCommandProc, commandSourceService, "Manages CommandSource lifecycle via", "Java")
+Rel(syncCommandProc, commandHandlerProvider, "Resolves handler via entityName+actionName", "Java")
+Rel(syncCommandProc, configurationService, "Checks maker-checker config via", "Java")
+Rel(syncCommandProc, retryConfig, "Wraps execution with retry via", "Java")
+Rel(syncCommandProc, fineractContext, "Stores/retrieves commandSourceId via", "Java")
+Rel(syncCommandProc, batchContext, "Checks enclosing transaction via", "Java")
+
+Rel(commandSourceService, commandSource, "Creates/updates persistent", "JPA")
+Rel(commandSource, commandSourceRepo, "Persisted via", "Spring Data JPA")
+Rel(commandSourceRepo, database, "Reads/Writes", "JDBC/SQL")
+
+Rel(syncCommandProc, newCommandHandler, "Invokes handle() on", "Java")
+Rel(newCommandHandler, domainServices, "Calls domain business logic on", "Java")
+Rel(domainServices, database, "Reads/Writes domain data", "JDBC/SQL")
+
+Rel(syncCommandProc, errorHandler, "Maps exceptions via", "Java")
+Rel(syncCommandProc, rollbackException, "Throws for pending maker-checker", "Java")
+
+Rel(commandWrapper, jsonCommand, "Transformed into via fromApiJsonHelper.parse()", "Java")
+Rel(jsonCommand, newCommandHandler, "Passed as parameter to", "Java")
+
+SHOW_LEGEND()
+@enduml

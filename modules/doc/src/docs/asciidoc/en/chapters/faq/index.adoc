@@ -1,0 +1,7 @@
+= Frequently Asked Questions
+
+include::development.adoc[leveloffset=+1]
+
+include::test.adoc[leveloffset=+1]
+
+// include::{commondir}/faq.adoc[leveloffset=+1]

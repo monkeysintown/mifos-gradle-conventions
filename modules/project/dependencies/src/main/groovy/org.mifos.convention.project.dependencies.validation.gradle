@@ -1,0 +1,7 @@
+dependencies {
+    constraints {
+        implementation "org.hibernate.validator:hibernate-validator:8.0.2.Final"
+        annotationProcessor "org.hibernate.validator:hibernate-validator-annotation-processor:8.0.2.Final"
+        testAnnotationProcessor "org.hibernate.validator:hibernate-validator-annotation-processor:8.0.2.Final"
+    }
+}

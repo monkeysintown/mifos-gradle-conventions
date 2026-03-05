@@ -1,0 +1,244 @@
+= Glossary of Domain-Driven Design Terms
+
+This glossary defines all important Domain-Driven Design (DDD), event-based architecture, and integration terms used in the VSLA Service implementation plan. Each definition is contextualized to the Self-Funded Group (VSLA) domain.
+
+== A
+
+Aggregate::
+A cluster of domain objects (entities and value objects) that are treated as a single unit for data changes. An aggregate defines a transactional consistency boundary—everything inside it is persisted together. In the VSLA service, `SelfFundedGroup`, `GroupCapital`, `InternalLoan`, and `GroupLedger` are aggregates. Each aggregate has exactly one root entity through which all external references must pass.
+
+Aggregate Root::
+The single entity that serves as the entry point to an aggregate. It controls the lifecycle and enforces the invariants of all objects within its boundary. For example, `SelfFundedGroup` is the root of the Group Lifecycle aggregate; no other code may directly modify a `MemberEnrollment` without loading the group root first.
+
+Anti-Corruption Layer (ACL)::
+A protective layer of code that isolates one bounded context from another, translating foreign concepts and data models into the local ubiquitous language. The VSLA service uses ACLs to communicate with Fineract Core: `FineractSavingsHandler`, `FineractLoanHandler`, and `FineractJournalEntryHandler` translate VSLA domain events into Fineract REST API payloads, preventing Fineract's internal model from leaking into the VSLA domain.
+
+Application Service::
+A thin orchestration layer that coordinates use cases by loading aggregates, invoking domain behavior, persisting changes, and publishing events. In the VSLA service, command handlers (e.g., `PurchaseSharesHandler`) act as application services. They contain no domain logic themselves; they delegate to aggregates and infrastructure.
+
+== B
+
+Bounded Context::
+A semantic boundary within which a domain model is defined and valid. Outside the boundary, the same term may have a different meaning. The VSLA service contains seven bounded contexts: Group Lifecycle, Capital & Shares, Internal Lending, External Funding, Group Accounting, Membership & Governance, and Mobile & Payments. Each context owns its own model, database schema, and ubiquitous language.
+
+== C
+
+Command::
+An immutable object representing an intent to change system state. Commands are named in the imperative (e.g., `PurchaseSharesCommand`, `ApproveInternalLoanCommand`). They carry all data required for a single transactional operation and are dispatched to exactly one aggregate. In the VSLA service, commands are implemented as Java records with Jakarta Validation annotations.
+
+Command Bus::
+The infrastructure mechanism that routes commands to their appropriate command handlers. The VSLA service implements a `SpringCommandBus` that looks up handlers by command type and executes a middleware pipeline before invoking the handler. This decouples the API layer from application logic.
+
+Command Handler::
+The application-layer component responsible for executing a specific command type. Each handler loads the target aggregate, invokes domain methods, persists state, and publishes domain events. For example, `PurchaseSharesHandler` implements `CommandHandler<PurchaseSharesCommand>`.
+
+Command Processing::
+The end-to-end lifecycle of handling a command: validation, authorization, aggregate loading, domain behavior execution, persistence, event publication, and side-effect triggering. The VSLA service uses typed command processing (immutable DTOs) rather than Fineract's legacy `JsonCommand` string-based approach.
+
+Compensating Action::
+A corrective operation that reverses or offsets the effect of a previously completed action when a later failure occurs. In the VSLA-Fineract integration, if an Outbox processor successfully posts a journal entry to Fineract but the VSLA transaction rolls back, a reconciliation job creates a compensating Outbox entry to reverse the orphan Fineract posting.
+
+Context Map::
+A high-level diagram that visualizes the relationships between bounded contexts, showing upstream/downstream dependencies and integration patterns (e.g., customer-supplier, published language, open host). The VSLA Context Map identifies Group Lifecycle as upstream, Capital & Shares as customer-supplier to Fineract, and Group Accounting as a published-language subscriber.
+
+CQRS (Command Query Responsibility Segregation)::
+An architectural pattern that separates the write model (commands, aggregates, domain events) from the read model (queries, projections, dashboards). In the VSLA service, command handlers mutate aggregates, while event listeners asynchronously project read-only views such as `GroupDashboardView` and `EstimatedShareOutView`. Read models are never updated directly by commands.
+
+Customer-Supplier::
+A context-map relationship where one bounded context (the customer) depends on another (the supplier) for functionality or data. The supplier must accommodate the customer's needs. In the VSLA topology, Capital & Shares is a customer of Fineract's Savings module; Fineract must expose the APIs required for share deposit tracking.
+
+== D
+
+Dead Letter::
+An Outbox event that has exceeded the maximum retry threshold and cannot be synchronized with Fineract. Dead-lettered events require manual operator intervention or automated compensating workflows.
+
+Domain Event::
+An immutable record of something that happened in the domain, named in the past tense (e.g., `SharesPurchased`, `InternalLoanRepaid`). Domain events are published by aggregates after state changes and consumed by other parts of the system to trigger side effects, update read models, or synchronize with external systems. In the VSLA service, `VslaDomainEvent` is a sealed interface implemented by all domain events.
+
+Domain Service::
+A stateless operation that encapsulates domain logic not naturally belonging to any single entity or value object. The VSLA service uses domain services for cross-aggregate calculations, such as the `ShareOutCalculator` (computing member payouts from corpus) and the earnings-split calculator (dividing interest between group retained earnings and cooperative support).
+
+Downstream::
+A bounded context that consumes events or data from an upstream context. Downstream contexts must adapt to changes in the upstream model. In the VSLA Context Map, Capital & Shares, Internal Lending, and Group Accounting are all downstream of Group Lifecycle.
+
+== E
+
+Entity::
+A domain object with a unique identity that persists across state changes. Unlike value objects, entities are distinguished by their ID, not their attributes. `SelfFundedGroup`, `InternalLoan`, and `MemberEnrollment` are entities because their identity (`groupId`, `loanId`, `memberId`) remains constant even as attributes change.
+
+Event-Driven Architecture::
+An architectural style where components communicate by producing and consuming events rather than direct method invocation. The VSLA service is event-driven internally (Spring `ApplicationEventPublisher`) and externally (Outbox events trigger Fineract REST calls). This decouples bounded contexts and enables asynchronous processing.
+
+Event Listener::
+A component that reacts to published domain events. Listeners may be synchronous (participating in the same transaction, e.g., Outbox writers) or asynchronous (running after commit, e.g., dashboard projections and mobile push notifications).
+
+Event Store::
+An append-only persistence mechanism that records all domain events for a given aggregate. While the VSLA service does not use full Event Sourcing (it stores current aggregate state in JPA entities), it maintains an event store table (`m_vsla_domain_events`) for audit, offline replay, and read-model rebuilds.
+
+Eventual Consistency::
+A consistency model that guarantees that, if no new updates are made to a given data item, eventually all accesses to that item will return the last updated value. The VSLA service and Fineract Core are eventually consistent: a share purchase command commits immediately in VSLA, but the corresponding Fineract savings deposit may lag by seconds until the Outbox processor completes.
+
+== F
+
+Fineract Account Mapping::
+A value object that correlates VSLA domain identifiers (`GroupId`, `MemberId`) with Fineract external identifiers (`fineractClientId`, `fineractSavingsAccountId`). Stored in the VSLA database, these mappings allow the Outbox processor to route financial operations to the correct Fineract accounts.
+
+== G
+
+Group-Level Accounting::
+The VSLA-specific practice of maintaining a Chart of Accounts, General Ledger, Trial Balance, Profit & Loss, and Balance Sheet at the self-funded group level rather than the institution level. This is a core domain requirement because the group—not the facilitating NGO or MFI—owns the profits.
+
+== H
+
+Handler::
+See <<Command Handler>>.
+
+== I
+
+Idempotency::
+The property of an operation such that executing it multiple times produces the same result as executing it once. The VSLA service ensures idempotency against Fineract by generating a unique `externalId` (derived from the `OutboxEvent` UUID) for every financial posting. Retries of the same Outbox row do not create duplicate transactions in Fineract.
+
+Integration Event::
+A domain event whose primary purpose is to notify external systems or bounded contexts of a state change. `FineractSyncRequired` is an integration event that signals the Outbox processor to execute a Fineract REST call.
+
+Invariant::
+A business rule that must always be true within an aggregate boundary. Invariants are enforced by the aggregate root. Examples: a group's cycle dates are immutable once active; the corpus must equal the sum of savings plus borrowings minus investments; a cash-out transaction cannot be accepted offline without server-side balance confirmation.
+
+== L
+
+Local Transaction::
+A database transaction confined to a single system (the VSLA PostgreSQL database). The VSLA service uses local transactions for aggregate persistence and Outbox writes. It does not use distributed (two-phase commit) transactions across the VSLA-Fineract boundary.
+
+== M
+
+Meeting Schedule::
+A value object that defines when a self-funded group meets, supporting patterns such as monthly on a specific date, nth weekday, or twice-monthly. Encapsulated as an immutable record, it is assigned to the `SelfFundedGroup` aggregate.
+
+Middleware::
+A cross-cutting concern that intercepts commands in the command bus pipeline before they reach the handler. The VSLA service uses middleware for validation, authorization, idempotency, offline conflict detection, transaction management, and Outbox persistence. Each middleware may short-circuit the pipeline or pass control to the next middleware.
+
+Mobile-First API::
+The REST API surface designed exclusively for the offline-first mobile application. It hides Fineract complexity and exposes VSLA-specific endpoints for sync, dashboards, and command batching. The mobile app never communicates directly with Fineract.
+
+== O
+
+Offline Conflict Detection::
+The middleware and domain logic that identifies when a mobile-originated command conflicts with server state that changed while the device was offline. The VSLA service applies a merge strategy: cash-in transactions are accepted tentatively; cash-out transactions are rejected if the server balance has changed.
+
+Open Host Service::
+A context-map pattern where a bounded context exposes a well-defined, stable protocol (often a REST API or webhook interface) for multiple downstream consumers. The Mobile & Payments context is an open host service: it defines the contract (`/vsla/webhooks/yape`, `/vsla/commands/batch`) consumed by the mobile app and payment providers.
+
+Operational Parameter::
+A group-level configuration value that governs self-funded group behavior, such as the value of one share, minimum shares per meeting, penalty amounts, or loan eligibility rules. These parameters are part of the `SelfFundedGroup` aggregate and vary per group.
+
+Outbox Event::
+A row in the `outbox_events` table representing a pending side-effect that must be executed against Fineract Core. Outbox events are written in the same local transaction as the domain event that triggered them, ensuring at-least-once delivery.
+
+Outbox Pattern::
+An integration pattern that guarantees reliable message delivery from a local database transaction to an external system. Instead of calling Fineract directly inside a command handler, the VSLA service writes an Outbox row and a background processor polls and executes the REST call asynchronously. This avoids dual-write problems and distributed transactions.
+
+== P
+
+Package Structure::
+The physical organization of source code into modules or directories that reflect the bounded context and layer boundaries. The VSLA service uses a package structure aligned with DDD layers: `api`, `application` (command, handler, middleware, service, event), `domain` (group, capital, lending, accounting, shared), and `infrastructure` (config, fineract, outbox, persistence, mobile, payment).
+
+Penalty::
+A monetary fine applied to a member for violating group rules (absence, lateness, failure to purchase minimum shares). Penalties are domain events (`PenaltyApplied`) that increase group capital and may be reflected in member dashboards.
+
+Pipeline::
+The ordered chain of middleware functions through which every command passes before reaching its handler. The VSLA `SpringCommandBus` constructs a functional pipeline using `Function<T, CommandProcessingResult>` composition.
+
+Port::
+An interface defined by the domain layer that specifies a required capability from infrastructure. For example, `InternalLoanPort` defines how the domain expects loans to be disbursed; the `VslaLoanAccountAdapter` (in the ACL) implements this port using Fineract's REST API.
+
+Projection::
+See <<Read Model>>.
+
+Published Language::
+A context-map pattern where a bounded context publishes a well-defined set of domain events that other contexts may subscribe to without tight coupling. Group Accounting uses a published language: it subscribes to `SharesPurchased`, `InternalLoanRepaid`, `ExternalFundingReceived`, and `EarningsAllocated` without knowing the internal structure of the originating contexts.
+
+== Q
+
+Query Service::
+The read-side component in CQRS that serves data to API consumers. Query services access materialized views (projections) rather than aggregates. Examples: `GroupDashboardQueryService`, `GroupCorpusQueryService`, `ShareOutCalculator`.
+
+== R
+
+Read Model::
+A denormalized, query-optimized representation of data built from domain events. Read models are updated asynchronously by event listeners and are never modified by command handlers. The VSLA service maintains read models for group dashboards, member dashboards, corpus tracking, and estimated share-out.
+
+Reconciliation::
+The process of comparing VSLA domain state with Fineract financial state to detect discrepancies. A nightly reconciliation job compares `GroupCapital` corpus against Fineract savings balances and internal loan principal against account transfers, emitting `ReconciliationAlert` events for mismatches.
+
+Repository::
+An abstraction that mediates between the domain and data mapping layers, acting like an in-memory collection of aggregates. The VSLA service defines repositories such as `SelfFundedGroupRepository`, `GroupCapitalRepository`, and `InternalLoanRepository`. Repositories load aggregates by ID and persist aggregate changes (including domain events) to the database.
+
+Retry::
+The Outbox processor's mechanism for re-attempting failed Fineract REST calls with exponential backoff. Each Outbox event tracks a `retryCount`; after exceeding `maxRetries`, the event is moved to a dead-letter state.
+
+== S
+
+Saga::
+A long-running business process that coordinates multiple transactions across bounded contexts or systems. While not explicitly named in the VSLA plan, the Outbox-driven synchronization of a share purchase (VSLA commit + Fineract deposit) is effectively a saga with eventual consistency and compensating actions.
+
+Sealed Interface::
+A Java language feature (JEP 409) that restricts which classes or records may implement an interface. `VslaDomainEvent` is a sealed interface, ensuring that all domain events are known at compile time and enabling exhaustive pattern matching in event listeners.
+
+Self-Funded Group::
+The core domain concept: a member-owned financial association that pools savings, lends internally, maintains its own balance sheet, and distributes profits. Contrasts with Joint Liability Groups (JLGs), where the MFI owns the financial relationship.
+
+Sequence Number::
+An optimistic concurrency control mechanism within an aggregate's event stream. Each domain event for a given aggregate carries a monotonically increasing sequence number, enabling offline conflict detection and ordered replay.
+
+Share-Out::
+The periodic redistribution of accumulated group profits to members based on their shareholdings. Computed by the `ShareOutCalculator` domain service and recorded via the `ShareOutComputed` domain event.
+
+Side Effect::
+Any operation triggered by a domain event that falls outside the originating aggregate's boundary. Examples: writing an Outbox row, updating a dashboard projection, pushing a mobile notification, or posting to Fineract's GL. Side effects are executed by event listeners.
+
+Standalone Service::
+An independently deployable application with its own database, runtime, and release cycle. The VSLA service is a standalone Spring Boot application that integrates with Fineract Core exclusively via REST, preserving upgrade independence for both systems.
+
+State Change::
+Any mutation to an aggregate's data that results in a new domain event. In DDD, state changes are always initiated by commands, validated against invariants, and recorded as events.
+
+System of Record::
+The authoritative data source for a given piece of information. The VSLA service is the system of record for group parameters, internal loans, and group accounting. Fineract Core is the system of record for client master data, savings balances, external loans, and institution-level GL.
+
+== T
+
+Trapdoor Setting::
+A deployment-time configuration (`vsla.group-type`) that selects between two mutually exclusive operational modes: Self-Funded Groups or Joint Liability Groups. Once transactions exist in the system, this setting cannot be changed. It acts as a bounded-context guard, ensuring that a single deployment supports only one group model.
+
+Trial Balance::
+An accounting report that verifies the mathematical equality of debits and credits within the group-level Chart of Accounts. Generated by the `GroupLedger` aggregate and exposed via the Group Accounting read model.
+
+Typed Command Processing::
+The practice of using strongly-typed, immutable command records (Java records) rather than untyped string maps (e.g., `JsonCommand`). Typed commands enable compile-time safety, IDE autocompletion, and Jakarta Bean Validation.
+
+== U
+
+Ubiquitous Language::
+A shared, rigorous language used by domain experts and developers to describe the domain model. Terms such as "corpus," "share-out," "cycle dates," "meeting schedule," and "internal loan" are part of the VSLA ubiquitous language and appear consistently in code, documentation, and API contracts.
+
+Upstream::
+A bounded context whose model influences downstream contexts. Changes to an upstream context may force downstream contexts to adapt. In the VSLA Context Map, Group Lifecycle is upstream because its events (`SelfFundedGroupCreated`, `MemberEnrolled`) trigger behavior in Capital & Shares, Internal Lending, and Group Accounting.
+
+== V
+
+Value Object::
+An immutable domain object defined entirely by its attribute values, with no conceptual identity. Value objects are compared by content, not by ID. Examples: `ShareSpecification`, `MeetingSchedule`, `LoanEligibilityRule`, `Money`, `EarningsAllocationRatio`. Value objects may be shared across aggregates and are safe to pass by value.
+
+Vertical Slice::
+A software architecture approach where a feature is implemented end-to-end (API, application, domain, infrastructure) within a single cohesive module rather than across horizontal layers. The VSLA service is a vertical slice that cuts through Fineract without modifying its horizontal layers.
+
+Vote::
+A domain concept within the Internal Lending context representing a member's approval or rejection of an internal loan application. The `InternalLoanApproved` event carries a `List<MemberVote>`, and the aggregate enforces quorum rules (minimum number of approving votes).
+
+== W
+
+Webhook::
+An HTTP callback mechanism used by external payment providers (YAPE, PLIN) to notify the VSLA service of incoming payments. The `PaymentWebhookController` translates webhook payloads into typed commands (`ReceiveMobilePaymentCommand`) that enter the command bus.
+
+Write Model::
+The command-side of CQRS consisting of aggregates, command handlers, domain events, and repositories. The write model enforces business invariants and is optimized for consistency, not query performance. In the VSLA service, all command handlers and aggregates form the write model.

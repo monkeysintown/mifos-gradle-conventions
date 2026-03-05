@@ -1,0 +1,539 @@
+plugins {
+    id "java"
+    id "pmd"
+    id "checkstyle"
+    id "org.owasp.dependencycheck"
+    id "com.autonomousapps.dependency-analysis"
+    id "org.sonarqube"
+    id "com.github.spotbugs"
+    id "com.diffplug.spotless"
+    id "net.ltgt.errorprone"
+    id "de.kontext-e.jqassistant.gradle"
+    id "name.remal.sonarlint"
+    id "org.checkerframework"
+    id "org.openrewrite.rewrite"
+    id "org.jetbrains.qodana"
+    id "com.cmgapps.licenses"
+    // id "io.snyk.gradle.plugin.snykplugin"
+    // id "com.palantir.java-format-spotless"
+}
+
+ext["checkstyleVersion"] = "13.4.2"
+
+tasks.withType(JavaCompile).configureEach {
+    options.errorprone {
+        enabled = project.gradle.startParameter.taskNames.contains('build') || project.gradle.startParameter.taskNames.contains('check')
+        disableWarningsInGeneratedCode = true
+        allErrorsAsWarnings = true
+        excludedPaths = ".*/build/.*"
+        option(
+            "NullAway:AnnotatedPackages", "com.uber"
+        )
+        disable(
+            // TODO Remove disabled checks from this list, by fixing remaining usages
+            "UnusedVariable",
+            "TypeParameterUnusedInFormals",
+            "EmptyBlockTag",
+            "MissingSummary",
+            "InvalidParam",
+            "ReturnFromVoid",
+            "AlmostJavadoc",
+            "InvalidBlockTag",
+            "JavaUtilDate",
+            "ReturnValueIgnored",
+            "DirectInvocationOnMock",
+            "CanIgnoreReturnValueSuggester",
+            "SameNameButDifferent", // Until errorprone recognizes Lombok
+            "MultiVariableDeclaration", // Until errorprone recognizes Lombok
+            "UnnecessaryDefaultInEnumSwitch"
+        )
+        warn(
+            "NullAway",
+            "DefaultCharset",
+            "RemoveUnusedImports",
+            "WaitNotInLoop",
+            "ThreeLetterTimeZoneID",
+            "VariableNameSameAsType",
+            "UnnecessaryParentheses",
+            "MultipleTopLevelClasses",
+            "MixedMutabilityReturnType",
+            "AssertEqualsArgumentOrderChecker",
+            "EmptySetMultibindingContributions",
+            "BigDecimalEquals",
+            "MixedArrayDimensions",
+            "PackageLocation",
+            "UseBinds",
+            "BadImport",
+            "IntLongMath",
+            "FloatCast",
+            "ReachabilityFenceUsage",
+            "StreamResourceLeak",
+            "TruthIncompatibleType",
+            "ByteBufferBackingArray",
+            "OrphanedFormatString",
+            "CatchAndPrintStackTrace",
+            "ObjectToString",
+            "StringSplitter",
+            "AssertThrowsMultipleStatements",
+            "BoxedPrimitiveConstructor",
+            "EmptyCatch",
+            "BoxedPrimitiveEquality",
+            "SynchronizeOnNonFinalField",
+            "WildcardImport",
+            "FutureReturnValueIgnored",
+            "PrivateConstructorForNoninstantiableModule",
+            "ClassCanBeStatic",
+            "ClassNewInstance",
+            "UnnecessaryStaticImport",
+            "UnsafeFinalization",
+            "JavaTimeDefaultTimeZone",
+            "JodaPlusMinusLong",
+            "SwitchDefault",
+            "VarTypeName",
+            "ArgumentSelectionDefectChecker",
+            "CompareToZero",
+            "InjectOnConstructorOfAbstractClass",
+            "ImmutableEnumChecker",
+            "NarrowingCompoundAssignment",
+            "MissingCasesInEnumSwitch",
+            "ReferenceEquality",
+            "UndefinedEquals",
+            "UnescapedEntity",
+            "ModifyCollectionInEnhancedForLoop",
+            "NonCanonicalType",
+            "InvalidInlineTag",
+            "MutablePublicArray",
+            "StaticAssignmentInConstructor",
+            "ProtectedMembersInFinalClass",
+            "OperatorPrecedence",
+            "EqualsGetClass",
+            "EqualsUnsafeCast",
+            "DoubleBraceInitialization",
+            "UnusedNestedClass",
+            "UnusedMethod",
+            "ModifiedButNotUsed",
+            "InconsistentCapitalization",
+            "MissingOverride",
+            "InvalidBlockTag",
+            "InconsistentOverloads",
+            "MethodCanBeStatic",
+            "Var",
+            "ConstantField",
+            "UnnecessaryDefaultInEnumSwitch",
+            "FieldCanBeFinal"
+        )
+    }
+}
+
+dependencies {
+    spotbugsPlugins "jp.skypencil.findbugs.slf4j:bug-pattern:1.5.0@jar"
+    spotbugsPlugins "com.h3xstream.findsecbugs:findsecbugs-plugin:1.14.0"
+    spotbugsPlugins "com.mebigfatguy.sb-contrib:sb-contrib:7.7.4"
+    // spotbugsPlugins "de.heidelberg.pvs.diego:1.0-SNAPSHOT"
+
+    errorprone "com.uber.nullaway:nullaway:0.13.4"
+    errorprone "com.google.errorprone:error_prone_core:2.49.0"
+    errorprone "jp.skypencil.errorprone.slf4j:errorprone-slf4j:0.1.20"
+
+    rewrite platform("org.openrewrite.recipe:rewrite-recipe-bom:latest.release")
+    rewrite "org.openrewrite.recipe:rewrite-migrate-java"
+    rewrite "org.openrewrite.recipe:rewrite-static-analysis"
+    rewrite "org.openrewrite.recipe:rewrite-third-party"
+
+    constraints {
+        checkstyle "com.puppycrawl.tools:checkstyle:$checkstyleVersion"
+        checkstyle "com.github.sevntu-checkstyle:sevntu-checks:1.44.1"
+    }
+
+    checkerQual "org.checkerframework:checker-qual:4.2.0"
+    checkerQual "org.checkerframework:dataflow-nullaway:4.2.0"
+    checkerQual "org.checkerframework:dataflow-errorprone:4.2.0"
+    checkerFramework "org.checkerframework:checker:4.2.0"
+}
+
+// owasp
+
+dependencyCheck {
+    autoUpdate = true
+
+    // cveValidForHours = 24
+
+    // let's ignore errors to make builds in Jenkins more stable
+    failOnError = false
+    // OWASP Dependency Check plugin for Jenkins needs an XML report,
+    // but humans may also need an HTML one
+    format = "ALL"
+
+    // set up a quality gate for vulnerabilities with high severity level:
+    // let's consider that a vulnerability has a high severity level if its CVSS score is higher than 7
+    // the build is going to fail if vulnerabilities with high severity level found
+    // failBuildOnCVSS = 7
+
+    // specify a list of known issues which contain:
+    // false-positives
+    // confirmed vulnerabilities which are not fixed yet, but we have a ticket for that
+    suppressionFile = "${rootDir}/.mifos/config/owasp/suppressions.xml"
+}
+
+// pmd
+
+tasks.named("pmdMain") {
+    source = sourceSets.main.allJava.matching {
+        exclude "**/generated/**"
+        exclude "**/build/generated/source/proto/**"
+    }
+}
+
+tasks.named("pmdTest") {
+    source = sourceSets.test.allJava.matching {
+        exclude "**/generated/**"
+        exclude "**/build/generated/source/proto/**"
+    }
+}
+
+pmd {
+    ignoreFailures = true
+    consoleOutput = false
+    toolVersion = "7.25.0"
+    rulesMinimumPriority = 5
+    ruleSets = ["category/java/errorprone.xml", "category/java/bestpractices.xml"]
+    sourceSets = [sourceSets.main]
+    // threads = 4
+    pmdMain {
+        excludes = [
+            "**/bin/**",
+            "**/out/**",
+            "**/build/**",
+            "**/target/**"
+        ]
+    }
+}
+
+// sonar
+
+sonarqube {
+    properties {
+        property "sonar.sources", "src"
+        property "sonar.sourceEncoding", "UTF-8"
+        property "sonar.exclusions", "**/generated/**/*"
+    }
+}
+
+// spotbugs
+
+configurations.named("spotbugs").configure {
+    resolutionStrategy.eachDependency {
+        if (it.requested.group == 'org.ow2.asm') {
+            it.useVersion "9.9.1"
+            it.because "Asm 9.9.1 is required for JDK 25 support"
+        }
+    }
+}
+
+spotbugs {
+    ignoreFailures = true
+    showStackTraces = false
+    showProgress = false
+    // effort = Effort.DEFAULT
+    // reportLevel = Confidence.DEFAULT
+    visitors = ["FindSqlInjection", "SwitchFallthrough"]
+    // omitVisitors = ["FindNonShortCircuit"]
+
+    reportsDir = file("${projectDir}/build/reports/spotbugs")
+    // includeFilter = "${rootDir}/.mifos/config/spotbugs/include.xml"
+    excludeFilter = file("${rootDir}/.mifos/config/spotbugs/exclude.xml")
+
+    // baselineFile = file("${rootDir}/.mifos/config/spotbugs/baseline.xml")
+    // onlyAnalyze = ["org.mifos.*"]
+    // maxHeapSize = "1g"
+    // extraArgs = ["-nested:false"]
+    // jvmArgs = ["-Duser.language=en"]
+}
+
+spotbugsMain {
+    reports {
+        sarif {
+            enabled = true
+        }
+        html {
+            enabled = true
+            stylesheet = "fancy-hist.xsl"
+        }
+    }
+}
+
+spotbugsTest {
+    reports {
+        sarif {
+            enabled = true
+        }
+        html {
+            // TODO: make tests compilable again
+            enabled = true
+            stylesheet = "fancy-hist.xsl"
+        }
+    }
+}
+
+// spotless
+
+spotless {
+    enforceCheck = false // TODO: once we are ready enable this!
+
+    encoding = "UTF-8"
+
+    format "misc", {
+        target "**/*.md", "**/*.properties", "**/gitignore.txt", "**/.openapi-generator-ignore", "**/*.yml", "**/*.xml", "**/**.json", "**/*.sql"
+        targetExclude "**/build/**", "**/resources/template/**", "**/main/template/**", "**/bin/**", "**/.settings/**", "**/.idea/**", "**/.gradle/**", "**/gradlew.bat", "**/licenses/**", "**/banner.txt", ".vscode/**", ".profileconfig.json"
+        leadingTabsToSpaces(4)
+        endWithNewline()
+        trimTrailingWhitespace()
+    }
+
+    java {
+        target "src/*/java/**/*.java", "**/build/generated/sources/openapi/**/*.java"
+        licenseHeaderFile "${rootDir}/.mifos/config/licenses/license.java"
+        targetExclude "**/build/**", "**/bin/**", "**/out/**"
+        // importOrder() //sort imports alphabetically
+        removeUnusedImports()
+        // cleanthat()
+        palantirJavaFormat()
+                .formatJavadoc(true)
+        formatAnnotations()
+        endWithNewline()
+        trimTrailingWhitespace()
+
+        // Enforce style modifier order
+//        custom "Modifier ordering", {
+//            def modifierRanking = [
+//                public      : 1,
+//                protected   : 2,
+//                private     : 3,
+//                abstract    : 4,
+//                default     : 5,
+//                static      : 6,
+//                final       : 7,
+//                transient   : 8,
+//                volatile    : 9,
+//                synchronized: 10,
+//                native      : 11,
+//                strictfp    : 12
+//            ]
+//            // Find any instance of multiple modifiers. Lead with a non-word character to avoid
+//            // accidental matching against for instance, "an alternative default value"
+//            it.replaceAll(/\W(?:public |protected |private |abstract |default |static |final |transient |volatile |synchronized |native |strictfp ){2,}/, {
+//                // Do not replace the leading non-word character.  Identify the modifiers
+//                it.replaceAll(/(?:public |protected |private |abstract |default |static |final |transient |volatile |synchronized |native |strictfp ){2,}/, {
+//                    // Sort the modifiers according to the ranking above
+//                    it.split().sort({ modifierRanking[it] }).join(" ") + " "
+//                })
+//            }
+//            )
+//        }
+    }
+
+    groovyGradle {
+        target "*.gradle", "**/*.gradle"
+        targetExclude "**/build/**"
+        // greclipse()
+        leadingTabsToSpaces(4)
+        endWithNewline()
+        trimTrailingWhitespace()
+    }
+
+    lineEndings = "UNIX"
+}
+
+// checkstyle
+
+checkstyle {
+    toolVersion = "$checkstyleVersion"
+    configFile = file("${rootDir}/.mifos/config/checkstyle/checkstyle.xml")
+    configDirectory = file("${rootDir}/.mifos/config/checkstyle")
+    configProperties = [
+        "checkstyleSuppressionsPath": file("${rootDir}/.mifos/config/checkstyle/suppressions.xml").absolutePath,
+    ]
+}
+
+checkstyleMain.exclude "**/bin/**"
+checkstyleMain.exclude "**/out/**"
+checkstyleMain.exclude "**/build/**"
+checkstyleMain.exclude "**/target/**"
+
+checkstyleTest.exclude "**/bin/**"
+checkstyleTest.exclude "**/out/**"
+checkstyleTest.exclude "**/build/**"
+checkstyleTest.exclude "**/target/**"
+
+tasks.withType(Checkstyle) {
+    exclude "**/bin/**"
+    exclude "**/out/**"
+    exclude "**/build/**"
+    exclude "**/target/**"
+    reports {
+        sarif.required = true
+    }
+}
+
+/*
+jqassistant {
+    toolVersion = "3.0.1"
+    neo4jVersion = 5
+    configFile = "${rootDir}/.mifos/config/jqassistant/.jqassistant.yml"
+    installLocation = "${rootDir}/jqassistant"
+    scanDir = "${rootDir}/.git"
+    option = "-Djqassistant.scan.reset=true"
+}
+*/
+
+sonarLint {
+    isGeneratedCodeIgnored = true // `true` by default, set to `false` to validate generated code (code inside `./build/`)
+
+    // Build fails only on issues at or above this severity. Allowed: 'ERROR', 'WARNING', 'INFO'.
+    // When unset (default), every issue fails the build.
+    // All issues are still logged and written to XML/HTML reports regardless of this setting.
+    failOnSeverity("WARNING")
+
+    rules {
+        rule("java:S1190") {
+            property("format", '^[a-z_][a-zA-Z0-9]*$') // Configure `format` property for `java:S100` rule
+        }
+    }
+
+    languages {
+        include("java") // Enable Java and Kotlin languages only, all other languages become disabled
+
+        includeInfra = true // Include infra languages (like CloudFormation) that are excluded by default
+        includeFrontend = false // Include frontend languages (like JavaScript) that are excluded by default
+    }
+
+    // ignoredPaths.add('**/dto/**') // Ignore all files which relative path matches `**/dto/**` glob for all rules
+    ignoredPaths.add("**/org/mifos/*/sdk/*")
+
+    // Which source sets contain test sources.
+    // Source sets created by plugins like `jvm-test-suite`, `java-test-fixtures`, or `name.remal.test-source-sets` are automatically handled.
+    // Most likely, you don't have to configure anything yourself.
+    testSourceSets = sourceSets.matching { true }
+
+    logging {
+        withDescription = false // Hide rule descriptions from console output
+    }
+}
+
+checkerFramework {
+    version = "4.2.0"
+    skipCheckerFramework = true // TODO: enable again, when clear how to use
+    excludeTests = true
+    // incrementalize = false
+    checkers = [
+        "org.checkerframework.checker.index.IndexChecker",
+        "org.checkerframework.checker.nullness.NullnessChecker",
+        "org.checkerframework.checker.resourceleak.ResourceLeakChecker",
+        "org.checkerframework.checker.lock.LockChecker",
+        "org.checkerframework.checker.units.UnitsChecker",
+    ]
+}
+
+rewrite {
+    exclusions.addAll(
+            "**.dirty.java",
+            "**FormatterProperties.java",
+            "**_gradle_node_plugin_example_**",
+            "**gradle/changelog.gradle",
+            "**gradle/java-publish.gradle",
+            "**idea/full.clean.java",
+            "**java-setup.gradle",
+            "**lib-extra/build.gradle",
+            "**lib/build.gradle",
+            "**package-info.java",
+            "**plugin-maven/build.gradle",
+            "**settings.gradle",
+            "**special-tests.gradle",
+            "**testlib/src/main/resources**"
+    )
+    activeRecipe(
+            // "org.openrewrite.gradle.EnableGradleBuildCache",
+            // "org.openrewrite.gradle.EnableGradleParallelExecution",
+            "org.openrewrite.java.RemoveUnusedImports",
+            "org.openrewrite.java.format.NormalizeFormat",
+            "org.openrewrite.java.format.NormalizeLineBreaks",
+            "org.openrewrite.java.format.RemoveTrailingWhitespace",
+            "org.openrewrite.java.migrate.UpgradeToJava25",
+            "org.openrewrite.java.migrate.lang.StringRulesRecipes",
+            "org.openrewrite.java.migrate.util.JavaUtilAPIs",
+            "org.openrewrite.java.migrate.util.MigrateInflaterDeflaterToClose",
+            "org.openrewrite.java.migrate.util.ReplaceStreamCollectWithToList",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.staticanalysis.BufferedWriterCreationRecipes",
+            "org.openrewrite.staticanalysis.CommonStaticAnalysis",
+            "org.openrewrite.staticanalysis.EqualsAvoidsNull",
+            "org.openrewrite.staticanalysis.JavaApiBestPractices",
+            "org.openrewrite.staticanalysis.LowercasePackage",
+            "org.openrewrite.staticanalysis.MissingOverrideAnnotation",
+            "org.openrewrite.staticanalysis.ModifierOrder",
+            "org.openrewrite.staticanalysis.NoFinalizer",
+            "org.openrewrite.staticanalysis.NoToStringOnStringType",
+            "org.openrewrite.staticanalysis.NoValueOfOnStringType",
+            "org.openrewrite.staticanalysis.RemoveUnusedLocalVariables",
+            "org.openrewrite.staticanalysis.RemoveUnusedPrivateFields",
+            "org.openrewrite.staticanalysis.RemoveUnusedPrivateMethods",
+            "org.openrewrite.staticanalysis.SimplifyTernaryRecipes",
+            "org.openrewrite.staticanalysis.URLEqualsHashCodeRecipes",
+            "org.openrewrite.staticanalysis.UnnecessaryCloseInTryWithResources",
+            "org.openrewrite.staticanalysis.UnnecessaryExplicitTypeArguments",
+            "org.openrewrite.staticanalysis.UnnecessaryParentheses",
+            "org.openrewrite.staticanalysis.UnnecessaryReturnAsLastStatement",
+            "tech.picnic.errorprone.refasterrules.BigDecimalRulesRecipes",
+            "tech.picnic.errorprone.refasterrules.CharSequenceRulesRecipes",
+            "tech.picnic.errorprone.refasterrules.ClassRulesRecipes",
+            "tech.picnic.errorprone.refasterrules.ComparatorRulesRecipes",
+            "tech.picnic.errorprone.refasterrules.EqualityRulesRecipes",
+            "tech.picnic.errorprone.refasterrules.FileRulesRecipes",
+            "tech.picnic.errorprone.refasterrules.MapRulesRecipes",
+            "tech.picnic.errorprone.refasterrules.MicrometerRulesRecipes",
+            "tech.picnic.errorprone.refasterrules.MockitoRulesRecipes",
+            "tech.picnic.errorprone.refasterrules.NullRulesRecipes",
+            "tech.picnic.errorprone.refasterrules.OptionalRulesRecipes",
+            "tech.picnic.errorprone.refasterrules.PatternRulesRecipes",
+            "tech.picnic.errorprone.refasterrules.PreconditionsRulesRecipes",
+            "tech.picnic.errorprone.refasterrules.PrimitiveRulesRecipes",
+            "tech.picnic.errorprone.refasterrules.StreamRulesRecipes",
+            "tech.picnic.errorprone.refasterrules.StringRulesRecipes",
+            "tech.picnic.errorprone.refasterrules.TimeRulesRecipes",
+    )
+    // configFile = file("${rootDir}/rewrite.yml")
+    failOnDryRunResults = true
+    // sizeThresholdMb = 10
+    // exportDatatables = true
+}
+
+qodana {
+    resultsPath = "${rootDir}/build/qodana/results"
+    cachePath = "${rootDir}/build/qodana/cache"
+}
+
+/*
+snyk {
+    arguments = "--all-sub-projects"
+    severity = "low"
+    api = project.hasProperty(SNYK_API_KEY)?:""
+    autoDownload = true
+    autoUpdate = true
+}
+*/
+
+licenses {
+    reports {
+        html {
+            enabled = false
+        }
+        json {
+            enabled = true
+            outputFile = file("${projectDir}/build/reports/licenses/licenses.xml")
+        }
+        markdown {
+            enabled = true
+            outputFile = file("${projectDir}/build/reports/licenses/licenses.md")
+        }
+    }
+}

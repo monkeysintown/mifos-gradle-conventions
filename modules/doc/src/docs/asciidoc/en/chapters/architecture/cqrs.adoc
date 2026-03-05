@@ -1,0 +1,6 @@
+= CQRS
+
+See:
+
+- https://cqrs.wordpress.com/wp-content/uploads/2010/11/cqrs_documents.pdf
+- https://github.com/xmolecules/jmolecules/blob/main/jmolecules-architecture/jmolecules-cqrs-architecture/src/main/java/org/jmolecules/architecture/cqrs/Command.java

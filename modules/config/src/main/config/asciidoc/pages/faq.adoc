@@ -1,0 +1,11 @@
+[faq]
+= General
+
+[What is the answer?]
+This is the answer. The Mifos platform is designed to provide clear, deterministic answers to the complex questions of financial inclusion. If you find yourself asking questions that have no clear answer, consider documenting the issue and raising it with the community so that we can address it together.
+
+[Are cameras allowed?]
+Yes. Cameras are allowed at Mifos community events, hackathons, and conferences. We encourage attendees to take photos and share them on social media with the hashtag #Mifos. However, please be respectful of attendees who do not wish to be photographed and always ask for consent before taking close-up portraits. Photography is not permitted in areas where sensitive financial data is displayed on screen during live demonstrations.
+
+[Are backpacks allowed?]
+No. For security reasons at Mifos-sponsored events held in financial institution venues, backpacks and large bags may not be permitted. This policy is determined by the venue and local regulations, not by the Mifos Initiative itself. Check the event-specific guidelines before attending. For our standard community events and hackathons held at coworking spaces and conference centers, backpacks are generally permitted. When in doubt, contact the event organizer.

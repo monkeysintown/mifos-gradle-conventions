@@ -1,0 +1,18 @@
+dependencies {
+    constraints {
+        implementation "io.pebbletemplates:pebble:4.1.1"
+        implementation "io.pebbletemplates:pebble-spring-boot-starter:4.1.1"
+
+        implementation "com.github.jknack:handlebars.java:4.4.0"
+        implementation "com.github.jknack:handlebars:4.4.0"
+        implementation "com.github.jknack:handlebars-guava-cache:4.4.0"
+        implementation "com.github.jknack:handlebars-helpers:4.4.0"
+        implementation "com.github.jknack:handlebars-humanize:4.3.1"
+        implementation "com.github.jknack:handlebars-jackson:4.4.0"
+        implementation "com.github.jknack:handlebars-markdown:4.2.1"
+        implementation "com.github.jknack:handlebars-proto:4.4.0"
+
+        implementation "com.github.mfornos:humanize-slim:1.2.2"
+        implementation "com.github.mfornos:humanize-icu:1.2.2"
+    }
+}

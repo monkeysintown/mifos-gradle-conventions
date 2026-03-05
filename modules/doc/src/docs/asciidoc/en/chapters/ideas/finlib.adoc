@@ -1,0 +1,10 @@
+= Financial Libraries
+
+TBD
+
+See:
+
+- https://www.quantlib.org/extensions.shtml
+- https://github.com/frgomes/jquantlib
+- https://github.com/moov-io/awesome-fintech
+-
